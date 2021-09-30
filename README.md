@@ -36,19 +36,33 @@ http://127.0.0.1:8082/readiness
 
 ## Création et export d'une clé
 
-#### Création d'une clé publique
-
 ```
+// Création d'une clé publique
 gpg --gen-key
+
+// Export de la clé publique
+gpg --export --armor adrienparrochia@gmail.com > pubkey.asc
+
+scp -r -p pubkey.asc ariden@51.15.171.142:/home/ariden/
+
+// Export de la clé publique
+gpg --import pubkey.asc
 ```
 
-#### Export de la clé publique
+## Installation d'IPFS
+
+- Download [ipfs](https://dist.ipfs.io/#ipfs-update)
 
 ```
-gpg --export --armor -email > pubkey.asc
+ipfs-update versions
+ipfs-update install latest
+ipfs init
+sysctl -w net.core.rmem_max=2500000
+ipfs daemon
 ```
 
 ## Ressources
 
-* Block hashing algorithm [learn-to-securely-share-files-on-the-blockchain-with-ipfs](https://mycoralhealth.medium.com/learn-to-securely-share-files-on-the-blockchain-with-ipfs-219ee47df54c)
+* [learn-to-securely-share-files-on-the-blockchain-with-ipfs](https://mycoralhealth.medium.com/learn-to-securely-share-files-on-the-blockchain-with-ipfs-219ee47df54c)
+* [download ipfs](https://dist.ipfs.io/#ipfs-update)
 
