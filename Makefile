@@ -52,6 +52,13 @@ local:
 	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./.
 	-cli_level=INFO ./bin/main
 
+local-proof:
+	@echo "> Launch local proof of work ..."
+	go fmt ./...
+	export GO111MODULE=on;
+	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./proof-work/.
+	-cli_level=INFO ./bin/main
+
 local-vendor:
 	@echo "> Regenerate vendor ..."
 	# dep init
