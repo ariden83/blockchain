@@ -51,7 +51,8 @@ gpg --import pubkey.asc
 
 ## Installation d'IPFS
 
-- Download [ipfs](https://dist.ipfs.io/#ipfs-update)
+- Download [ipfs](https://dist.ipfs.io/#ipfs-update) with graphic interface
+- Download [ipfs](https://www.geekdecoder.com/install-ipfs-on-debian/) for debian
 
 ```
 ipfs-update versions
