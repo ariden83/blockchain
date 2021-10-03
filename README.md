@@ -49,10 +49,18 @@ scp -r -p pubkey.asc ariden@51.15.171.142:/home/ariden/
 gpg --import pubkey.asc
 ```
 
-## Installation d'IPFS
+## IPFS
 
-- Download [ipfs](https://dist.ipfs.io/#ipfs-update) with graphic interface
-- Download [ipfs](https://www.geekdecoder.com/install-ipfs-on-debian/) for debian
+## Ressources
+
+* See [ipfs instanciate daemon](https://developers.cloudflare.com/distributed-web/ipfs-gateway/setting-up-a-server)
+* See [ipfs tutorial](https://gist.github.com/YannBouyeron/53e6d67782dcff5995754b0a7333fa0b)
+* [learn-to-securely-share-files-on-the-blockchain-with-ipfs](https://mycoralhealth.medium.com/learn-to-securely-share-files-on-the-blockchain-with-ipfs-219ee47df54c)
+* [download ipfs](https://dist.ipfs.io/#ipfs-update)
+
+### Installation d'IPFS
+
+- Download [ipfs](https://dist.ipfs.io/#ipfs-update)
 
 ```
 ipfs-update versions
@@ -62,8 +70,25 @@ sysctl -w net.core.rmem_max=2500000
 ipfs daemon
 ```
 
-## Ressources
+### IPFS Daemon
 
-* [learn-to-securely-share-files-on-the-blockchain-with-ipfs](https://mycoralhealth.medium.com/learn-to-securely-share-files-on-the-blockchain-with-ipfs-219ee47df54c)
-* [download ipfs](https://dist.ipfs.io/#ipfs-update)
+To do this, we create a unit file at /etc/systemd/system/ipfs.service with the contents:
+
+```
+[Unit]
+Description=IPFS Daemon
+
+[Service]
+ExecStart=/usr/local/bin/ipfs daemon
+User=ipfs
+Restart=always
+LimitNOFILE=10240
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### IPFS site perso
+
+[Site de test](https://ipfs.io/ipfs/QmeY4kWRSpJUAseeeYet2AY4iCTT4G9DjQqhgEmRtA4q2D)
 
