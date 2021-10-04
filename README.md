@@ -93,3 +93,28 @@ WantedBy=multi-user.target
 
 [Site de test](https://ipfs.io/ipfs/QmeY4kWRSpJUAseeeYet2AY4iCTT4G9DjQqhgEmRtA4q2D)
 
+
+## TCP 
+
+## Ressources
+
+* See [networking tutorial](https://mycoralhealth.medium.com/part-2-networking-code-your-own-blockchain-in-less-than-200-lines-of-go-17fe1dad46e1)
+
+## Test
+
+
+In the first terminal :
+
+```
+make local-networking
+```
+
+In a second terminal : 
+
+```
+nc localhost 9000
+5
+7
+...
+```
+
