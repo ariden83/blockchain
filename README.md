@@ -11,7 +11,8 @@ My first own blockchain
 ## Command
 
 - `make local` - launch the app
-- `make test` - launch test
+- `make local-proof` - launch the for pprof
+- `make local-p2p` - launch the app for p2p
 
 
 ### Metrics

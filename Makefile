@@ -59,6 +59,12 @@ local-proof:
 	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./proof-work/.
 	-cli_level=INFO ./bin/main
 
+local-p2p:
+	@echo "> Launch local p2p ..."
+	go fmt ./...
+	go run p2p/main.go -l 10000 -secio
+
+
 local-vendor:
 	@echo "> Regenerate vendor ..."
 	# dep init
