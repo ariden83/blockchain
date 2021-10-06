@@ -6,14 +6,15 @@ My first own blockchain
 * See tutorial [Code your own blockchain in less than 200 lines of Go!](https://mycoralhealth.medium.com/code-your-own-blockchain-in-less-than-200-lines-of-go-e296282bcffc)
 * See original code [nosequeldeebee/blockchain-tutorial](https://github.com/nosequeldeebee/blockchain-tutorial)
 * Block hashing algorithm [Block_hashing_algorithm](https://en.bitcoin.it/wiki/Block_hashing_algorithm)
-
+* Block hashing algorithm [o-create-a-bitcoin-hd-wallet-with-golang-and-grpc-part-l-u51d3wwm](https://hackernoon.com/how-to-create-a-bitcoin-hd-wallet-with-golang-and-grpc-part-l-u51d3wwm)
 
 ## Command
 
 - `make local` - launch the app
-- `make local-proof` - launch the for pprof
+- `make local-proof` - launch the for pprof of work
 - `make local-p2p` - launch the app for p2p
-
+- `make local-proof-stake` - launch the app for pprof of stake
+- `make local-seed` - launch the app for seed
 
 ### Metrics
 
