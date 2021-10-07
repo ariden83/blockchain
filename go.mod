@@ -7,6 +7,7 @@ require (
 	github.com/blockcypher/gobcy v2.0.1+incompatible
 	github.com/brianium/mnemonic v0.0.0-20180124190051-72af92c51f88
 	github.com/davecgh/go-spew v1.1.1
+	github.com/dgraph-io/badger v1.6.2
 	github.com/gorilla/mux v1.8.0
 	github.com/ipfs/go-log v1.0.5
 	github.com/joho/godotenv v1.4.0

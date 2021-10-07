@@ -35,7 +35,7 @@ clean:
 
 build-app:
 	@echo "> start building..."
-	docker build $(BUILD_OPTIONS) .
+	docker build -t "toto" .
 
 push:
 	@echo "> start push..."
@@ -49,7 +49,7 @@ local:
 	@echo "> Launch local ..."
 	go fmt ./...
 	export GO111MODULE=on;
-	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./.
+	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./base/.
 	-cli_level=INFO ./bin/main
 
 local-proof:
@@ -64,6 +64,33 @@ local-p2p:
 	go fmt ./...
 	go run p2p/main.go -l 10000 -secio
 
+local-networking:
+	@echo "> Launch local networking ..."
+	go fmt ./...
+	export GO111MODULE=on;
+	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./networking/.
+	-cli_level=INFO ./bin/main
+
+local-proof-stake:
+	@echo "> Launch local proof of stake ..."
+	go fmt ./...
+	export GO111MODULE=on;
+	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./proof-stake/.
+	-cli_level=INFO ./bin/main
+
+local-seed:
+	@echo "> Launch local seed ..."
+	go fmt ./...
+	export GO111MODULE=on;
+	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./seed/.
+	-cli_level=INFO ./bin/main
+
+local-persistence:
+	@echo "> Launch local seed ..."
+	go fmt ./...
+	export GO111MODULE=on;
+	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./persistence/.
+	-cli_level=INFO ./bin/main
 
 local-vendor:
 	@echo "> Regenerate vendor ..."
