@@ -7,6 +7,7 @@ My first own blockchain
 * See original code [nosequeldeebee/blockchain-tutorial](https://github.com/nosequeldeebee/blockchain-tutorial)
 * Block hashing algorithm [Block_hashing_algorithm](https://en.bitcoin.it/wiki/Block_hashing_algorithm)
 * Block hashing algorithm [o-create-a-bitcoin-hd-wallet-with-golang-and-grpc-part-l-u51d3wwm](https://hackernoon.com/how-to-create-a-bitcoin-hd-wallet-with-golang-and-grpc-part-l-u51d3wwm)
+* Building a blockChain with persistence [building-a-blockchain-in-go-pt-iii-persistence](https://dev.to/nheindev/building-a-blockchain-in-go-pt-iii-persistence-3884)
 
 ## Command
 
