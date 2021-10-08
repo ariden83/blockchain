@@ -9,6 +9,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dgraph-io/badger v1.6.2
 	github.com/gorilla/mux v1.8.0
+	github.com/heetch/confita v0.10.0
 	github.com/ipfs/go-log v1.0.5
 	github.com/joho/godotenv v1.4.0
 	github.com/libp2p/go-libp2p v0.15.1

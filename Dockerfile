@@ -2,6 +2,8 @@
 FROM alpine:3.10.1
 ARG PROJECT_ROOT
 
+copy Makefile Makefile
+
 WORKDIR /go
 
 RUN apk update && \
