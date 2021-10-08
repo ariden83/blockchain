@@ -15,10 +15,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type server struct {
-	endpoint *endpoint.EndPoint
-}
-
 func main() {
 	defer os.Exit(0)
 
