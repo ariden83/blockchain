@@ -10,9 +10,6 @@ import (
 	"github.com/ariden83/blockchain/internal/persistence"
 )
 
-//reward is the amnount of tokens given to someone that "mines" a new block
-const reward = 100
-
 var ErrNotEnoughFunds = errors.New("Not enough funds")
 
 type Transactions struct {
@@ -27,16 +24,34 @@ func Init(conf *config.Config, per *persistence.Persistence) *Transactions {
 	}
 }
 
-//CoinbaseTx is the function that will run when someone on a node succesfully "mines" a block. The reward inside as it were.
-func CoinbaseTx(toAddress, publicKey string) *blockchain.Transaction {
-	if publicKey == "" {
-		publicKey = fmt.Sprintf("Coins to %s", toAddress)
+// CoinBaseTx is the function that will run when someone on a node succesfully "mines" a block. The reward inside as it were.
+func (t *Transactions) CoinBaseTx(toPubKey, data string) *blockchain.Transaction {
+	if data == "" {
+		data = fmt.Sprintf("Coins to %s", toPubKey)
 	}
-	//Since this is the "first" transaction of the block, it has no previous output to reference.
-	//This means that we initialize it with no ID, and it's OutputIndex is -1
-	txIn := blockchain.TxInput{[]byte{}, -1, publicKey}
-	//txOut will represent the amount of tokens(reward) given to the person(toAddress) that executed CoinbaseTx
-	txOut := blockchain.TxOutput{reward, toAddress} // You can see it follows {value, PubKey}
+	// Since this is the "first" transaction of the block, it has no previous output to reference.
+	// This means that we initialize it with no ID, and it's OutputIndex is -1
+	txIn := blockchain.TxInput{
+		// ID will find the Transaction that a specific output is inside of
+		ID: []byte{},
+		// Out will be the index of the specific output we found within a transaction.
+		// For example if a transaction has 4 outputs, we can use this "out" field to specify which output we are looking for
+		Out: -1,
+		// This would be a script that adds data to an outputs' PubKey
+		// however for this tutorial the Sig will be indentical to the PubKey.
+		Sig: data,
+	}
+	// txOut will represent the amount of tokens(reward) given to the person(toAddress) that executed CoinbaseTx
+
+	// Value would be representative of the amount of coins in a transaction
+	txOut := blockchain.TxOutput{
+		// Value would be representative of the amount of coins in a transaction
+		Value: t.config.Reward,
+		// La Pubkey est nécessaire pour "déverrouiller" toutes les pièces dans une sortie. Cela indique que VOUS êtes celui qui l'a envoyé.
+		// Vous êtes identifiable par votre PubKey
+		// PubKey dans cette itération sera très simple, mais dans une application réelle, il s'agit d'un algorithme plus complexe
+		PubKey: toPubKey,
+	} // You can see it follows {value, PubKey}
 
 	tx := blockchain.Transaction{nil, []blockchain.TxInput{txIn}, []blockchain.TxOutput{txOut}}
 
@@ -48,14 +63,19 @@ func (t *Transactions) New(from, to string, amount int) (*blockchain.Transaction
 	var inputs []blockchain.TxInput
 	var outputs []blockchain.TxOutput
 
+	// Trouver des sorties utilisables
 	acc, validOutputs := t.FindSpendableOutputs(from, amount)
 
+	// Vérifiez si nous avons assez d'argent pour envoyer le montant que nous demandons
 	if acc < amount {
 		return nil, ErrNotEnoughFunds
 	}
+	// Si nous le faisons, créez des inputs qui indiquent les outputs que nous dépensons
 	for txID, outs := range validOutputs {
 		decodeTxID, err := hex.DecodeString(txID)
-		return nil, err
+		if err != nil {
+			return nil, err
+		}
 
 		for _, out := range outs {
 			input := blockchain.TxInput{decodeTxID, out, from}
@@ -65,16 +85,45 @@ func (t *Transactions) New(from, to string, amount int) (*blockchain.Transaction
 
 	outputs = append(outputs, blockchain.TxOutput{amount, to})
 
+	// S'il reste de l'argent, faites de nouvelles sorties à partir de la différence.
 	if acc > amount {
 		outputs = append(outputs, blockchain.TxOutput{acc - amount, from})
 	}
 
+	// Initialiser une nouvelle transaction avec toutes les nouvelles entrées et sorties que nous avons effectuées
 	tx := blockchain.Transaction{nil, inputs, outputs}
+
+	// Définissez un nouvel identifiant et renvoyez-le.
 	tx.SetID()
 
 	return &tx, nil
 }
 
+// un TxOutput est représentatif d'une action entre deux adresses,
+// TxInput est simplement une référence à un TxOutput précédent.
+// nous sommes en mesure de déterminer le solde d'un compte.
+// nous pouvons vérifier toutes les sorties qu'un compte lui a liées, puis vérifier toutes les entrées.
+// Les sorties qui n'ont pas d'entrée pointant vers elles seront dépensables.
+/**
+Transactions: ([]*blockchain.Transaction) (len=1 cap=1) {
+	(*blockchain.Transaction)(0xc00556c230)({
+		ID: ([]uint8) <nil>,
+		Inputs: ([]blockchain.TxInput) (len=1 cap=1) {
+			(blockchain.TxInput) {
+				ID: ([]uint8) {},
+				Out: (int) -1,
+				Sig: (string) (len=111) "xpub661MyMwAqRbcFTZYiEcSv4Qj2Qr2NzQ7rjYc3iv9c6VSTxoYsqA9AA6nNbp8e9nVR9hRARXz5CApP6j5BxUnohyj89oSg3zZdDuKmGhdSFF"
+			}
+		},
+		Outputs: ([]blockchain.TxOutput) (len=1 cap=1) {
+			(blockchain.TxOutput) {
+				Value: (int) 100,
+				PubKey: (string) (len=34) "1P1aBegXRiTinJhhEYHHiMALfG26Wu9sG3"
+			}
+		}
+	})
+}
+*/
 func (t *Transactions) FindUnspentTransactions(address string) []blockchain.Transaction {
 	var unspentTxs []blockchain.Transaction
 
@@ -93,6 +142,7 @@ func (t *Transactions) FindUnspentTransactions(address string) []blockchain.Tran
 
 		Outputs:
 			for outIdx, out := range tx.Outputs {
+				// Si, nous trouvons un txID, nous savons que cette sortie a été dépensée.
 				if spentTXOs[txID] != nil {
 					for _, spentOut := range spentTXOs[txID] {
 						if spentOut == outIdx {
@@ -100,10 +150,15 @@ func (t *Transactions) FindUnspentTransactions(address string) []blockchain.Tran
 						}
 					}
 				}
+				// Nous pouvons maintenant vérifier si ces sorties peuvent être déverrouillées.
+				// En utilisant notre méthode CanBeUnlocked, nous avons juste besoin de transmettre l'adresse.
+				// Si cela renvoie true, nous pouvons l'ajouter à notre variable unspentTxs que nous avons déclarée en haut de la méthode.
 				if out.CanBeUnlocked(address) {
 					unspentTxs = append(unspentTxs, *tx)
 				}
 			}
+			// nous vérifions si la transaction est une transaction coinbase.
+			// Si ce n'est pas le cas, nous pouvons parcourir toutes les entrées.
 			if !tx.IsCoinBase() {
 				for _, in := range tx.Inputs {
 					if in.CanUnlock(address) {
@@ -121,6 +176,10 @@ func (t *Transactions) FindUnspentTransactions(address string) []blockchain.Tran
 	return unspentTxs
 }
 
+// Maintenant que nous avons un moyen de trouver toutes les transactions non dépensées,
+// nous pouvons rechercher les sorties non dépensées.
+// Parcourez toutes les transactions non dépensées et voyez si nous pouvons déverrouiller les sorties.
+// Ajoutez-les tous à un tableau et retournez ce tableau de TxOutputs
 func (t *Transactions) FindUTXO(address string) []blockchain.TxOutput {
 	var UTXOs []blockchain.TxOutput
 	unspentTransactions := t.FindUnspentTransactions(address)
@@ -135,16 +194,18 @@ func (t *Transactions) FindUTXO(address string) []blockchain.TxOutput {
 	return UTXOs
 }
 
-func (t *Transactions) FindSpendableOutputs(address string, amount int) (int, map[string][]int) {
+// Ce qui suit sera une fonction qui prend l'adresse d'un compte et le montant que nous aimerions dépenser.
+// Il renvoie un tuple qui contient le montant que nous pouvons dépenser et une carte des sorties agrégées qui peuvent y arriver.
+func (t *Transactions) FindSpendableOutputs(pubKey string, amount int) (int, map[string][]int) {
 	unspentOuts := make(map[string][]int)
-	unspentTxs := t.FindUnspentTransactions(address)
+	unspentTxs := t.FindUnspentTransactions(pubKey)
 	accumulated := 0
 
 Work:
 	for _, tx := range unspentTxs {
 		txID := hex.EncodeToString(tx.ID)
 		for outIdx, out := range tx.Outputs {
-			if out.CanBeUnlocked(address) && accumulated < amount {
+			if out.CanBeUnlocked(pubKey) && accumulated < amount {
 				accumulated += out.Value
 				unspentOuts[txID] = append(unspentOuts[txID], outIdx)
 

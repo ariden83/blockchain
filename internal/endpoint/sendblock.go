@@ -2,9 +2,12 @@ package endpoint
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/handle"
 	"github.com/ariden83/blockchain/internal/transactions"
+	"github.com/ariden83/blockchain/internal/utils"
+	"github.com/davecgh/go-spew/spew"
 	"io"
 	"net/http"
 )
@@ -43,7 +46,24 @@ func (e *EndPoint) sendBlock(w http.ResponseWriter, input SendBlockInput) {
 		handle.Handle(err)
 	}
 
-	blockchain.AddBlock(lastHash, index, tx)
+	newBlock := blockchain.AddBlock(lastHash, index, tx)
+
+	if blockchain.IsBlockValid(newBlock, blockchain.BlockChain[len(blockchain.BlockChain)-1]) {
+
+		mutex.Lock()
+		blockchain.BlockChain = append(blockchain.BlockChain, newBlock)
+		mutex.Unlock()
+
+		ser, err := utils.Serialize(&newBlock)
+		handle.Handle(err)
+
+		err = e.persistence.Update(newBlock.Hash, ser)
+		handle.Handle(err)
+		spew.Dump(blockchain.BlockChain)
+
+	} else {
+		handle.Handle(fmt.Errorf("new block is invalid"))
+	}
 
 	io.WriteString(w, "Transaction done")
 }

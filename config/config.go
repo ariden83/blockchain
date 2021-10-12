@@ -17,20 +17,48 @@ type Database struct {
 	File string `config:"blockchain_file"`
 }
 
+type Gas struct {
+	// Minimum amount of Wei per GAS to be paid for a transaction to be accepted for mining. Note: gasprice is listed in wei. Note 2: --gasprice is a “Legacy Option”
+	Price int `config:"gas-price"`
+	// Les mineurs sur le réseau décident de la limite de gaz du bloc.
+	// Il faut réintroduire une fonction de limite de gaz adaptative
+	Limit int `config:"gas-limit"`
+	// il existe une stratégie d'exploitation minière par défaut
+	// d'une limite de gaz de bloc minimale de 4 712 388 pour la plupart des clients
+	TargetMinLimit int `config:"targetgasMinlimit"`
+	TargetMaxLimit int `config:"targetgaslimit"`
+	// Amount of gas per block to target when sealing a new block
+	FloorTarget int `config:"gas-floor-target"`
+	// A cap on how large we will raise the gas limit per block due to transaction volume
+	Cap int `config:"gas-cap"`
+}
+
 type Config struct {
 	Name     string
 	Port     int
 	Database Database
 	Address  string
+	//reward is the amnount of tokens given to someone that "mines" a new block
+	Reward int
+	Gas    Gas
 }
 
 func getDefaultConfig() *Config {
 	return &Config{
-		Name: "blockChain",
-		Port: 8098,
+		Name:   "blockChain",
+		Port:   8098,
+		Reward: 100,
 		Database: Database{
 			Path: "./tmp/blocks",
 			File: "./tmp/blocks/MANIFEST",
+		},
+		Gas: Gas{
+			Price:          4000000000,
+			Limit:          1,
+			TargetMinLimit: 1,
+			TargetMaxLimit: 4712388,
+			FloorTarget:    4700000,
+			Cap:            6283184,
 		},
 	}
 }

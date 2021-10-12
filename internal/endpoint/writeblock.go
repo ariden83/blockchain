@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/handle"
-	"github.com/ariden83/blockchain/internal/transactions"
 	"github.com/ariden83/blockchain/internal/utils"
 	"github.com/davecgh/go-spew/spew"
 	"io"
@@ -36,6 +35,11 @@ func (e *EndPoint) handleWriteBlock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if m.PubKey == "" {
+		io.WriteString(w, "No pub key set")
+		return
+	}
+
 	newBlock := e.WriteBlock(m)
 
 	respondWithJSON(w, r, http.StatusCreated, newBlock)
@@ -62,7 +66,7 @@ func (e *EndPoint) WriteBlock(p WriteBlockInput) blockchain.Block {
 	lastHash, index := e.getLastBlock()
 
 	//mutex.Lock()
-	cbtx := transactions.CoinbaseTx(p.Address, p.PubKey)
+	cbtx := e.transaction.CoinBaseTx(p.PubKey, "")
 	newBlock := blockchain.AddBlock(lastHash, index, cbtx)
 	//mutex.Unlock()
 

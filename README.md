@@ -11,6 +11,8 @@ My first own blockchain
 * Building a blockChain with persistence [code source](https://replit.com/@nheingit/GolangBlockChain-3)
 * Building a blockChain with transactions [building-a-blockchain-in-go-pt-iv-transactions](https://dev.to/nheindev/building-a-blockchain-in-go-pt-iv-transactions-1612)
 * Building a blockChain with transactions [code source](https://replit.com/@nheingit/GolangBlockChain-4)
+* Ethereum block structure explained [ethereum-block-structure-explained](https://medium.com/@eiki1212/ethereum-block-structure-explained-1893bb226bd6)
+* Ethereum accounts transactions gas [accounts-transactions-gas-ethereum](https://hudsonjameson.com/2017-06-27-accounts-transactions-gas-ethereum/)
 
 
 ## Command
@@ -40,7 +42,138 @@ and
 http://127.0.0.1:8082/readiness
 `
 
-## Utiles
+### Test
+
+
+#### 1) GENERATE A SEED (WALLET)
+
+```
+make local-seed
+```
+
+And call IT
+
+```
+curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' 'http://127.0.0.1:8092/create' -d ''
+```
+
+Return 
+
+```
+{
+  "Address": "1P1aBegXRiTinJhhEYHHiMALfG26Wu9sG3",
+  "Timestamp": "2021-10-11 16:52:12.416519751 +0200 CEST m=+27.320229089",
+  "PubKey": "xpub661MyMwAqRbcFTZYiEcSv4Qj2Qr2NzQ7rjYc3iv9c6VSTxoYsqA9AA6nNbp8e9nVR9hRARXz5CApP6j5BxUnohyj89oSg3zZdDuKmGhdSFF",
+  "PrivKey": "xprv9s21ZrQH143K2yV5cD5SYvTzUP1XyXgGVWd1FLWY3kxTbAUQLHqtcMnJXJgfkH1Q3UqXqZ6FmDRTwLHdvDTJC6wNm7Vh9FokRma8WrDGQAe",
+  "Mnemonic": "couple robot escape silent main once smoke check good basket mimic similar"
+}
+```
+
+#### 2) GENERATE YOUR FIRST BLOCK 
+
+```
+make local-persistence
+```
+
+And call IT
+
+```
+curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' 'http://127.0.0.1:8098/write' -d '{"address": "1P1aBegXRiTinJhhEYHHiMALfG26Wu9sG3", "key": "xpub661MyMwAqRbcFTZYiEcSv4Qj2Qr2NzQ7rjYc3iv9c6VSTxoYsqA9AA6nNbp8e9nVR9hRARXz5CApP6j5BxUnohyj89oSg3zZdDuKmGhdSFF"}'
+```
+
+Return 
+
+```
+{
+  "Index": 26,
+  "Timestamp": "2021-10-11 17:04:46.977307004 +0200 CEST m=+45.479261977",
+  "Transactions": [
+    {
+      "ID": null,
+      "Inputs": [
+        {
+          "ID": "",
+          "Out": -1,
+          "Sig": "xpub661MyMwAqRbcFTZYiEcSv4Qj2Qr2NzQ7rjYc3iv9c6VSTxoYsqA9AA6nNbp8e9nVR9hRARXz5CApP6j5BxUnohyj89oSg3zZdDuKmGhdSFF"
+        }
+      ],
+      "Outputs": [
+        {
+          "Value": 1,
+          "PubKey": "1P1aBegXRiTinJhhEYHHiMALfG26Wu9sG3"
+        }
+      ]
+    }
+  ],
+  "Hash": "MGRiODRmMWFlNjhmZjQ5ZDA5ZmI4M2JhODE0MDg2YTdjN2QxOWYyZGFjODEzMzdhZmVlMTU3YjU4MjZhYzkwZQ==",
+  "PrevHash": "MDcyYWMxYTlkNmI5YjQ1ZWFiMWYyMTI3Y2U1YzVlMGVlZjBiYjE3NTI3NTFkNzQyMWM2Y2U1ZmUxN2MwOTUyNA==",
+  "Difficulty": 1,
+  "Nonce": "8"
+}
+```
+
+#### 3) YOUR BALANCE
+
+Call your balance :
+
+```
+curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' 'http://127.0.0.1:8098/balance' -d '{"key": "xpub661MyMwAqRbcFTZYiEcSv4Qj2Qr2NzQ7rjYc3iv9c6VSTxoYsqA9AA6nNbp8e9nVR9hRARXz5CApP6j5BxUnohyj89oSg3zZdDuKmGhdSFF"}'
+```
+
+return 
+
+```
+Balance of xpub661MyMwAqRbcFTZYiEcSv4Qj2Qr2NzQ7rjYc3iv9c6VSTxoYsqA9AA6nNbp8e9nVR9hRARXz5CApP6j5BxUnohyj89oSg3zZdDuKmGhdSFF: 1
+```
+
+#### 4) GENERATE A SECOND WALLET 
+
+```
+{
+  "Address": "1NKEsiake5Yu8yx2H2uHm2oJZe2xYnQ8ZS",
+  "Timestamp": "2021-10-11 17:04:24.263414034 +0200 CEST m=+3.378949045",
+  "PubKey": "xpub661MyMwAqRbcG4VYfVo7ptRncn7wsGMjNubLNrm5Stu5ERP4RtJqo7sQgSQAESwyJKi442EJ6sNWRz5wWZ2ecFE8p1JEJs6qGkzPKncdkhb",
+  "PrivKey": "xprv9s21ZrQH143K3aR5ZUG7TkV44kHTTodt1gfjaUMTtZN6Md3utLzbFKYvqCuqyXAnVcirzpNuzcBkcvpTfJNRjakAwsmEA26wNWmDmLJKXYD",
+  "Mnemonic": "couple office mix shadow glide crater sister check gown sister mirror indoor"
+}
+```
+
+#### 4) SEND ONE TOKEN TO THE 2nd WALLET
+
+a) On envoi la somme du compte A au compte B
+
+```
+curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' 'http://127.0.0.1:8098/send' -d '{"from": "xpub661MyMwAqRbcFTZYiEcSv4Qj2Qr2NzQ7rjYc3iv9c6VSTxoYsqA9AA6nNbp8e9nVR9hRARXz5CApP6j5BxUnohyj89oSg3zZdDuKmGhdSFF", "to": "xpub661MyMwAqRbcG4VYfVo7ptRncn7wsGMjNubLNrm5Stu5ERP4RtJqo7sQgSQAESwyJKi442EJ6sNWRz5wWZ2ecFE8p1JEJs6qGkzPKncdkhb", "amount": 3}'
+```
+
+b) On récupère la balance du compte envoyeur
+
+```
+curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' 'http://127.0.0.1:8098/balance' -d '{"key": "xpub661MyMwAqRbcFTZYiEcSv4Qj2Qr2NzQ7rjYc3iv9c6VSTxoYsqA9AA6nNbp8e9nVR9hRARXz5CApP6j5BxUnohyj89oSg3zZdDuKmGhdSFF"}'
+```
+
+retourne 
+
+
+```
+Balance of xpub661MyMwAqRbcFTZYiEcSv4Qj2Qr2NzQ7rjYc3iv9c6VSTxoYsqA9AA6nNbp8e9nVR9hRARXz5CApP6j5BxUnohyj89oSg3zZdDuKmGhdSFF: 97
+```
+
+c) On récupère la balance du compte receptionneur
+
+```
+curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' 'http://127.0.0.1:8098/balance' -d '{"key": "xpub661MyMwAqRbcG4VYfVo7ptRncn7wsGMjNubLNrm5Stu5ERP4RtJqo7sQgSQAESwyJKi442EJ6sNWRz5wWZ2ecFE8p1JEJs6qGkzPKncdkhb"}'
+```
+
+retourne 
+
+
+```
+Balance of xpub661MyMwAqRbcG4VYfVo7ptRncn7wsGMjNubLNrm5Stu5ERP4RtJqo7sQgSQAESwyJKi442EJ6sNWRz5wWZ2ecFE8p1JEJs6qGkzPKncdkhb: 3
+```
+
+
+## GPG tutorial
 
 ## Création et export d'une clé
 
@@ -57,7 +190,7 @@ scp -r -p pubkey.asc ariden@51.15.171.142:/home/ariden/
 gpg --import pubkey.asc
 ```
 
-## IPFS
+## IPFS tutorial
 
 ## Ressources
 
@@ -98,7 +231,7 @@ WantedBy=multi-user.target
 
 ### IPFS site perso
 
-[Site de test](https://ipfs.io/ipfs/QmeY4kWRSpJUAseeeYet2AY4iCTT4G9DjQqhgEmRtA4q2D)
+> [Site de test](https://ipfs.io/ipfs/QmeY4kWRSpJUAseeeYet2AY4iCTT4G9DjQqhgEmRtA4q2D)
 
 
 ## TCP 
@@ -124,4 +257,5 @@ nc localhost 9000
 7
 ...
 ```
+
 

@@ -9,6 +9,7 @@ import (
 
 type GetBalanceInput struct {
 	Address string `json:"address"`
+	PubKey  string `json:"key"`
 }
 
 func (e *EndPoint) handleGetBalance(w http.ResponseWriter, r *http.Request) {
@@ -24,11 +25,11 @@ func (e *EndPoint) handleGetBalance(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	balance := 0
-	UTXOs := e.transaction.FindUTXO(m.Address)
+	UTXOs := e.transaction.FindUTXO(m.PubKey)
 
 	for _, out := range UTXOs {
 		balance += out.Value
 	}
 
-	io.WriteString(w, fmt.Sprintf("Balance of %s: %d\n", m.Address, balance))
+	io.WriteString(w, fmt.Sprintf("Balance of %s: %d\n", m.PubKey, balance))
 }

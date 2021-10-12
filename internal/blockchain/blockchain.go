@@ -18,47 +18,60 @@ const (
 	difficulty int = 1
 )
 
-type Transaction struct {
-	ID      []byte
-	Inputs  []TxInput
-	Outputs []TxOutput
-}
-
-//TxOutput represents a transaction in the blockchain
-//For Example, I sent you 5 coins. Value would == 5, and it would have my unique PubKey
-type TxOutput struct {
-	Value int
-	//Value would be representative of the amount of coins in a transaction
-	PubKey string
-	//The Pubkey is needed to "unlock" any coins within an Output. This indicated that YOU are the one that sent it.
-	//You are indentifiable by your PubKey
-	//PubKey in this iteration will be very straightforward, however in an actual application this is a more complex algorithm
-}
-
-//Important to note that each output is Indivisible.
-//You cannot "make change" with any output.
-//If the Value is 10, in order to give someone 5, we need to make two five coin outputs.
-
-//TxInput is represntative of a reference to a previous TxOutput
-type TxInput struct {
-	ID []byte
-	//ID will find the Transaction that a specific output is inside of
-	Out int
-	//Out will be the index of the specific output we found within a transaction.
-	//For example if a transaction has 4 outputs, we can use this "out" field to specify which output we are looking for
-	Sig string
-	//This would be a script that adds data to an outputs' PubKey
-	//however for this tutorial the Sig will be indentical to the PubKey.
-}
-
 type Block struct {
 	Index        *big.Int
 	Timestamp    string
 	Transactions []*Transaction
 	Hash         []byte
 	PrevHash     []byte
-	Difficulty   int
-	Nonce        string
+	// Nœud racine du hachage de réception
+	ReceiptHash []byte
+	// Nœud racine du hachage de transaction
+	TransactionHashRoot []byte
+	Difficulty          int
+	// Code à usage unique choisi au hasard pour transmettre le mot de passe en toute sécurité et empêcher les attaques par rejeu
+	Nonce string
+	// Il détermine combien de transactions peuvent être stockées dans un bloc en fonction de la somme de gaz
+	// Par exemple, lorsque la limite de gaz du bloc est de 100 et que nous avons des transactions dont les limites
+	// de gaz sont de 50, 50 et 10. Block ne peut stocker que les deux premières transactions (les 50)
+	// mais pas la dernière (10).
+	GasLimit  int
+	GasUsed   int
+	ExtraData []interface{}
+}
+
+type Transaction struct {
+	ID      []byte
+	Inputs  []TxInput
+	Outputs []TxOutput
+	// le nonce dans la transaction est un nonce de compte qui représente un ordre de transaction qu'un compte crée.
+	//Nonce        string
+}
+
+//TxOutput represents a transaction in the blockchain
+//For Example, I sent you 5 coins. Value would == 5, and it would have my unique PubKey
+type TxOutput struct {
+	// Value would be representative of the amount of coins in a transaction
+	Value int
+	// La Pubkey est nécessaire pour "déverrouiller" toutes les pièces dans une sortie. Cela indique que VOUS êtes celui qui l'a envoyé.
+	// Vous êtes identifiable par votre PubKey
+	// PubKey dans cette itération sera très simple, mais dans une application réelle, il s'agit d'un algorithme plus complexe
+	PubKey string
+}
+
+// Important to note that each output is Indivisible.
+// Vous ne pouvez pas "faire de changement" avec n'importe quelle sortie.
+// Si la valeur est 10, afin de donner 5 à quelqu'un, nous devons faire deux sorties de cinq pièces.
+// TxInput is represntative of a reference to a previous TxOutput
+type TxInput struct {
+	// ID will find the Transaction that a specific output is inside of
+	ID []byte
+	// Out will be the index of the specific output we found within a transaction.
+	// For example if a transaction has 4 outputs, we can use this "out" field to specify which output we are looking for
+	Out int
+	// This would be a script that adds data to an outputs' PubKey
+	// however for this tutorial the Sig will be indentical to the PubKey.
+	Sig string
 }
 
 func (tx *Transaction) IsCoinBase() bool {

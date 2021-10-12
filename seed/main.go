@@ -51,7 +51,7 @@ func main() {
 // web server
 func run() error {
 	mux := makeMuxRouter()
-	httpPort := os.Getenv("PORT")
+	httpPort := os.Getenv("SEED_PORT")
 	log.Println("HTTP Server Listening on port :", httpPort)
 	s := &http.Server{
 		Addr:           ":" + httpPort,

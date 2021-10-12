@@ -14,7 +14,7 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
-	"os"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -49,7 +49,7 @@ func (e *EndPoint) Genesis() {
 
 		var genesisData = "First Transaction from Genesis" // This is arbitrary public key for our genesis data
 
-		cbtx := transactions.CoinbaseTx(e.config.Address, genesisData)
+		cbtx := e.transaction.CoinBaseTx(e.config.Address, genesisData)
 		genesis := blockchain.Genesis(cbtx)
 		fmt.Println("Genesis proved")
 
@@ -89,10 +89,9 @@ func (e *EndPoint) Genesis() {
 
 func (e *EndPoint) ListenHTTP(stop chan error) {
 	mux := e.makeMuxRouter()
-	httpPort := os.Getenv("PORT")
-	log.Println("HTTP Server Listening on port :", httpPort)
+	log.Println("HTTP Server Listening on port :", strconv.Itoa(e.config.Port))
 	e.server = &http.Server{
-		Addr:           ":" + httpPort,
+		Addr:           ":" + strconv.Itoa(e.config.Port),
 		Handler:        mux,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
@@ -106,8 +105,8 @@ func (e *EndPoint) ListenHTTP(stop chan error) {
 
 func (e *EndPoint) makeMuxRouter() http.Handler {
 	muxRouter := mux.NewRouter()
-	muxRouter.HandleFunc("/create", e.handlePrintBlockChain).Methods("GET")
-	muxRouter.HandleFunc("/balance", e.handleGetBalance).Methods("GET")
+	muxRouter.HandleFunc("/blockchain", e.handlePrintBlockChain).Methods("GET")
+	muxRouter.HandleFunc("/balance", e.handleGetBalance).Methods("POST")
 	muxRouter.HandleFunc("/write", e.handleWriteBlock).Methods("POST")
 	muxRouter.HandleFunc("/send", e.handleSendBlock).Methods("POST")
 	return muxRouter
