@@ -67,6 +67,8 @@ func (e *EndPoint) WriteBlock(p WriteBlockInput) blockchain.Block {
 
 	//mutex.Lock()
 	cbtx := e.transaction.CoinBaseTx(p.PubKey, "")
+	cbtx.SetID()
+
 	newBlock := blockchain.AddBlock(lastHash, index, cbtx)
 	//mutex.Unlock()
 

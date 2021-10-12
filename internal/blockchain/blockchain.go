@@ -45,7 +45,7 @@ type Transaction struct {
 	Inputs  []TxInput
 	Outputs []TxOutput
 	// le nonce dans la transaction est un nonce de compte qui représente un ordre de transaction qu'un compte crée.
-	//Nonce        string
+	Timestamp string
 }
 
 //TxOutput represents a transaction in the blockchain

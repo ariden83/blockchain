@@ -8,6 +8,7 @@ import (
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/iterator"
 	"github.com/ariden83/blockchain/internal/persistence"
+	"time"
 )
 
 var ErrNotEnoughFunds = errors.New("Not enough funds")
@@ -53,7 +54,8 @@ func (t *Transactions) CoinBaseTx(toPubKey, data string) *blockchain.Transaction
 		PubKey: toPubKey,
 	} // You can see it follows {value, PubKey}
 
-	tx := blockchain.Transaction{nil, []blockchain.TxInput{txIn}, []blockchain.TxOutput{txOut}}
+	timestamp := time.Now()
+	tx := blockchain.Transaction{nil, []blockchain.TxInput{txIn}, []blockchain.TxOutput{txOut}, timestamp.String()}
 
 	return &tx
 
@@ -91,7 +93,8 @@ func (t *Transactions) New(from, to string, amount int) (*blockchain.Transaction
 	}
 
 	// Initialiser une nouvelle transaction avec toutes les nouvelles entrées et sorties que nous avons effectuées
-	tx := blockchain.Transaction{nil, inputs, outputs}
+	timestamp := time.Now()
+	tx := blockchain.Transaction{nil, inputs, outputs, timestamp.String()}
 
 	// Définissez un nouvel identifiant et renvoyez-le.
 	tx.SetID()
@@ -124,7 +127,7 @@ Transactions: ([]*blockchain.Transaction) (len=1 cap=1) {
 	})
 }
 */
-func (t *Transactions) FindUnspentTransactions(address string) []blockchain.Transaction {
+func (t *Transactions) FindUnspentTransactions(pubKey string) []blockchain.Transaction {
 	var unspentTxs []blockchain.Transaction
 
 	spentTXOs := make(map[string][]int)
@@ -134,15 +137,20 @@ func (t *Transactions) FindUnspentTransactions(address string) []blockchain.Tran
 		Persistence: t.persistence,
 	}
 
+	// pour chaque bloc
 	for {
 		block := iter.Next()
 
+		// pour chaque transaction
 		for _, tx := range block.Transactions {
 			txID := hex.EncodeToString(tx.ID)
-
 		Outputs:
+			// pour chaque noeud (pub key) de chaque transaction
 			for outIdx, out := range tx.Outputs {
-				// Si, nous trouvons un txID, nous savons que cette sortie a été dépensée.
+				// Si, nous trouvons un txID (ID de transaction)
+				// dans toutes les transactions déjà trouvées pour le pub key actuel,
+				// nous savons que cette sortie a été dépensée plus tard dans le temps et doit être ignorée
+				// (rappel, nous sommes ici dans une boucle inversée, on remonte le temps)
 				if spentTXOs[txID] != nil {
 					for _, spentOut := range spentTXOs[txID] {
 						if spentOut == outIdx {
@@ -150,19 +158,20 @@ func (t *Transactions) FindUnspentTransactions(address string) []blockchain.Tran
 						}
 					}
 				}
-				// Nous pouvons maintenant vérifier si ces sorties peuvent être déverrouillées.
-				// En utilisant notre méthode CanBeUnlocked, nous avons juste besoin de transmettre l'adresse.
-				// Si cela renvoie true, nous pouvons l'ajouter à notre variable unspentTxs que nous avons déclarée en haut de la méthode.
-				if out.CanBeUnlocked(address) {
+				// Nous vérifions si le pub key en cours correspond au pubkey de la transaction
+				if out.CanBeUnlocked(pubKey) {
 					unspentTxs = append(unspentTxs, *tx)
 				}
 			}
-			// nous vérifions si la transaction est une transaction coinbase.
-			// Si ce n'est pas le cas, nous pouvons parcourir toutes les entrées.
+			// nous vérifions si la transaction est une transaction coinbase (donc nouveau block).
+			// Si ce n'est pas le cas, nous pouvons parcourir toutes l'historique de transaction lié au block en cours.
 			if !tx.IsCoinBase() {
+				// Pour chaque historique de transaction
 				for _, in := range tx.Inputs {
-					if in.CanUnlock(address) {
+					// si le sig enregistré correspond à notre pubkey
+					if in.CanUnlock(pubKey) {
 						inTxID := hex.EncodeToString(in.ID)
+						// alors nous enregistrons l'ID de transaction pour les ignorer immédiatement par la suite
 						spentTXOs[inTxID] = append(spentTXOs[inTxID], in.Out)
 					}
 				}
@@ -180,12 +189,12 @@ func (t *Transactions) FindUnspentTransactions(address string) []blockchain.Tran
 // nous pouvons rechercher les sorties non dépensées.
 // Parcourez toutes les transactions non dépensées et voyez si nous pouvons déverrouiller les sorties.
 // Ajoutez-les tous à un tableau et retournez ce tableau de TxOutputs
-func (t *Transactions) FindUTXO(address string) []blockchain.TxOutput {
+func (t *Transactions) FindUTXO(pubKey string) []blockchain.TxOutput {
 	var UTXOs []blockchain.TxOutput
-	unspentTransactions := t.FindUnspentTransactions(address)
+	unspentTransactions := t.FindUnspentTransactions(pubKey)
 	for _, tx := range unspentTransactions {
 		for _, out := range tx.Outputs {
-			if out.CanBeUnlocked(address) {
+			if out.CanBeUnlocked(pubKey) {
 				UTXOs = append(UTXOs, out)
 			}
 		}

@@ -34,7 +34,6 @@ func (e *EndPoint) handleSendBlock(w http.ResponseWriter, r *http.Request) {
 }
 
 func (e *EndPoint) sendBlock(w http.ResponseWriter, input SendBlockInput) {
-
 	lastHash, index := e.getLastBlock()
 
 	tx, err := e.transaction.New(input.From, input.To, input.Amount)

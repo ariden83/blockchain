@@ -46,27 +46,14 @@ func (e *EndPoint) Genesis() {
 
 	// si les fichiers locaux n'existent pas
 	if !e.persistence.DBExists() {
-
-		var genesisData = "First Transaction from Genesis" // This is arbitrary public key for our genesis data
-
-		cbtx := e.transaction.CoinBaseTx(e.config.Address, genesisData)
-		genesis := blockchain.Genesis(cbtx)
-		fmt.Println("Genesis proved")
-
-		lastHash = genesis.Hash
-
-		serializeBLock, err := utils.Serialize(genesis)
-		handle.Handle(err)
-
-		err = e.persistence.Update(lastHash, serializeBLock)
-		handle.Handle(err)
+		handle.Handle(fmt.Errorf("fail to open DB files"))
 	}
 
 	lastHash, err := e.persistence.GetLastHash()
 	handle.Handle(err)
 
 	if lastHash == nil {
-		handle.Handle(fmt.Errorf("No blockchain found, please create one first"))
+		lastHash = e.createGenesis()
 
 	} else {
 
@@ -85,6 +72,22 @@ func (e *EndPoint) Genesis() {
 	}
 
 	return
+}
+
+func (e *EndPoint) createGenesis() []byte {
+	var genesisData = "First Transaction from Genesis" // This is arbitrary public key for our genesis data
+	cbtx := e.transaction.CoinBaseTx(e.config.Address, genesisData)
+	genesis := blockchain.Genesis(cbtx)
+	fmt.Println("Genesis proved")
+
+	firstHash := genesis.Hash
+
+	serializeBLock, err := utils.Serialize(genesis)
+	handle.Handle(err)
+
+	err = e.persistence.Update(firstHash, serializeBLock)
+	handle.Handle(err)
+	return firstHash
 }
 
 func (e *EndPoint) ListenHTTP(stop chan error) {
