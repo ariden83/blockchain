@@ -45,6 +45,10 @@ type Metrics struct {
 	Port      int
 }
 
+type Transactions struct {
+	Reward *big.Int
+}
+
 type Config struct {
 	Name     string
 	Version  string
@@ -52,17 +56,19 @@ type Config struct {
 	Database Database
 	Address  string
 	//reward is the amnount of tokens given to someone that "mines" a new block
-	Reward  *big.Int
-	Gas     Gas
-	Wallet  Wallet
-	Metrics Metrics
+	Gas          Gas
+	Wallet       Wallet
+	Metrics      Metrics
+	Transactions Transactions
 }
 
 func getDefaultConfig() *Config {
 	return &Config{
-		Name:   "blockChain",
-		Port:   8098,
-		Reward: big.NewInt(100),
+		Name: "blockChain",
+		Port: 8098,
+		Transactions: Transactions{
+			Reward: big.NewInt(100),
+		},
 		Database: Database{
 			Path: "./tmp/blocks",
 			File: "./tmp/blocks/MANIFEST",
@@ -82,6 +88,7 @@ func getDefaultConfig() *Config {
 		Metrics: Metrics{
 			Namespace: "block",
 			Name:      "chain",
+			Port:      8099,
 		},
 	}
 }
