@@ -8,6 +8,7 @@ import (
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/iterator"
 	"github.com/ariden83/blockchain/internal/persistence"
+	"math/big"
 	"time"
 )
 
@@ -61,7 +62,7 @@ func (t *Transactions) CoinBaseTx(toPubKey, data string) *blockchain.Transaction
 
 }
 
-func (t *Transactions) New(from, to string, amount int) (*blockchain.Transaction, error) {
+func (t *Transactions) New(from, to string, amount *big.Int) (*blockchain.Transaction, error) {
 	var inputs []blockchain.TxInput
 	var outputs []blockchain.TxOutput
 
@@ -69,7 +70,7 @@ func (t *Transactions) New(from, to string, amount int) (*blockchain.Transaction
 	acc, validOutputs := t.FindSpendableOutputs(from, amount)
 
 	// Vérifiez si nous avons assez d'argent pour envoyer le montant que nous demandons
-	if acc < amount {
+	if acc.Cmp(amount) < 0 {
 		return nil, ErrNotEnoughFunds
 	}
 	// Si nous le faisons, créez des inputs qui indiquent les outputs que nous dépensons
@@ -88,8 +89,9 @@ func (t *Transactions) New(from, to string, amount int) (*blockchain.Transaction
 	outputs = append(outputs, blockchain.TxOutput{amount, to})
 
 	// S'il reste de l'argent, faites de nouvelles sorties à partir de la différence.
-	if acc > amount {
-		outputs = append(outputs, blockchain.TxOutput{acc - amount, from})
+	if acc.Cmp(amount) > 0 {
+		newAmount := acc.Sub(acc, amount)
+		outputs = append(outputs, blockchain.TxOutput{newAmount, from})
 	}
 
 	// Initialiser une nouvelle transaction avec toutes les nouvelles entrées et sorties que nous avons effectuées
@@ -205,20 +207,21 @@ func (t *Transactions) FindUTXO(pubKey string) []blockchain.TxOutput {
 
 // Ce qui suit sera une fonction qui prend l'adresse d'un compte et le montant que nous aimerions dépenser.
 // Il renvoie un tuple qui contient le montant que nous pouvons dépenser et une carte des sorties agrégées qui peuvent y arriver.
-func (t *Transactions) FindSpendableOutputs(pubKey string, amount int) (int, map[string][]int) {
+func (t *Transactions) FindSpendableOutputs(pubKey string, amount *big.Int) (*big.Int, map[string][]int) {
 	unspentOuts := make(map[string][]int)
 	unspentTxs := t.FindUnspentTransactions(pubKey)
-	accumulated := 0
+	var accumulated *big.Int = new(big.Int)
 
 Work:
 	for _, tx := range unspentTxs {
 		txID := hex.EncodeToString(tx.ID)
 		for outIdx, out := range tx.Outputs {
-			if out.CanBeUnlocked(pubKey) && accumulated < amount {
-				accumulated += out.Value
+			if out.CanBeUnlocked(pubKey) && accumulated.Cmp(amount) < 0 {
+
+				accumulated = accumulated.Add(accumulated, out.Value)
 				unspentOuts[txID] = append(unspentOuts[txID], outIdx)
 
-				if accumulated >= amount {
+				if accumulated.Cmp(amount) >= 0 {
 					break Work
 				}
 			}

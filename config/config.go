@@ -8,6 +8,7 @@ import (
 	"github.com/heetch/confita/backend"
 	"github.com/heetch/confita/backend/env"
 	"github.com/heetch/confita/backend/flags"
+	"math/big"
 	"reflect"
 	"strings"
 )
@@ -33,24 +34,42 @@ type Gas struct {
 	Cap int `config:"gas-cap"`
 }
 
+type Wallet struct {
+	Path string `config:"wallet_path"`
+	File string `config:"wallet_file"`
+}
+
+type Metrics struct {
+	Namespace string
+	Name      string
+	Port      int
+}
+
 type Config struct {
 	Name     string
+	Version  string
 	Port     int
 	Database Database
 	Address  string
 	//reward is the amnount of tokens given to someone that "mines" a new block
-	Reward int
-	Gas    Gas
+	Reward  *big.Int
+	Gas     Gas
+	Wallet  Wallet
+	Metrics Metrics
 }
 
 func getDefaultConfig() *Config {
 	return &Config{
 		Name:   "blockChain",
 		Port:   8098,
-		Reward: 100,
+		Reward: big.NewInt(100),
 		Database: Database{
 			Path: "./tmp/blocks",
 			File: "./tmp/blocks/MANIFEST",
+		},
+		Wallet: Wallet{
+			Path: "./tmp/wallets",
+			File: "./tmp/wallets/wallets.data",
 		},
 		Gas: Gas{
 			Price:          4000000000,
@@ -59,6 +78,10 @@ func getDefaultConfig() *Config {
 			TargetMaxLimit: 4712388,
 			FloorTarget:    4700000,
 			Cap:            6283184,
+		},
+		Metrics: Metrics{
+			Namespace: "block",
+			Name:      "chain",
 		},
 	}
 }

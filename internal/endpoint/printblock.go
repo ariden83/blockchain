@@ -24,8 +24,6 @@ func (e *EndPoint) handlePrintBlockChain(w http.ResponseWriter, _ *http.Request)
 			break
 		}
 	}
-
-	return
 }
 
 // Iterator takes our BlockChain struct and returns it as a BlockCHainIterator struct

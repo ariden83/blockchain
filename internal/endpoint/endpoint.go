@@ -7,14 +7,20 @@ import (
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/handle"
+	"github.com/ariden83/blockchain/internal/metrics"
+	"github.com/ariden83/blockchain/internal/middleware"
 	"github.com/ariden83/blockchain/internal/persistence"
 	"github.com/ariden83/blockchain/internal/transactions"
 	"github.com/ariden83/blockchain/internal/utils"
+	"github.com/ariden83/blockchain/internal/wallet"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -22,17 +28,34 @@ import (
 var mutex = &sync.Mutex{}
 
 type EndPoint struct {
-	config      *config.Config
-	persistence *persistence.Persistence
-	transaction *transactions.Transactions
-	server      *http.Server
+	config        *config.Config
+	persistence   *persistence.Persistence
+	transaction   *transactions.Transactions
+	server        *http.Server
+	metricsServer *http.Server
+	wallets       *wallet.Wallets
+	metrics       *metrics.Metrics
 }
 
-func Init(conf *config.Config, per *persistence.Persistence, trans *transactions.Transactions) *EndPoint {
+type Healthz struct {
+	Result   bool     `json:"result"`
+	Messages []string `json:"messages"`
+	Version  string   `json:"version"`
+}
+
+func Init(
+	conf *config.Config,
+	per *persistence.Persistence,
+	trans *transactions.Transactions,
+	wallets *wallet.Wallets,
+	mtcs *metrics.Metrics,
+) *EndPoint {
 	e := &EndPoint{
 		config:      conf,
 		persistence: per,
 		transaction: trans,
+		wallets:     wallets,
+		metrics:     mtcs,
 	}
 	go func() {
 		e.Genesis()
@@ -112,11 +135,41 @@ func (e *EndPoint) makeMuxRouter() http.Handler {
 	muxRouter.HandleFunc("/balance", e.handleGetBalance).Methods("POST")
 	muxRouter.HandleFunc("/write", e.handleWriteBlock).Methods("POST")
 	muxRouter.HandleFunc("/send", e.handleSendBlock).Methods("POST")
+	muxRouter.HandleFunc("/wallets", e.handlePrintWallets).Methods("GET")
+	muxRouter.HandleFunc("/wallet", e.handleCreateWallet).Methods("POST")
+	muxRouter.HandleFunc("/mywallet", e.handleMyWallet).Methods("POST")
+
+	muxRouter.Use(middleware.DefaultHeader)
+	muxRouter.Use(e.MetricsMiddleware)
+
 	return muxRouter
 }
 
+func (e *EndPoint) MetricsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		route := strings.ToLower(r.Method)
+
+		jsonHandler := promhttp.InstrumentHandlerInFlight(
+			e.metrics.InFlight,
+
+			promhttp.InstrumentHandlerResponseSize(
+				e.metrics.ResponseSize.MustCurryWith(prometheus.Labels{"service": route}),
+
+				promhttp.InstrumentHandlerRequestSize(
+					e.metrics.RequestSize.MustCurryWith(prometheus.Labels{"service": route}),
+
+					promhttp.InstrumentHandlerCounter(
+						e.metrics.RouteCountReqs.MustCurryWith(prometheus.Labels{"service": route}),
+
+						promhttp.InstrumentHandlerDuration(
+							e.metrics.ResponseDuration.MustCurryWith(prometheus.Labels{"service": route}),
+							next)))))
+
+		jsonHandler.ServeHTTP(w, r)
+	})
+}
+
 func respondWithJSON(w http.ResponseWriter, r *http.Request, code int, payload interface{}) {
-	w.Header().Set("Content-Type", "application/json")
 	response, err := json.MarshalIndent(payload, "", "  ")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

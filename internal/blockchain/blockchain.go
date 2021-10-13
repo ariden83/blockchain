@@ -52,7 +52,7 @@ type Transaction struct {
 //For Example, I sent you 5 coins. Value would == 5, and it would have my unique PubKey
 type TxOutput struct {
 	// Value would be representative of the amount of coins in a transaction
-	Value int
+	Value *big.Int
 	// La Pubkey est nécessaire pour "déverrouiller" toutes les pièces dans une sortie. Cela indique que VOUS êtes celui qui l'a envoyé.
 	// Vous êtes identifiable par votre PubKey
 	// PubKey dans cette itération sera très simple, mais dans une application réelle, il s'agit d'un algorithme plus complexe

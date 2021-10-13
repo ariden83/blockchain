@@ -45,18 +45,11 @@ run: build
 	@echo "> launch local docker image"
 	docker run -p 8080/tcp -p 8082:8082/tcp -p 8081:8081/tcp --rm $(IMAGE)
 
-local:
-	@echo "> Launch local ..."
-	go fmt ./...
-	export GO111MODULE=on;
-	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./base/.
-	-cli_level=INFO ./bin/main
-
 local-proof:
 	@echo "> Launch local proof of work ..."
 	go fmt ./...
 	export GO111MODULE=on;
-	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./proof-work/.
+	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./cmd/proof-work/.
 	-cli_level=INFO ./bin/main
 
 local-p2p:
@@ -68,28 +61,28 @@ local-networking:
 	@echo "> Launch local networking ..."
 	go fmt ./...
 	export GO111MODULE=on;
-	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./networking/.
+	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./cmd/networking/.
 	-cli_level=INFO ./bin/main
 
 local-proof-stake:
 	@echo "> Launch local proof of stake ..."
 	go fmt ./...
 	export GO111MODULE=on;
-	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./proof-stake/.
+	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./cmd/proof-stake/.
 	-cli_level=INFO ./bin/main
 
 local-seed:
 	@echo "> Launch local seed ..."
 	go fmt ./...
 	export GO111MODULE=on;
-	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./seed/.
+	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./cmd/seed/.
 	-cli_level=INFO ./bin/main
 
-local-persistence:
-	@echo "> Launch local seed ..."
+local:
+	@echo "> Launch local ..."
 	go fmt ./...
 	export GO111MODULE=on;
-	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./persistence/.
+	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./cmd/app/.
 	-cli_level=INFO ./bin/main
 
 local-vendor:

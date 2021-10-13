@@ -9,14 +9,15 @@ import (
 	"github.com/ariden83/blockchain/internal/utils"
 	"github.com/davecgh/go-spew/spew"
 	"io"
+	"math/big"
 	"net/http"
 )
 
 // Message takes incoming JSON payload for writing heart rate
 type SendBlockInput struct {
-	From   string `json:"from"`
-	To     string `json:"to"`
-	Amount int    `json:"amount"`
+	From   string   `json:"from"`
+	To     string   `json:"to"`
+	Amount *big.Int `json:"amount"`
 }
 
 func (e *EndPoint) handleSendBlock(w http.ResponseWriter, r *http.Request) {
