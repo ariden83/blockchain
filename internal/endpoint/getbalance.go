@@ -2,7 +2,6 @@ package endpoint
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"math/big"
 	"net/http"
@@ -39,17 +38,14 @@ func (e *EndPoint) handleGetBalance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var balance *big.Int = new(big.Int)
-	UTXOs := e.transaction.FindUTXO(input.PubKey)
-
-	for _, out := range UTXOs {
-		balance = balance.Add(balance, out.Value)
-	}
-
-	io.WriteString(w, fmt.Sprintf("Balance of %s: %d\n", input.PubKey, balance))
+	balance := e.transaction.FindUserBalance(input.PubKey)
+	tokensSend := e.transaction.FindUserTokensSend(input.PubKey)
+	tokensReceived := e.transaction.FindUserTokensReceived(input.PubKey)
 
 	respondWithJSON(w, r, http.StatusOK, getBalanceOutput{
-		Address: input.PubKey,
-		Balance: balance,
+		Address:       input.PubKey,
+		Balance:       balance,
+		TotalReceived: tokensReceived,
+		TotalSent:     tokensSend,
 	})
 }

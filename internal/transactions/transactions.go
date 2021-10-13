@@ -205,6 +205,88 @@ func (t *Transactions) FindUTXO(pubKey string) []blockchain.TxOutput {
 	return UTXOs
 }
 
+func (t *Transactions) FindUserBalance(pubKey string) *big.Int {
+	var balance *big.Int = new(big.Int)
+	UTXOs := t.FindUTXO(pubKey)
+
+	for _, out := range UTXOs {
+		balance = balance.Add(balance, out.Value)
+	}
+	return balance
+}
+
+func (t *Transactions) FindUserTokensSend(pubKey string) *big.Int {
+	var tokensSend *big.Int = new(big.Int)
+
+	iter := iterator.BlockChainIterator{
+		CurrentHash: t.persistence.LastHash,
+		Persistence: t.persistence,
+	}
+
+	for {
+		block := iter.Next()
+		for _, tx := range block.Transactions {
+
+			var isSending bool
+			for _, in := range tx.Inputs {
+				// si le sig enregistré correspond à notre pubkey
+				if in.CanUnlock(pubKey) {
+					isSending = true
+				}
+			}
+
+			if !isSending {
+				continue
+			}
+
+			for _, out := range tx.Outputs {
+				if !out.CanBeUnlocked(pubKey) && isSending {
+					tokensSend = tokensSend.Add(tokensSend, out.Value)
+				}
+			}
+		}
+		if len(block.PrevHash) == 0 {
+			break
+		}
+	}
+
+	return tokensSend
+}
+
+func (t *Transactions) FindUserTokensReceived(pubKey string) *big.Int {
+	var tokensReceived *big.Int = new(big.Int)
+
+	iter := iterator.BlockChainIterator{
+		CurrentHash: t.persistence.LastHash,
+		Persistence: t.persistence,
+	}
+
+	for {
+		block := iter.Next()
+	Outputs:
+		for _, tx := range block.Transactions {
+			if tx.IsCoinBase() {
+				continue
+			}
+			for _, in := range tx.Inputs {
+				if in.CanUnlock(pubKey) {
+					continue Outputs
+				}
+			}
+			for _, out := range tx.Outputs {
+				if out.CanBeUnlocked(pubKey) {
+					tokensReceived = tokensReceived.Add(tokensReceived, out.Value)
+				}
+			}
+		}
+		if len(block.PrevHash) == 0 {
+			break
+		}
+	}
+
+	return tokensReceived
+}
+
 // Ce qui suit sera une fonction qui prend l'adresse d'un compte et le montant que nous aimerions dépenser.
 // Il renvoie un tuple qui contient le montant que nous pouvons dépenser et une carte des sorties agrégées qui peuvent y arriver.
 func (t *Transactions) FindSpendableOutputs(pubKey string, amount *big.Int) (*big.Int, map[string][]int) {
