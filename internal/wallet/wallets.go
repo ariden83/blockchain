@@ -25,13 +25,13 @@ type Options struct {
 	InMemory bool
 }
 
-func Init(conf *config.Config) (*Wallets, error) {
+func Init(conf config.Wallet) (*Wallets, error) {
 	wallets := Wallets{
-		FilePath: conf.Wallet.File,
+		FilePath: conf.File,
 	}
 	wallets.Seeds = make([]Seed, 0)
 
-	err := wallets.LoadFile(conf.Wallet)
+	err := wallets.LoadFile(conf)
 
 	return &wallets, err
 }

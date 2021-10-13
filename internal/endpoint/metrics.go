@@ -24,6 +24,7 @@ func (e *EndPoint) ListenMetrics(stop chan error) {
 		MaxHeaderBytes: 1 << 12,
 	}
 	go func() {
+		log.Println("Metrics Server Listening on port :", strconv.Itoa(e.config.Metrics.Port))
 		if err := e.metricsServer.ListenAndServe(); err != nil {
 			stop <- fmt.Errorf("cannot start healthz server %s", err)
 		}

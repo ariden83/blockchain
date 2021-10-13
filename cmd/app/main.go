@@ -27,9 +27,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	per := persistence.Init(conf)
+	per := persistence.Init(conf.Database)
 	trans := transactions.Init(conf, per)
-	wallets, err := wallet.Init(conf)
+	wallets, err := wallet.Init(conf.Wallet)
 	if err != nil {
 		log.Fatal(err)
 	}

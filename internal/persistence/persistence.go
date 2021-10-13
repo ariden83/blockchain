@@ -9,13 +9,13 @@ import (
 
 type Persistence struct {
 	db       *badger.DB
-	config   *config.Config
+	config   config.Database
 	LastHash []byte
 }
 
 // InitBlockChain will be what starts a new blockChain
-func Init(conf *config.Config) *Persistence {
-	opts := badger.DefaultOptions(conf.Database.Path)
+func Init(conf config.Database) *Persistence {
+	opts := badger.DefaultOptions(conf.Path)
 
 	db, err := badger.Open(opts)
 	handle.Handle(err)
@@ -29,7 +29,7 @@ func Init(conf *config.Config) *Persistence {
 }
 
 func (p *Persistence) DBExists() bool {
-	if _, err := os.Stat(p.config.Database.File); os.IsNotExist(err) {
+	if _, err := os.Stat(p.config.File); os.IsNotExist(err) {
 		return false
 	}
 	return true

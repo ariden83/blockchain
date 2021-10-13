@@ -15,13 +15,13 @@ import (
 var ErrNotEnoughFunds = errors.New("Not enough funds")
 
 type Transactions struct {
-	config      *config.Config
+	Reward      *big.Int
 	persistence *persistence.Persistence
 }
 
 func Init(conf *config.Config, per *persistence.Persistence) *Transactions {
 	return &Transactions{
-		config:      conf,
+		Reward:      conf.Reward,
 		persistence: per,
 	}
 }
@@ -48,7 +48,7 @@ func (t *Transactions) CoinBaseTx(toPubKey, data string) *blockchain.Transaction
 	// Value would be representative of the amount of coins in a transaction
 	txOut := blockchain.TxOutput{
 		// Value would be representative of the amount of coins in a transaction
-		Value: t.config.Reward,
+		Value: t.Reward,
 		// La Pubkey est nécessaire pour "déverrouiller" toutes les pièces dans une sortie. Cela indique que VOUS êtes celui qui l'a envoyé.
 		// Vous êtes identifiable par votre PubKey
 		// PubKey dans cette itération sera très simple, mais dans une application réelle, il s'agit d'un algorithme plus complexe
