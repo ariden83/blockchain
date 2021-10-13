@@ -19,7 +19,7 @@ type Transactions struct {
 	persistence *persistence.Persistence
 }
 
-func Init(conf *config.Config, per *persistence.Persistence) *Transactions {
+func Init(conf config.Transactions, per *persistence.Persistence) *Transactions {
 	return &Transactions{
 		Reward:      conf.Reward,
 		persistence: per,
