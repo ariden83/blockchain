@@ -2,7 +2,6 @@ package wallet
 
 import (
 	"github.com/LuisAcerv/btchdwallet/crypt"
-	"github.com/ariden83/blockchain/internal/handle"
 	"github.com/brianium/mnemonic"
 	"github.com/wemeetagain/go-hdwallet"
 	"sync"
@@ -38,26 +37,28 @@ func (ws *Wallets) GetAllSeeds() []SeedNoPrivKey {
 	return allSeeds
 }
 
-func (ws *Wallets) Create() *Seed {
+func (ws *Wallets) Create() (*Seed, error) {
 
 	seed := crypt.CreateHash()
 	mnemonic, err := mnemonic.New([]byte(seed), mnemonic.English)
-	handle.Handle(err)
+	if err != nil {
+		return nil, err
+	}
 
 	// Create a master private key
-	masterprv := hdwallet.MasterKey([]byte(mnemonic.Sentence()))
+	masterPrv := hdwallet.MasterKey([]byte(mnemonic.Sentence()))
 
 	// Convert a private key to public key
-	masterpub := masterprv.Pub()
+	masterPub := masterPrv.Pub()
 
 	// Get your address
-	address := masterpub.Address()
+	address := masterPub.Address()
 
 	t := time.Now()
 	newSeed := Seed{
 		Address:   address,
-		PubKey:    masterpub.String(),
-		PrivKey:   masterprv.String(),
+		PubKey:    masterPub.String(),
+		PrivKey:   masterPrv.String(),
 		Mnemonic:  mnemonic.Sentence(),
 		Timestamp: t.String(),
 	}
@@ -68,5 +69,5 @@ func (ws *Wallets) Create() *Seed {
 
 	ws.Save()
 
-	return &newSeed
+	return &newSeed, nil
 }

@@ -3,6 +3,7 @@ package endpoint
 import (
 	"encoding/json"
 	"github.com/wemeetagain/go-hdwallet"
+	"go.uber.org/zap"
 	"io"
 	"net/http"
 )
@@ -20,17 +21,21 @@ type getWalletOutput struct {
 func (e *EndPoint) handleMyWallet(w http.ResponseWriter, r *http.Request) {
 	var p getWalletInput
 
+	log := e.log.With(zap.String("input", "myWallet"))
+
 	r.Body = http.MaxBytesReader(w, r.Body, 1048)
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
 	err := dec.Decode(&p)
 	if err != nil {
+		log.Error("fail to decode input", zap.Error(err))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	err = dec.Decode(&struct{}{})
 	if err != io.EOF {
 		msg := "Request body must only contain a single JSON object"
+		log.Error(msg, zap.Error(err))
 		http.Error(w, msg, http.StatusBadRequest)
 		return
 	}
@@ -43,7 +48,7 @@ func (e *EndPoint) handleMyWallet(w http.ResponseWriter, r *http.Request) {
 
 	// Get your address
 	address := masterpub.Address()
-	respondWithJSON(w, r, http.StatusCreated, getWalletOutput{
+	e.respondWithJSON(w, r, http.StatusCreated, getWalletOutput{
 		Address:    address,
 		PubKey:     masterpub.String(),
 		PrivateKey: masterprv.String(),

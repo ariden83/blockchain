@@ -2,6 +2,7 @@ package endpoint
 
 import (
 	"encoding/json"
+	"go.uber.org/zap"
 	"io"
 	"math/big"
 	"net/http"
@@ -28,12 +29,14 @@ func (e *EndPoint) handleGetBalance(w http.ResponseWriter, r *http.Request) {
 	dec.DisallowUnknownFields()
 	err := dec.Decode(&input)
 	if err != nil {
+		e.log.Error("Request body must only contain a single JSON object", zap.Error(err))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	err = dec.Decode(&struct{}{})
 	if err != io.EOF {
 		msg := "Request body must only contain a single JSON object"
+		e.log.Error("Request body must only contain a single JSON object")
 		http.Error(w, msg, http.StatusBadRequest)
 		return
 	}
@@ -42,7 +45,7 @@ func (e *EndPoint) handleGetBalance(w http.ResponseWriter, r *http.Request) {
 	tokensSend := e.transaction.FindUserTokensSend(input.PubKey)
 	tokensReceived := e.transaction.FindUserTokensReceived(input.PubKey)
 
-	respondWithJSON(w, r, http.StatusOK, getBalanceOutput{
+	e.respondWithJSON(w, r, http.StatusOK, getBalanceOutput{
 		Address:       input.PubKey,
 		Balance:       balance,
 		TotalReceived: tokensReceived,

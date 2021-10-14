@@ -10,35 +10,58 @@ import (
 	"fmt"
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/endpoint"
+	"github.com/ariden83/blockchain/internal/logger"
 	"github.com/ariden83/blockchain/internal/metrics"
 	"github.com/ariden83/blockchain/internal/persistence"
 	"github.com/ariden83/blockchain/internal/transactions"
 	"github.com/ariden83/blockchain/internal/wallet"
-	"github.com/joho/godotenv"
+	"go.uber.org/zap"
+	"runtime"
 )
 
 func main() {
-	defer os.Exit(0)
-
-	conf := config.New()
-
-	err := godotenv.Load()
+	cfg, err := config.New()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("fail to init persistence %s", err)
 	}
 
-	per := persistence.Init(conf.Database)
-	trans := transactions.Init(conf.Transactions, per)
-	wallets, err := wallet.Init(conf.Wallet)
-	if err != nil {
-		log.Fatal(err)
-	}
-	mtcs := metrics.New(conf.Metrics)
+	if cfg.Threads > 0 {
+		runtime.GOMAXPROCS(cfg.Threads)
+		log.Printf("Running with %v threads", cfg.Threads)
 
-	server := endpoint.Init(conf, per, trans, wallets, mtcs)
+	} else {
+		n := runtime.NumCPU()
+		runtime.GOMAXPROCS(n)
+		log.Printf("Running with default %v threads", n)
+	}
+
+	logs := logger.Init(cfg.Log)
+	logs = logs.With(zap.String("v", cfg.Version))
+
+	defer logs.Sync()
+
+	per, err := persistence.Init(cfg.Database)
+	if err != nil {
+		logs.Fatal("fail to init persistence", zap.Error(err))
+	}
+
+	trans := transactions.Init(cfg.Transactions, per, logs)
+
+	wallets, err := wallet.Init(cfg.Wallet)
+	if err != nil {
+		logs.Fatal("fail to init wallet", zap.Error(err))
+	}
+
+	mtc := metrics.New(cfg.Metrics)
+
+	server := endpoint.Init(cfg, per, trans, wallets, mtc, logs)
 
 	stop := make(chan error, 1)
-	server.ListenHTTP(stop)
+
+	if cfg.API.Enabled {
+		server.ListenHTTP(stop)
+	}
+
 	server.ListenMetrics(stop)
 
 	/**

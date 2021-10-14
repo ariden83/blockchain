@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ariden83/blockchain/internal/blockchain"
-	"github.com/ariden83/blockchain/internal/handle"
 	"github.com/ariden83/blockchain/internal/utils"
 	"github.com/davecgh/go-spew/spew"
 	"io"
@@ -25,7 +24,7 @@ func (e *EndPoint) handleWriteBlock(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&m); err != nil {
-		respondWithJSON(w, r, http.StatusBadRequest, r.Body)
+		e.respondWithJSON(w, r, http.StatusBadRequest, r.Body)
 		return
 	}
 	defer r.Body.Close()
@@ -42,22 +41,22 @@ func (e *EndPoint) handleWriteBlock(w http.ResponseWriter, r *http.Request) {
 
 	newBlock := e.WriteBlock(m)
 
-	respondWithJSON(w, r, http.StatusCreated, newBlock)
+	e.respondWithJSON(w, r, http.StatusCreated, newBlock)
 
 }
 
 func (e *EndPoint) getLastBlock() ([]byte, *big.Int) {
 	lastHash, err := e.persistence.GetLastHash()
-	handle.Handle(err)
+	e.Handle(err)
 
 	if lastHash == nil {
-		handle.Handle(fmt.Errorf("no hash found"))
+		e.Handle(fmt.Errorf("no hash found"))
 	}
 
 	serializeBloc, err := e.persistence.GetCurrentHashSerialize(lastHash)
-	handle.Handle(err)
+	e.Handle(err)
 	block, err := utils.Deserialize(serializeBloc)
-	handle.Handle(err)
+	e.Handle(err)
 
 	return lastHash, block.Index
 }
@@ -79,13 +78,13 @@ func (e *EndPoint) WriteBlock(p WriteBlockInput) blockchain.Block {
 		mutex.Unlock()
 
 		ser, err := utils.Serialize(&newBlock)
-		handle.Handle(err)
+		e.Handle(err)
 
 		err = e.persistence.Update(newBlock.Hash, ser)
-		handle.Handle(err)
+		e.Handle(err)
 		spew.Dump(blockchain.BlockChain)
 	} else {
-		handle.Handle(fmt.Errorf("new block is invalid"))
+		e.Handle(fmt.Errorf("new block created is invalid"))
 	}
 
 	return newBlock

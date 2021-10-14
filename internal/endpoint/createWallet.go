@@ -1,10 +1,18 @@
 package endpoint
 
-import "net/http"
+import (
+	"go.uber.org/zap"
+	"net/http"
+)
 
 func (e *EndPoint) handleCreateWallet(w http.ResponseWriter, r *http.Request) {
 
-	newSeed := e.wallets.Create()
+	newSeed, err := e.wallets.Create()
+	if err != nil {
+		e.log.Error("Fail to create wallet", zap.Error(err))
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-	respondWithJSON(w, r, http.StatusCreated, newSeed)
+	e.respondWithJSON(w, r, http.StatusCreated, newSeed)
 }

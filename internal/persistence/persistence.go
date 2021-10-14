@@ -2,7 +2,6 @@ package persistence
 
 import (
 	"github.com/ariden83/blockchain/config"
-	"github.com/ariden83/blockchain/internal/handle"
 	"github.com/dgraph-io/badger"
 	"os"
 )
@@ -14,18 +13,20 @@ type Persistence struct {
 }
 
 // InitBlockChain will be what starts a new blockChain
-func Init(conf config.Database) *Persistence {
+func Init(conf config.Database) (*Persistence, error) {
 	opts := badger.DefaultOptions(conf.Path)
 
 	db, err := badger.Open(opts)
-	handle.Handle(err)
+	if err != nil {
+		return nil, err
+	}
 
 	per := &Persistence{
 		db:     db,
 		config: conf,
 	}
 
-	return per
+	return per, nil
 }
 
 func (p *Persistence) DBExists() bool {

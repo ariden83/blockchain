@@ -3,6 +3,7 @@ package endpoint
 import (
 	"fmt"
 	"github.com/ariden83/blockchain/internal/iterator"
+	"go.uber.org/zap"
 	"io"
 	"net/http"
 )
@@ -11,7 +12,10 @@ func (e *EndPoint) handlePrintBlockChain(w http.ResponseWriter, _ *http.Request)
 	iterator := e.Iterator()
 
 	for {
-		block := iterator.Next()
+		block, err := iterator.Next()
+		if err != nil {
+			e.log.Fatal("fail to iterate next block", zap.Error(err))
+		}
 
 		io.WriteString(w, fmt.Sprintf("Previous hash: %x\n", block.PrevHash))
 		io.WriteString(w, fmt.Sprintf("data: %+v\n", block))

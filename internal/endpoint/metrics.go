@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"log"
+	"go.uber.org/zap"
 	"net/http"
 	"net/http/pprof"
 	"strconv"
@@ -24,7 +24,7 @@ func (e *EndPoint) ListenMetrics(stop chan error) {
 		MaxHeaderBytes: 1 << 12,
 	}
 	go func() {
-		log.Println("Metrics Server Listening on port :", strconv.Itoa(e.config.Metrics.Port))
+		e.log.Info("Metrics Server start", zap.Int("port", e.config.Metrics.Port))
 		if err := e.metricsServer.ListenAndServe(); err != nil {
 			stop <- fmt.Errorf("cannot start healthz server %s", err)
 		}
@@ -38,10 +38,10 @@ func (e *EndPoint) makeHealthzRouter() http.Handler {
 		res := Healthz{Result: true, Messages: []string{message}, Version: e.config.Version}
 		js, err := json.Marshal(res)
 		if err != nil {
-			log.Fatalf(fmt.Sprintf("Fail to jsonify %s", err))
+			e.log.Fatal("Fail to jsonify healthz response", zap.Error(err))
 		}
 		if _, err := w.Write(js); err != nil {
-			log.Fatalf(fmt.Sprintf("Fail to Write response in http.ResponseWriter %s", err))
+			e.log.Fatal("Fail to Write response in http.ResponseWriter", zap.Error(err))
 			return
 		}
 	})
@@ -53,10 +53,10 @@ func (e *EndPoint) makeHealthzRouter() http.Handler {
 		res := Healthz{Result: result, Messages: []string{message}, Version: e.config.Version}
 		js, err := json.Marshal(res)
 		if err != nil {
-			log.Fatalf(fmt.Sprintf("Fail to jsonify %s", err))
+			e.log.Fatal("Fail to jsonify", zap.Error(err))
 		}
 		if _, err := w.Write(js); err != nil {
-			log.Fatalf(fmt.Sprintf("Fail to Write response in http.ResponseWriter %s", err))
+			e.log.Fatal("Fail to Write response in http.ResponseWriter", zap.Error(err))
 			return
 		}
 	})

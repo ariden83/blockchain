@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"crypto/elliptic"
 	"encoding/gob"
-	"fmt"
 	"github.com/ariden83/blockchain/config"
+	"github.com/ariden83/blockchain/internal/dir"
 	"io/ioutil"
 	"log"
 	"os"
@@ -14,15 +14,6 @@ import (
 type Wallets struct {
 	FilePath string
 	Seeds    []Seed
-}
-
-type Options struct {
-	// Required options.
-	Dir      string
-	ValueDir string
-	File     string
-	ReadOnly bool
-	InMemory bool
 }
 
 func Init(conf config.Wallet) (*Wallets, error) {
@@ -36,23 +27,19 @@ func Init(conf config.Wallet) (*Wallets, error) {
 	return &wallets, err
 }
 
-func (Wallets) DefaultOptions(conf config.Wallet) Options {
-	return Options{
-		Dir:      conf.Path,
-		ValueDir: conf.Path,
-		File:     conf.File,
-	}
-}
-
 // var _ io.Reader = (*os.File)(nil)
 
 func (ws *Wallets) LoadFile(conf config.Wallet) error {
-	opt := ws.DefaultOptions(conf)
+	opt := dir.Options{
+		Dir:      conf.Path,
+		File:     conf.File,
+		FileMode: os.FileMode(0700),
+	}
 
 	var wallets Wallets
 
-	if _, err := os.Stat(conf.File); os.IsNotExist(err) {
-		if err := ws.createDirs(opt); err != nil {
+	if !dir.DirExists(opt) {
+		if err := dir.CreateDir(opt); err != nil {
 			return err
 		}
 		ws.Save()
@@ -90,35 +77,4 @@ func (ws *Wallets) Save() {
 	if err != nil {
 		log.Panic(err)
 	}
-}
-
-func (ws *Wallets) createDirs(opt Options) error {
-	for _, path := range []string{opt.Dir, opt.ValueDir} {
-		dirExists, err := ws.exists(path)
-		if err != nil {
-			return fmt.Errorf("Invalid Dir: %s error: %+v", path, err)
-		}
-		if !dirExists {
-			if opt.ReadOnly {
-				return fmt.Errorf("Cannot find directory %q for read-only open", path)
-			}
-			// Try to create the directory
-			err = os.MkdirAll(path, 0700)
-			if err != nil {
-				return fmt.Errorf("Error Creating Dir: %s error: %+v", path, err)
-			}
-		}
-	}
-	return nil
-}
-
-func (Wallets) exists(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return true, err
 }

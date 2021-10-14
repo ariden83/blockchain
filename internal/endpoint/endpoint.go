@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/blockchain"
-	"github.com/ariden83/blockchain/internal/handle"
 	"github.com/ariden83/blockchain/internal/metrics"
 	"github.com/ariden83/blockchain/internal/middleware"
 	"github.com/ariden83/blockchain/internal/persistence"
@@ -17,7 +16,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"log"
+	"go.uber.org/zap"
 	"net/http"
 	"strconv"
 	"strings"
@@ -35,6 +34,7 @@ type EndPoint struct {
 	metricsServer *http.Server
 	wallets       *wallet.Wallets
 	metrics       *metrics.Metrics
+	log           *zap.Logger
 }
 
 type Healthz struct {
@@ -49,6 +49,7 @@ func Init(
 	trans *transactions.Transactions,
 	wallets *wallet.Wallets,
 	mtcs *metrics.Metrics,
+	logs *zap.Logger,
 ) *EndPoint {
 	e := &EndPoint{
 		config:      conf,
@@ -56,6 +57,7 @@ func Init(
 		transaction: trans,
 		wallets:     wallets,
 		metrics:     mtcs,
+		log:         logs,
 	}
 	go func() {
 		e.Genesis()
@@ -69,11 +71,11 @@ func (e *EndPoint) Genesis() {
 
 	// si les fichiers locaux n'existent pas
 	if !e.persistence.DBExists() {
-		handle.Handle(fmt.Errorf("fail to open DB files"))
+		e.Handle(fmt.Errorf("fail to open DB files"))
 	}
 
 	lastHash, err := e.persistence.GetLastHash()
-	handle.Handle(err)
+	e.Handle(err)
 
 	if lastHash == nil {
 		lastHash = e.createGenesis()
@@ -81,9 +83,9 @@ func (e *EndPoint) Genesis() {
 	} else {
 
 		val, err := e.persistence.GetCurrentHashSerialize(lastHash)
-		handle.Handle(err)
+		e.Handle(err)
 		block, err := utils.Deserialize(val)
-		handle.Handle(err)
+		e.Handle(err)
 
 		e.persistence.SetLastHash(lastHash)
 
@@ -98,7 +100,7 @@ func (e *EndPoint) Genesis() {
 }
 
 func (e *EndPoint) createGenesis() []byte {
-	var genesisData = "First Transaction from Genesis" // This is arbitrary public key for our genesis data
+	var genesisData string = "First Transaction from Genesis" // This is arbitrary public key for our genesis data
 	cbtx := e.transaction.CoinBaseTx(e.config.Address, genesisData)
 	genesis := blockchain.Genesis(cbtx)
 	fmt.Println("Genesis proved")
@@ -106,16 +108,18 @@ func (e *EndPoint) createGenesis() []byte {
 	firstHash := genesis.Hash
 
 	serializeBLock, err := utils.Serialize(genesis)
-	handle.Handle(err)
+	e.Handle(err)
 
 	err = e.persistence.Update(firstHash, serializeBLock)
-	handle.Handle(err)
+	e.Handle(err)
 	return firstHash
 }
 
 func (e *EndPoint) ListenHTTP(stop chan error) {
 	mux := e.makeMuxRouter()
-	log.Println("HTTP Server Listening on port :", strconv.Itoa(e.config.Port))
+
+	e.log.Info(fmt.Sprintf("HTTP Server Listening on port : %s", strconv.Itoa(e.config.Port)))
+
 	e.server = &http.Server{
 		Addr:           ":" + strconv.Itoa(e.config.Port),
 		Handler:        mux,
@@ -169,9 +173,10 @@ func (e *EndPoint) MetricsMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func respondWithJSON(w http.ResponseWriter, r *http.Request, code int, payload interface{}) {
+func (e *EndPoint) respondWithJSON(w http.ResponseWriter, r *http.Request, code int, payload interface{}) {
 	response, err := json.MarshalIndent(payload, "", "  ")
 	if err != nil {
+		e.log.Error("HTTP 500: Internal Server Error", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("HTTP 500: Internal Server Error"))
 		return

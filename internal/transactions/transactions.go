@@ -8,6 +8,7 @@ import (
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/iterator"
 	"github.com/ariden83/blockchain/internal/persistence"
+	"go.uber.org/zap"
 	"math/big"
 	"time"
 )
@@ -17,12 +18,14 @@ var ErrNotEnoughFunds = errors.New("Not enough funds")
 type Transactions struct {
 	Reward      *big.Int
 	persistence *persistence.Persistence
+	log         *zap.Logger
 }
 
-func Init(conf config.Transactions, per *persistence.Persistence) *Transactions {
+func Init(conf config.Transactions, per *persistence.Persistence, log *zap.Logger) *Transactions {
 	return &Transactions{
 		Reward:      conf.Reward,
 		persistence: per,
+		log:         log,
 	}
 }
 
@@ -141,7 +144,10 @@ func (t *Transactions) FindUnspentTransactions(pubKey string) []blockchain.Trans
 
 	// pour chaque bloc
 	for {
-		block := iter.Next()
+		block, err := iter.Next()
+		if err != nil {
+			t.log.Fatal("fail to iterate next block", zap.Error(err))
+		}
 
 		// pour chaque transaction
 		for _, tx := range block.Transactions {
@@ -224,7 +230,10 @@ func (t *Transactions) FindUserTokensSend(pubKey string) *big.Int {
 	}
 
 	for {
-		block := iter.Next()
+		block, err := iter.Next()
+		if err != nil {
+			t.log.Fatal("fail to iterate next block", zap.Error(err))
+		}
 		for _, tx := range block.Transactions {
 
 			var isSending bool
@@ -262,7 +271,10 @@ func (t *Transactions) FindUserTokensReceived(pubKey string) *big.Int {
 	}
 
 	for {
-		block := iter.Next()
+		block, err := iter.Next()
+		if err != nil {
+			t.log.Fatal("fail to iterate next block", zap.Error(err))
+		}
 	Outputs:
 		for _, tx := range block.Transactions {
 			if tx.IsCoinBase() {

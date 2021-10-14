@@ -3,7 +3,6 @@ package config
 import (
 	"context"
 	"fmt"
-	"github.com/ariden83/blockchain/internal/handle"
 	"github.com/heetch/confita"
 	"github.com/heetch/confita/backend"
 	"github.com/heetch/confita/backend/env"
@@ -49,17 +48,36 @@ type Transactions struct {
 	Reward *big.Int
 }
 
+// address of actual user which mine on this server
+type Miner struct {
+	PubKey     string `config:"miner_pub_key"`
+	PrivateKey string `config:"miner_private_key"`
+	Address    string `config:"miner_address"`
+}
+
+type API struct {
+	Enabled bool `config:"api_enabled"`
+}
+
+type Log struct {
+	Path string `config:"log_path"`
+}
+
 type Config struct {
-	Name     string
-	Version  string
-	Port     int
-	Database Database
-	Address  string
+	Name    string
+	Version string
+	Port    int
+	Address string
+	Threads int `json:"threads"`
 	//reward is the amnount of tokens given to someone that "mines" a new block
 	Gas          Gas
 	Wallet       Wallet
 	Metrics      Metrics
 	Transactions Transactions
+	Miner        Miner
+	Database     Database
+	API          API
+	Log          Log
 }
 
 func getDefaultConfig() *Config {
@@ -90,11 +108,18 @@ func getDefaultConfig() *Config {
 			Name:      "chain",
 			Port:      8099,
 		},
+		Miner: Miner{},
+		API: API{
+			Enabled: true,
+		},
+		Log: Log{
+			Path: "./tmp/logs",
+		},
 	}
 }
 
 // New Load the config
-func New() *Config {
+func New() (*Config, error) {
 	loaders := []backend.Backend{
 		env.NewBackend(),
 		flags.NewBackend(),
@@ -105,11 +130,11 @@ func New() *Config {
 	cfg := getDefaultConfig()
 	err := loader.Load(context.Background(), cfg)
 	if err != nil {
-		handle.Handle(err)
+		return cfg, err
 	}
 
 	fmt.Println(fmt.Sprintf("%+v", cfg))
-	return cfg
+	return cfg, nil
 }
 
 func (c *Config) String() string {
