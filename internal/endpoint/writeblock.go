@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ariden83/blockchain/internal/blockchain"
+	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/utils"
 	"github.com/davecgh/go-spew/spew"
 	"io"
@@ -79,6 +80,8 @@ func (e *EndPoint) WriteBlock(p WriteBlockInput) blockchain.Block {
 
 		ser, err := utils.Serialize(&newBlock)
 		e.Handle(err)
+
+		e.event.Push(event.BlockChain)
 
 		err = e.persistence.Update(newBlock.Hash, ser)
 		e.Handle(err)

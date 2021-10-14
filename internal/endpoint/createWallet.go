@@ -1,6 +1,7 @@
 package endpoint
 
 import (
+	"github.com/ariden83/blockchain/internal/event"
 	"go.uber.org/zap"
 	"net/http"
 )
@@ -13,6 +14,8 @@ func (e *EndPoint) handleCreateWallet(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	e.event.Push(event.Wallet)
 
 	e.respondWithJSON(w, r, http.StatusCreated, newSeed)
 }

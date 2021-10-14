@@ -3,12 +3,12 @@ package event
 type EventType int
 
 type Event struct {
-	Chan chan EventType
+	channel chan EventType
 }
 
 const (
-	Blockchain EventType = iota
-	Wallets
+	BlockChain EventType = iota
+	Wallet
 	Pool
 )
 
@@ -19,6 +19,14 @@ func (e EventType) String() string {
 func New() *Event {
 	c := make(chan EventType)
 	return &Event{
-		Chan: c,
+		channel: c,
 	}
+}
+
+func (e *Event) Push(evt EventType) {
+	e.channel <- evt
+}
+
+func (e *Event) Get() chan EventType {
+	return e.channel
 }

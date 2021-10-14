@@ -236,9 +236,9 @@ func (e *EndPoint) readData(rw *bufio.ReadWriter) {
 			mutex.Lock()
 
 			switch mess.Name {
-			case event.Blockchain:
+			case event.BlockChain:
 				e.readBlockChain(mess.Value)
-			case event.Wallets:
+			case event.Wallet:
 				e.readWallets(mess.Value)
 			case event.Pool:
 				e.readPool(mess.Value)
@@ -267,14 +267,14 @@ func (e *EndPoint) writeData(rw *bufio.ReadWriter) {
 	go func() {
 		var bytes []byte
 
-		for data := range e.event.Chan {
+		for data := range e.event.Get() {
 			e.log.Info("New update", zap.String("type", data.String()))
 			mutex.Lock()
 
 			switch data {
-			case event.Blockchain:
+			case event.BlockChain:
 				bytes = e.sendBlockChain(rw)
-			case event.Wallets:
+			case event.Wallet:
 				bytes = e.sendWallets(rw)
 			case event.Pool:
 				bytes = e.sendPool(rw)
