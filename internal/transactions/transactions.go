@@ -25,7 +25,7 @@ func Init(conf config.Transactions, per *persistence.Persistence, log *zap.Logge
 	return &Transactions{
 		Reward:      conf.Reward,
 		persistence: per,
-		log:         log,
+		log:         log.With(zap.String("service", "transactions")),
 	}
 }
 

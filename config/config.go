@@ -57,6 +57,24 @@ type Miner struct {
 
 type API struct {
 	Enabled bool `config:"api_enabled"`
+	Port    int  `config:"api_port"`
+}
+
+type P2P struct {
+	Enabled bool `config:"p2p_enabled"`
+	// Parse options from the command line
+	// Port ouvre le port auquel nous voulons autoriser les connexions
+	Port int `config:"p2p_port"`
+	// secio : sécurisation des flux
+	Secio bool `config:"p2p_secio_enabled"`
+	// target nous permet de spécifier l'adresse d'un autre hôte auquel nous voulons nous connecter,
+	// ce qui signifie que nous agissons en tant qu'homologue d'un hôte si nous utilisons ce drapeau.
+	Target string `config:"p2p_target"`
+	// seed est le paramètre aléatoire facultatif utilisé pour construire notre adresse
+	// que d'autres pairs peuvent utiliser pour se connecter à nous
+	Seed int64 `config:"p2p_seed"`
+
+	TimeToCommunicate int `config:"p2p_time_to_communicate"`
 }
 
 type Log struct {
@@ -66,7 +84,6 @@ type Log struct {
 type Config struct {
 	Name    string
 	Version string
-	Port    int
 	Address string
 	Threads int `json:"threads"`
 	//reward is the amnount of tokens given to someone that "mines" a new block
@@ -78,12 +95,12 @@ type Config struct {
 	Database     Database
 	API          API
 	Log          Log
+	P2P          P2P
 }
 
 func getDefaultConfig() *Config {
 	return &Config{
 		Name: "blockChain",
-		Port: 8098,
 		Transactions: Transactions{
 			Reward: big.NewInt(100),
 		},
@@ -111,6 +128,12 @@ func getDefaultConfig() *Config {
 		Miner: Miner{},
 		API: API{
 			Enabled: true,
+			Port:    8098,
+		},
+		P2P: P2P{
+			Port:              8097,
+			Enabled:           true,
+			TimeToCommunicate: 5,
 		},
 		Log: Log{
 			Path: "./tmp/logs",

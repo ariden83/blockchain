@@ -10,8 +10,10 @@ import (
 	"fmt"
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/endpoint"
+	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/logger"
 	"github.com/ariden83/blockchain/internal/metrics"
+	"github.com/ariden83/blockchain/internal/p2p"
 	"github.com/ariden83/blockchain/internal/persistence"
 	"github.com/ariden83/blockchain/internal/transactions"
 	"github.com/ariden83/blockchain/internal/wallet"
@@ -54,15 +56,22 @@ func main() {
 
 	mtc := metrics.New(cfg.Metrics)
 
-	server := endpoint.Init(cfg, per, trans, wallets, mtc, logs)
+	evt := event.New()
 
+	server := endpoint.Init(cfg, per, trans, wallets, mtc, logs, evt)
 	stop := make(chan error, 1)
+
+	server.Genesis()
+	server.ListenMetrics(stop)
 
 	if cfg.API.Enabled {
 		server.ListenHTTP(stop)
 	}
 
-	server.ListenMetrics(stop)
+	if cfg.P2P.Enabled {
+		p := p2p.Init(cfg, per, trans, wallets, mtc, logs, evt)
+		p.Listen(stop)
+	}
 
 	/**
 	 * And wait for shutdown via signal or error.

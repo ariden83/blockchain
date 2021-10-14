@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/blockchain"
+	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/metrics"
 	"github.com/ariden83/blockchain/internal/middleware"
 	"github.com/ariden83/blockchain/internal/persistence"
@@ -27,7 +28,7 @@ import (
 var mutex = &sync.Mutex{}
 
 type EndPoint struct {
-	config        *config.Config
+	cfg           *config.Config
 	persistence   *persistence.Persistence
 	transaction   *transactions.Transactions
 	server        *http.Server
@@ -35,6 +36,7 @@ type EndPoint struct {
 	wallets       *wallet.Wallets
 	metrics       *metrics.Metrics
 	log           *zap.Logger
+	event         *event.Event
 }
 
 type Healthz struct {
@@ -44,64 +46,64 @@ type Healthz struct {
 }
 
 func Init(
-	conf *config.Config,
+	cfg *config.Config,
 	per *persistence.Persistence,
 	trans *transactions.Transactions,
 	wallets *wallet.Wallets,
 	mtcs *metrics.Metrics,
 	logs *zap.Logger,
+	evt *event.Event,
 ) *EndPoint {
 	e := &EndPoint{
-		config:      conf,
+		cfg:         cfg,
 		persistence: per,
 		transaction: trans,
 		wallets:     wallets,
 		metrics:     mtcs,
-		log:         logs,
+		log:         logs.With(zap.String("service", "http")),
+		event:       evt,
 	}
-	go func() {
-		e.Genesis()
-	}()
 
 	return e
 }
 
 func (e *EndPoint) Genesis() {
-	var lastHash []byte
+	go func() {
+		var lastHash []byte
 
-	// si les fichiers locaux n'existent pas
-	if !e.persistence.DBExists() {
-		e.Handle(fmt.Errorf("fail to open DB files"))
-	}
+		// si les fichiers locaux n'existent pas
+		if !e.persistence.DBExists() {
+			e.Handle(fmt.Errorf("fail to open DB files"))
+		}
 
-	lastHash, err := e.persistence.GetLastHash()
-	e.Handle(err)
-
-	if lastHash == nil {
-		lastHash = e.createGenesis()
-
-	} else {
-
-		val, err := e.persistence.GetCurrentHashSerialize(lastHash)
-		e.Handle(err)
-		block, err := utils.Deserialize(val)
+		lastHash, err := e.persistence.GetLastHash()
 		e.Handle(err)
 
-		e.persistence.SetLastHash(lastHash)
+		if lastHash == nil {
+			lastHash = e.createGenesis()
 
-		mutex.Lock()
-		blockchain.BlockChain = append(blockchain.BlockChain, *block)
-		mutex.Unlock()
+		} else {
 
-		spew.Dump(blockchain.BlockChain)
-	}
+			val, err := e.persistence.GetCurrentHashSerialize(lastHash)
+			e.Handle(err)
+			block, err := utils.Deserialize(val)
+			e.Handle(err)
 
-	return
+			e.persistence.SetLastHash(lastHash)
+
+			mutex.Lock()
+			blockchain.BlockChain = append(blockchain.BlockChain, *block)
+			mutex.Unlock()
+
+			spew.Dump(blockchain.BlockChain)
+		}
+
+	}()
 }
 
 func (e *EndPoint) createGenesis() []byte {
 	var genesisData string = "First Transaction from Genesis" // This is arbitrary public key for our genesis data
-	cbtx := e.transaction.CoinBaseTx(e.config.Address, genesisData)
+	cbtx := e.transaction.CoinBaseTx(e.cfg.Address, genesisData)
 	genesis := blockchain.Genesis(cbtx)
 	fmt.Println("Genesis proved")
 
@@ -118,10 +120,10 @@ func (e *EndPoint) createGenesis() []byte {
 func (e *EndPoint) ListenHTTP(stop chan error) {
 	mux := e.makeMuxRouter()
 
-	e.log.Info(fmt.Sprintf("HTTP Server Listening on port : %s", strconv.Itoa(e.config.Port)))
+	e.log.Info("Start listening HTTP Server", zap.Int("port", e.cfg.API.Port))
 
 	e.server = &http.Server{
-		Addr:           ":" + strconv.Itoa(e.config.Port),
+		Addr:           ":" + strconv.Itoa(e.cfg.API.Port),
 		Handler:        mux,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,

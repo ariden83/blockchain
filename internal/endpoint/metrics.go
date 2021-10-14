@@ -16,7 +16,7 @@ func (e *EndPoint) ListenMetrics(stop chan error) {
 	mux := e.makeHealthzRouter()
 
 	e.metricsServer = &http.Server{
-		Addr:           ":" + strconv.Itoa(e.config.Metrics.Port),
+		Addr:           ":" + strconv.Itoa(e.cfg.Metrics.Port),
 		Handler:        mux,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
@@ -24,7 +24,7 @@ func (e *EndPoint) ListenMetrics(stop chan error) {
 		MaxHeaderBytes: 1 << 12,
 	}
 	go func() {
-		e.log.Info("Metrics Server start", zap.Int("port", e.config.Metrics.Port))
+		e.log.Info("Metrics Server start", zap.Int("port", e.cfg.Metrics.Port))
 		if err := e.metricsServer.ListenAndServe(); err != nil {
 			stop <- fmt.Errorf("cannot start healthz server %s", err)
 		}
@@ -35,7 +35,7 @@ func (e *EndPoint) makeHealthzRouter() http.Handler {
 	muxRouter := mux.NewRouter()
 	muxRouter.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		message := "The service responds correctly"
-		res := Healthz{Result: true, Messages: []string{message}, Version: e.config.Version}
+		res := Healthz{Result: true, Messages: []string{message}, Version: e.cfg.Version}
 		js, err := json.Marshal(res)
 		if err != nil {
 			e.log.Fatal("Fail to jsonify healthz response", zap.Error(err))
@@ -50,7 +50,7 @@ func (e *EndPoint) makeHealthzRouter() http.Handler {
 		result := true
 		message := "Service responds correctly"
 
-		res := Healthz{Result: result, Messages: []string{message}, Version: e.config.Version}
+		res := Healthz{Result: result, Messages: []string{message}, Version: e.cfg.Version}
 		js, err := json.Marshal(res)
 		if err != nil {
 			e.log.Fatal("Fail to jsonify", zap.Error(err))
