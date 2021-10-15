@@ -187,9 +187,9 @@ func (e *EndPoint) makeBasicHost() (host.Host, error) {
 	fullAddr := addr.Encapsulate(hostAddr)
 	e.log.Info(fmt.Sprintf("I am %s\n", fullAddr))
 	if e.cfg.P2P.Secio {
-		e.log.Info(fmt.Sprintf("Now run \"go run main.go -l %d -d %s -secio\" on a different terminal", e.cfg.P2P.Port+1, fullAddr))
+		e.log.Info(fmt.Sprintf("Now run \"go run main.go -l %d -d %s -secio\" on a different terminal", e.cfg.P2P.Port+101, fullAddr))
 	} else {
-		e.log.Info(fmt.Sprintf("Now run \"go run main.go -l %d -d %s\" on a different terminal", e.cfg.P2P.Port+1, fullAddr))
+		e.log.Info(fmt.Sprintf("Now run \"go run main.go -l %d -d %s\" on a different terminal", e.cfg.P2P.Port+101, fullAddr))
 	}
 
 	e.host = basicHost
@@ -209,7 +209,7 @@ func (e *EndPoint) handleStream(s net.Stream) {
 	// stream 's' will stay open until you close it (or the other side closes it).
 }
 
-type Message struct {
+type message struct {
 	Name  event.EventType
 	Value []byte
 }
@@ -228,12 +228,11 @@ func (e *EndPoint) readData(rw *bufio.ReadWriter) {
 		}
 		if str != "\n" {
 
-			mess := Message{}
+			mess := message{}
+			//var mess []interface{}
 			if err := json.Unmarshal([]byte(str), &mess); err != nil {
 				log.Fatal(err)
 			}
-
-			mutex.Lock()
 
 			e.log.Info("New event read", zap.String("type", mess.Name.String()))
 
@@ -245,8 +244,6 @@ func (e *EndPoint) readData(rw *bufio.ReadWriter) {
 			case event.Pool:
 				e.readPool(mess.Value)
 			}
-
-			mutex.Unlock()
 		}
 	}
 }
@@ -275,7 +272,7 @@ func (e *EndPoint) writeData(rw *bufio.ReadWriter) {
 				continue
 			}
 
-			mess := Message{
+			mess := message{
 				Name:  data,
 				Value: bytes,
 			}
@@ -323,11 +320,12 @@ func (e *EndPoint) readBlockChain(chain []byte) {
 		e.log.Info("blockChain received smaller than current")
 		return
 	}
-
+	mutex.Lock()
 	if err := json.Unmarshal(chain, &blockchain.BlockChain); err != nil {
 		e.log.Error("fail to unmarshal blockChain received", zap.Error(err))
 		return
 	}
+	mutex.Unlock()
 	e.log.Info("received blockChain update")
 }
 
@@ -337,10 +335,12 @@ func (e *EndPoint) readWallets(chain []byte) {
 		return
 	}
 
+	mutex.Lock()
 	if err := json.Unmarshal(chain, &e.wallets.Seeds); err != nil {
 		e.log.Error("fail to unmarshal blockChain received", zap.Error(err))
 		return
 	}
+	mutex.Unlock()
 	e.log.Info("received blockChain update")
 }
 

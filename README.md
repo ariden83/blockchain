@@ -13,7 +13,7 @@ My first own blockchain
 * Building a blockChain with transactions [code source](https://replit.com/@nheingit/GolangBlockChain-4)
 * Ethereum block structure explained [ethereum-block-structure-explained](https://medium.com/@eiki1212/ethereum-block-structure-explained-1893bb226bd6)
 * Ethereum accounts transactions gas [accounts-transactions-gas-ethereum](https://hudsonjameson.com/2017-06-27-accounts-transactions-gas-ethereum/)
-
+* Le minage en 7 étapes [minage-7-etapes](http://www.ab-consulting.fr/blog/blockchain/minage-7-etapes=)
 
 ## Command
 
@@ -99,7 +99,7 @@ Return
       "Outputs": [
         {
           "Value": 1,
-          "PubKey": "1P1aBegXRiTinJhhEYHHiMALfG26Wu9sG3"
+          "PubKey": "xpub661MyMwAqRbcFTZYiEcSv4Qj2Qr2NzQ7rjYc3iv9c6VSTxoYsqA9AA6nNbp8e9nVR9hRARXz5CApP6j5BxUnohyj89oSg3zZdDuKmGhdSFF"
         }
       ]
     }
@@ -170,6 +170,24 @@ retourne
 ```
 Balance of xpub661MyMwAqRbcG4VYfVo7ptRncn7wsGMjNubLNrm5Stu5ERP4RtJqo7sQgSQAESwyJKi442EJ6sNWRz5wWZ2ecFE8p1JEJs6qGkzPKncdkhb: 3
 ```
+
+#### 5) Communicate new update of blockChain / wallet with every blockChain
+
+Après la commande 
+
+```
+make local
+> 2021-10-15T16:40:38.669+0200	INFO	Now run "go run main.go -l 8198 -d /ip4/127.0.0.1/tcp/8097/p2p/QmdJboshgG8BuRexqmq9opEsr49Zw961UqSMQrrfXxyzxQ" on a different terminal
+```
+
+il faut récupérer l'adresse TCP transmise dans les logs et l'executer dans un nouveau terminal
+
+```
+cd ./cmd/p2p
+go run main.go -l 8198 -d /ip4/127.0.0.1/tcp/8097/p2p/QmdJboshgG8BuRexqmq9opEsr49Zw961UqSMQrrfXxyzxQ
+```
+
+Après chaque création / update de la blockChain ou des seeds, le deuxième service lancé va se mettre à jour
 
 
 ## GPG tutorial

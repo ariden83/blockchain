@@ -18,6 +18,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ariden83/blockchain/internal/blockchain"
+	"github.com/ariden83/blockchain/internal/event"
 	"github.com/davecgh/go-spew/spew"
 	golog "github.com/ipfs/go-log"
 	gologging "github.com/ipfs/go-log"
@@ -113,6 +115,11 @@ func handleStream(s net.Stream) {
 	// stream 's' will stay open until you close it (or the other side closes it).
 }
 
+type message struct {
+	Name  event.EventType
+	Value []byte
+}
+
 func readData(rw *bufio.ReadWriter) {
 
 	for {
@@ -126,32 +133,66 @@ func readData(rw *bufio.ReadWriter) {
 		}
 		if str != "\n" {
 
-			chain := make([]Block, 0)
-			if err := json.Unmarshal([]byte(str), &chain); err != nil {
+			mess := message{}
+			if err := json.Unmarshal([]byte(str), &mess); err != nil {
 				log.Fatal(err)
 			}
 
-			mutex.Lock()
-			if len(chain) > len(Blockchain) {
-				Blockchain = chain
-				bytes, err := json.MarshalIndent(Blockchain, "", "  ")
-				if err != nil {
-
-					log.Fatal(err)
-				}
-				// Green console color: 	\x1b[32m
-				// Reset console color: 	\x1b[0m
-				fmt.Printf("\x1b[32m%s\x1b[0m> ", string(bytes))
+			switch mess.Name {
+			case event.BlockChain:
+				readBlockChain(mess.Value)
+			case event.Wallet:
+				readWallets(mess.Value)
+			case event.Pool:
+				readPool(mess.Value)
 			}
-			mutex.Unlock()
 		}
 	}
 }
 
+func readBlockChain(chain []byte) {
+	if len(chain) <= len(blockchain.BlockChain) {
+		fmt.Printf("blockChain received smaller than current")
+		return
+	}
+
+	if err := json.Unmarshal(chain, &blockchain.BlockChain); err != nil {
+		fmt.Printf("fail to unmarshal blockChain received %s", err)
+		return
+	}
+	fmt.Printf("received blockChain update %+v", blockchain.BlockChain)
+}
+
+type Seed struct {
+	Address   string
+	Timestamp string
+	PubKey    string
+	PrivKey   string
+	Mnemonic  string
+}
+
+var Seeds []Seed
+
+func readWallets(chain []byte) {
+	if len(chain) <= len(Seeds) {
+		fmt.Printf("blockChain received smaller than current")
+		return
+	}
+
+	if err := json.Unmarshal(chain, &Seeds); err != nil {
+		fmt.Printf("fail to unmarshal blockChain received %s", err)
+		return
+	}
+
+	fmt.Printf("seeds received %+v", Seeds)
+}
+
+func readPool(_ []byte) {}
+
 // routine Go qui diffuse le dernier état de notre blockchain toutes les 5 secondes à nos pairs
 // Ils le recevront et le jetteront si la longueur est plus courte que la leur. Ils l'accepteront si c'est plus long
 func writeData(rw *bufio.ReadWriter) {
-
+	return
 	go func() {
 		for {
 			time.Sleep(5 * time.Second)

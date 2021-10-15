@@ -1,6 +1,6 @@
 version: "3.4"
 services:
-  fizz-buzz:
+  blockchain:
     image: localhost:5000/ariden83/blockchain:782a3ff
     container_name: "blockChain"
     ports:
@@ -8,5 +8,7 @@ services:
       - "8581:8099"
       - "8582:8097"
     restart: "always"
+    volumes:
+      - "./tmp:/go/tmp"
 
 

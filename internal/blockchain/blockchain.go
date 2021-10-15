@@ -173,8 +173,8 @@ func AddBlock(lastHash []byte, index *big.Int, coinBase *Transaction) Block {
 		hex := fmt.Sprintf("%x", i)
 		newBlock.Nonce = hex
 		if !isHashValid(calculateHash(newBlock), newBlock.Difficulty) {
-			//fmt.Println(calculateHash(newBlock), " do more work!")
-			time.Sleep(time.Second)
+			fmt.Println(calculateHash(newBlock), " do more work!")
+			time.Sleep(10 * time.Millisecond)
 			continue
 		} else {
 			fmt.Println(calculateHash(newBlock), " work done!")

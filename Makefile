@@ -55,7 +55,7 @@ local-proof:
 local-p2p:
 	@echo "> Launch local p2p ..."
 	go fmt ./...
-	go run p2p/main.go -l 10000 -secio
+	go run ./cmd/p2p/main.go -l 10000 -secio
 
 local-networking:
 	@echo "> Launch local networking ..."
