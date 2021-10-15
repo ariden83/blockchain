@@ -35,7 +35,7 @@ clean:
 
 build-app:
 	@echo "> start building..."
-	docker build -t "toto" .
+	docker build $(BUILD_OPTIONS) .
 
 push:
 	@echo "> start push..."
@@ -84,6 +84,14 @@ local:
 	export GO111MODULE=on;
 	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./cmd/app/.
 	-cli_level=INFO ./bin/main
+
+local-pod2:
+	@echo "> Launch local ..."
+	go fmt ./...
+	export GO111MODULE=on;
+	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./cmd/app/.
+	-cli_level=INFO  ./bin/main
+
 
 local-vendor:
 	@echo "> Regenerate vendor ..."

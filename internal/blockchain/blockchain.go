@@ -137,16 +137,19 @@ func IsBlockValid(newBlock, oldBlock Block) bool {
 	newIndexWaiting := oldBlock.Index.Add(oldBlock.Index, big.NewInt(1))
 
 	if newIndexWaiting.Cmp(newBlock.Index) != 0 {
+		fmt.Println(fmt.Sprintf("is block valid fail, with cmp %d", newIndexWaiting.Cmp(newBlock.Index)))
 		return false
 	}
 
 	res := bytes.Compare(oldBlock.Hash, newBlock.PrevHash)
 	if res != 0 {
+		fmt.Println(fmt.Sprintf("is block valid fail %d with compare byte", res))
 		return false
 	}
 
 	res = bytes.Compare(calculateHash(newBlock), newBlock.Hash)
 	if res != 0 {
+		fmt.Println(fmt.Sprintf("is block valid fail %d with compare calculateHash", res))
 		return false
 	}
 
@@ -170,7 +173,7 @@ func AddBlock(lastHash []byte, index *big.Int, coinBase *Transaction) Block {
 		hex := fmt.Sprintf("%x", i)
 		newBlock.Nonce = hex
 		if !isHashValid(calculateHash(newBlock), newBlock.Difficulty) {
-			fmt.Println(calculateHash(newBlock), " do more work!")
+			//fmt.Println(calculateHash(newBlock), " do more work!")
 			time.Sleep(time.Second)
 			continue
 		} else {

@@ -72,7 +72,7 @@ func (e *EndPoint) Listen(stop chan error) {
 	}
 
 	if e.cfg.P2P.Target == "" {
-		log.Println("listening for connections")
+		e.log.Info("listening for connections")
 		// Set a stream handler on host A. /p2p/1.0.0 is
 		// a user-defined protocol name.
 		ha.SetStreamHandler("/p2p/1.0.0", e.handleStream)
@@ -235,6 +235,8 @@ func (e *EndPoint) readData(rw *bufio.ReadWriter) {
 
 			mutex.Lock()
 
+			e.log.Info("New event read", zap.String("type", mess.Name.String()))
+
 			switch mess.Name {
 			case event.BlockChain:
 				e.readBlockChain(mess.Value)
@@ -244,17 +246,6 @@ func (e *EndPoint) readData(rw *bufio.ReadWriter) {
 				e.readPool(mess.Value)
 			}
 
-			/*if len(chain) > len(Blockchain) {
-				Blockchain = chain
-				bytes, err := json.MarshalIndent(Blockchain, "", "  ")
-				if err != nil {
-
-					log.Fatal(err)
-				}
-				// Green console color: 	\x1b[32m
-				// Reset console color: 	\x1b[0m
-				fmt.Printf("\x1b[32m%s\x1b[0m> ", string(bytes))
-			}*/
 			mutex.Unlock()
 		}
 	}
@@ -263,12 +254,11 @@ func (e *EndPoint) readData(rw *bufio.ReadWriter) {
 // routine Go qui diffuse le dernier état de notre blockchain toutes les 5 secondes à nos pairs
 // Ils le recevront et le jetteront si la longueur est plus courte que la leur. Ils l'accepteront si c'est plus long
 func (e *EndPoint) writeData(rw *bufio.ReadWriter) {
-
 	go func() {
 		var bytes []byte
 
-		for data := range e.event.Get() {
-			e.log.Info("New update", zap.String("type", data.String()))
+		for data := range e.event.NewReader() {
+			e.log.Info("New event push", zap.String("type", data.String()))
 			mutex.Lock()
 
 			switch data {

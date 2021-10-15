@@ -41,7 +41,6 @@ func (e *EndPoint) handleWriteBlock(w http.ResponseWriter, r *http.Request) {
 	}
 
 	newBlock := e.WriteBlock(m)
-
 	e.respondWithJSON(w, r, http.StatusCreated, newBlock)
 
 }
@@ -86,7 +85,6 @@ func (e *EndPoint) WriteBlock(p WriteBlockInput) blockchain.Block {
 		err = e.persistence.Update(newBlock.Hash, ser)
 		e.Handle(err)
 		spew.Dump(blockchain.BlockChain)
-
 	} else {
 		e.Handle(fmt.Errorf("new block created is invalid"))
 	}
