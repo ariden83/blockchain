@@ -1,0 +1,12 @@
+version: "3.4"
+services:
+  fizz-buzz:
+    image: localhost:5000/ariden83/blockchain:782a3ff
+    container_name: "blockChain"
+    ports:
+      - "8580:8098"
+      - "8581:8099"
+      - "8582:8097"
+    restart: "always"
+
+
