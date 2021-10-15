@@ -4,10 +4,8 @@ import (
 	"bufio"
 	"context"
 	"crypto/rand"
-	"encoding/json"
 	"fmt"
 	"github.com/ariden83/blockchain/config"
-	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/metrics"
 	"github.com/ariden83/blockchain/internal/persistence"
 	"github.com/ariden83/blockchain/internal/transactions"
@@ -16,7 +14,6 @@ import (
 	"github.com/libp2p/go-libp2p-core/crypto"
 	"go.uber.org/zap"
 	"io"
-	"log"
 	mrand "math/rand"
 	"strings"
 	"sync"
@@ -66,71 +63,88 @@ func Init(
 }
 
 func (e *EndPoint) Listen(stop chan error) {
-	ha, err := e.makeBasicHost()
-	if err != nil {
-		log.Fatal(err)
-	}
+	go func() {
+		ha, err := e.makeBasicHost()
+		if err != nil {
+			stop <- err
+			return
+		}
 
+		if e.cfg.P2P.Target == "" {
+			e.log.Info("listening for connections")
+			// Set a stream handler on host A. /p2p/1.0.0 is
+			// a user-defined protocol name.
+			ha.SetStreamHandler("/p2p/1.0.0", e.handleStream)
+
+			select {} // hang forever
+			/**** This is where the listener code ends ****/
+		} else {
+			ha.SetStreamHandler("/p2p/1.0.0", e.handleStream)
+			e.connectToIPFS(stop, ha)
+		}
+	}()
+}
+
+func (e *EndPoint) HasTarget() bool {
 	if e.cfg.P2P.Target == "" {
-		e.log.Info("listening for connections")
-		// Set a stream handler on host A. /p2p/1.0.0 is
-		// a user-defined protocol name.
-		ha.SetStreamHandler("/p2p/1.0.0", e.handleStream)
-
-		select {} // hang forever
-		/**** This is where the listener code ends ****/
-	} else {
-		ha.SetStreamHandler("/p2p/1.0.0", e.handleStream)
-
-		// The following code extracts target's peer ID from the
-		// given multiaddress
-		ipfsaddr, err := ma.NewMultiaddr(e.cfg.P2P.Target)
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		pid, err := ipfsaddr.ValueForProtocol(ma.P_IPFS)
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		// Nous nous retrouvons avec le peerID et l'adresse cible targetAddr de l'hôte auquel nous voulons nous connecter
-		// et ajoutons cet enregistrement dans notre "magasin"
-		// afin que nous puissions garder une trace de qui nous sommes connectés.
-		// Nous le faisons avec ha.Peerstore().AddAddr
-		peerid, err := peer.Decode(pid)
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		// Decapsulate the /ipfs/<peerID> part from the target
-		// /ip4/<a.b.c.d>/ipfs/<peer> becomes /ip4/<a.b.c.d>
-		targetPeerAddr, _ := ma.NewMultiaddr(fmt.Sprintf("/ipfs/%s", peer.Encode(peerid)))
-		targetAddr := ipfsaddr.Decapsulate(targetPeerAddr)
-
-		// We have a peer ID and a targetAddr so we add it to the peerstore
-		// so LibP2P knows how to contact it
-		ha.Peerstore().AddAddr(peerid, targetAddr, pstore.PermanentAddrTTL)
-
-		e.log.Info("opening stream p2p")
-		// make a new stream from host B to host A
-		// it should be handled on host A by the handler we set above because
-		// we use the same /p2p/1.0.0 protocol
-		s, err := ha.NewStream(context.Background(), peerid, "/p2p/1.0.0")
-		if err != nil {
-			log.Fatalln(err)
-		}
-		// Create a buffered stream so that read and writes are non blocking.
-		rw := bufio.NewReadWriter(bufio.NewReader(s), bufio.NewWriter(s))
-
-		// Create a thread to read and write data.
-		go e.writeData(rw)
-		go e.readData(rw)
-
-		// select vide afin que notre programme ne se contente pas de se terminer et de s'arrêter
-		select {} // hang forever
-
+		// call default genesis
+		return false
 	}
+	return true
+}
+
+func (e *EndPoint) connectToIPFS(stop chan error, ha host.Host) {
+	// The following code extracts target's peer ID from the
+	// given multiaddress
+	ipfsAddr, err := ma.NewMultiaddr(e.cfg.P2P.Target)
+	if err != nil {
+		stop <- err
+		return
+	}
+
+	pid, err := ipfsAddr.ValueForProtocol(ma.P_IPFS)
+	if err != nil {
+		stop <- err
+		return
+	}
+
+	// Nous nous retrouvons avec le peerID et l'adresse cible targetAddr de l'hôte auquel nous voulons nous connecter
+	// et ajoutons cet enregistrement dans notre "magasin"
+	// afin que nous puissions garder une trace de qui nous sommes connectés.
+	// Nous le faisons avec ha.Peerstore().AddAddr
+	peerid, err := peer.Decode(pid)
+	if err != nil {
+		stop <- err
+		return
+	}
+
+	// Decapsulate the /ipfs/<peerID> part from the target
+	// /ip4/<a.b.c.d>/ipfs/<peer> becomes /ip4/<a.b.c.d>
+	targetPeerAddr, _ := ma.NewMultiaddr(fmt.Sprintf("/ipfs/%s", peer.Encode(peerid)))
+	targetAddr := ipfsAddr.Decapsulate(targetPeerAddr)
+
+	// We have a peer ID and a targetAddr so we add it to the peerstore
+	// so LibP2P knows how to contact it
+	ha.Peerstore().AddAddr(peerid, targetAddr, pstore.PermanentAddrTTL)
+
+	e.log.Info("opening stream p2p", zap.String("target", e.cfg.P2P.Target))
+	// make a new stream from host B to host A
+	// it should be handled on host A by the handler we set above because
+	// we use the same /p2p/1.0.0 protocol
+	s, err := ha.NewStream(context.Background(), peerid, "/p2p/1.0.0")
+	if err != nil {
+		stop <- err
+		return
+	}
+	// Create a buffered stream so that read and writes are non blocking.
+	rw := bufio.NewReadWriter(bufio.NewReader(s), bufio.NewWriter(s))
+
+	// Create a thread to read and write data.
+	go e.writeData(rw)
+	go e.readData(rw)
+
+	// select vide afin que notre programme ne se contente pas de se terminer et de s'arrêter
+	select {} // hang forever
 }
 
 func (e *EndPoint) makeBasicHost() (host.Host, error) {
@@ -212,138 +226,4 @@ func (e *EndPoint) handleStream(s net.Stream) {
 type message struct {
 	Name  event.EventType
 	Value []byte
-}
-
-// routine Go qui récupère le dernier état de notre blockchain toutes les 5 secondes
-func (e *EndPoint) readData(rw *bufio.ReadWriter) {
-
-	for {
-		str, err := rw.ReadString('\n')
-		if err != nil {
-			e.log.Fatal("fail to read p2p data", zap.Error(err))
-		}
-
-		if str == "" {
-			return
-		}
-		if str != "\n" {
-
-			mess := message{}
-			//var mess []interface{}
-			if err := json.Unmarshal([]byte(str), &mess); err != nil {
-				log.Fatal(err)
-			}
-
-			e.log.Info("New event read", zap.String("type", mess.Name.String()))
-
-			switch mess.Name {
-			case event.BlockChain:
-				e.readBlockChain(mess.Value)
-			case event.Wallet:
-				e.readWallets(mess.Value)
-			case event.Pool:
-				e.readPool(mess.Value)
-			}
-		}
-	}
-}
-
-// routine Go qui diffuse le dernier état de notre blockchain toutes les 5 secondes à nos pairs
-// Ils le recevront et le jetteront si la longueur est plus courte que la leur. Ils l'accepteront si c'est plus long
-func (e *EndPoint) writeData(rw *bufio.ReadWriter) {
-	go func() {
-		var bytes []byte
-
-		for data := range e.event.NewReader() {
-			e.log.Info("New event push", zap.String("type", data.String()))
-			mutex.Lock()
-
-			switch data {
-			case event.BlockChain:
-				bytes = e.sendBlockChain(rw)
-			case event.Wallet:
-				bytes = e.sendWallets(rw)
-			case event.Pool:
-				bytes = e.sendPool(rw)
-			}
-			mutex.Unlock()
-
-			if len(bytes) == 0 {
-				continue
-			}
-
-			mess := message{
-				Name:  data,
-				Value: bytes,
-			}
-
-			bytes, err := json.Marshal(mess)
-			if err != nil {
-				e.log.Error("fail to marshal message", zap.Error(err))
-				continue
-			}
-
-			mutex.Lock()
-			rw.WriteString(fmt.Sprintf("%s\n", string(bytes)))
-			rw.Flush()
-			mutex.Unlock()
-		}
-	}()
-}
-
-func (e *EndPoint) sendBlockChain(rw *bufio.ReadWriter) []byte {
-	bytes, err := json.Marshal(blockchain.BlockChain)
-	if err != nil {
-		e.log.Error("fail to marshal blockChain", zap.Error(err))
-		return []byte{}
-	}
-
-	return bytes
-}
-
-func (e *EndPoint) sendWallets(rw *bufio.ReadWriter) []byte {
-	bytes, err := json.Marshal(e.wallets.Seeds)
-	if err != nil {
-		e.log.Error("fail to marshal wallets", zap.Error(err))
-		return []byte{}
-	}
-
-	return bytes
-}
-
-func (e *EndPoint) sendPool(rw *bufio.ReadWriter) []byte {
-	return []byte{}
-}
-
-func (e *EndPoint) readBlockChain(chain []byte) {
-	if len(chain) <= len(blockchain.BlockChain) {
-		e.log.Info("blockChain received smaller than current")
-		return
-	}
-	mutex.Lock()
-	if err := json.Unmarshal(chain, &blockchain.BlockChain); err != nil {
-		e.log.Error("fail to unmarshal blockChain received", zap.Error(err))
-		return
-	}
-	mutex.Unlock()
-	e.log.Info("received blockChain update")
-}
-
-func (e *EndPoint) readWallets(chain []byte) {
-	if len(chain) <= len(e.wallets.Seeds) {
-		e.log.Info("blockChain received smaller than current")
-		return
-	}
-
-	mutex.Lock()
-	if err := json.Unmarshal(chain, &e.wallets.Seeds); err != nil {
-		e.log.Error("fail to unmarshal blockChain received", zap.Error(err))
-		return
-	}
-	mutex.Unlock()
-	e.log.Info("received blockChain update")
-}
-
-func (e *EndPoint) readPool(_ []byte) {
-
 }

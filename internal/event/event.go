@@ -11,10 +11,11 @@ const (
 	BlockChain EventType = iota
 	Wallet
 	Pool
+	Files
 )
 
 func (e EventType) String() string {
-	return [...]string{"Blockchain", "Wallets", "Pool"}[e]
+	return [...]string{"Blockchain", "Wallets", "Pool", "files"}[e]
 }
 
 func New() *Event {

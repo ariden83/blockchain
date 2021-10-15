@@ -171,7 +171,7 @@ retourne
 Balance of xpub661MyMwAqRbcG4VYfVo7ptRncn7wsGMjNubLNrm5Stu5ERP4RtJqo7sQgSQAESwyJKi442EJ6sNWRz5wWZ2ecFE8p1JEJs6qGkzPKncdkhb: 3
 ```
 
-#### 6) Communicate new update of blockChain / wallet with every blockChain
+#### 6) Communicate new update of blockChain / wallet with every blockChain service
 
 Après la commande 
 

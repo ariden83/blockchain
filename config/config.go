@@ -75,6 +75,8 @@ type P2P struct {
 	Seed int64 `config:"p2p_seed"`
 
 	TimeToCommunicate int `config:"p2p_time_to_communicate"`
+	// token utilisé pour assurer la sécurité de la connexion
+	Token string
 }
 
 type Log struct {
@@ -134,6 +136,7 @@ func getDefaultConfig() *Config {
 			Port:              8097,
 			Enabled:           true,
 			TimeToCommunicate: 5,
+			Target:            "",
 		},
 		Log: Log{
 			Path: "./tmp/logs",

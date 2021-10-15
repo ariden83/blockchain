@@ -11,6 +11,7 @@ import (
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/endpoint"
 	"github.com/ariden83/blockchain/internal/event"
+	"github.com/ariden83/blockchain/internal/genesis"
 	"github.com/ariden83/blockchain/internal/logger"
 	"github.com/ariden83/blockchain/internal/metrics"
 	"github.com/ariden83/blockchain/internal/p2p"
@@ -61,16 +62,19 @@ func main() {
 	server := endpoint.Init(cfg, per, trans, wallets, mtc, logs, evt)
 	stop := make(chan error, 1)
 
-	server.Genesis()
 	server.ListenMetrics(stop)
+
+	var p *p2p.EndPoint
+	if cfg.P2P.Enabled {
+		p = p2p.Init(cfg, per, trans, wallets, mtc, logs, evt)
+		p.Listen(stop)
+	}
+
+	gen := genesis.New(cfg, per, trans, p, evt)
+	gen.Load(stop)
 
 	if cfg.API.Enabled {
 		server.ListenHTTP(stop)
-	}
-
-	if cfg.P2P.Enabled {
-		p := p2p.Init(cfg, per, trans, wallets, mtc, logs, evt)
-		p.Listen(stop)
 	}
 
 	/**
