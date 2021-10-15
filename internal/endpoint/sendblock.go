@@ -4,10 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ariden83/blockchain/internal/blockchain"
-	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/transactions"
-	"github.com/ariden83/blockchain/internal/utils"
-	"github.com/davecgh/go-spew/spew"
 	"go.uber.org/zap"
 	"io"
 	"math/big"
@@ -57,6 +54,10 @@ func (e *EndPoint) sendBlock(w http.ResponseWriter, input SendBlockInput) {
 	if blockchain.IsBlockValid(newBlock, blockchain.BlockChain[len(blockchain.BlockChain)-1]) {
 
 		mutex.Lock()
+		e.event.PushBlock(newBlock)
+		mutex.Unlock()
+
+		/*mutex.Lock()
 		blockchain.BlockChain = append(blockchain.BlockChain, newBlock)
 		mutex.Unlock()
 
@@ -67,7 +68,7 @@ func (e *EndPoint) sendBlock(w http.ResponseWriter, input SendBlockInput) {
 
 		err = e.persistence.Update(newBlock.Hash, ser)
 		e.Handle(err)
-		spew.Dump(blockchain.BlockChain)
+		spew.Dump(blockchain.BlockChain)*/
 
 	} else {
 		e.Handle(fmt.Errorf("new block is invalid"))

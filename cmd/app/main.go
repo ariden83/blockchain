@@ -65,8 +65,8 @@ func main() {
 	server.ListenMetrics(stop)
 
 	var p *p2p.EndPoint
-	if cfg.P2P.Enabled {
-		p = p2p.Init(cfg, per, trans, wallets, mtc, logs, evt)
+	p = p2p.Init(cfg, per, trans, wallets, mtc, logs, evt)
+	if p.Enabled() {
 		p.Listen(stop)
 	}
 

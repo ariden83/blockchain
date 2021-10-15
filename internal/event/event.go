@@ -1,21 +1,25 @@
 package event
 
+import "github.com/ariden83/blockchain/internal/blockchain"
+
 type EventType int
 
 type Event struct {
-	channel     chan EventType
-	listChannel []chan EventType
+	channel      chan EventType
+	channelBlock chan blockchain.Block
+	listChannel  []chan EventType
 }
 
 const (
 	BlockChain EventType = iota
+	NewBlock
 	Wallet
 	Pool
 	Files
 )
 
 func (e EventType) String() string {
-	return [...]string{"Blockchain", "Wallets", "Pool", "files"}[e]
+	return [...]string{"Blockchain", "Block", "Wallets", "Pool", "files"}[e]
 }
 
 func New() *Event {
@@ -44,5 +48,14 @@ func (e *Event) setConcurrence() {
 func (e *Event) NewReader() chan EventType {
 	newChan := make(chan EventType)
 	e.listChannel = append(e.listChannel, newChan)
+	return newChan
+}
+
+func (e *Event) PushBlock(block blockchain.Block) {
+	e.channelBlock <- block
+}
+
+func (e *Event) NewBlockReader() chan blockchain.Block {
+	newChan := make(chan blockchain.Block)
 	return newChan
 }

@@ -44,7 +44,7 @@ func (g *Genesis) Genesis() bool {
 
 func (g *Genesis) Load(stop chan error) {
 	// si y'a une instance, on la load
-	if found := g.p2p.HasTarget(); found {
+	if g.p2p.Enabled() && g.p2p.HasTarget() {
 		// on notifie la demande de récupération des fichiers
 		g.event.Push(event.Files)
 		return

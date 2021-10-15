@@ -31,27 +31,42 @@ func (e *EndPoint) writeData(rw *bufio.ReadWriter) {
 			}
 			mutex.Unlock()
 
-			if len(bytes) == 0 {
-				continue
-			}
-
-			mess := message{
-				Name:  data,
-				Value: bytes,
-			}
-
-			bytes, err := json.Marshal(mess)
-			if err != nil {
-				e.log.Error("fail to marshal message", zap.Error(err))
-				continue
-			}
-
-			mutex.Lock()
-			rw.WriteString(fmt.Sprintf("%s\n", string(bytes)))
-			rw.Flush()
-			mutex.Unlock()
+			e.marshal(rw, bytes)
 		}
 	}()
+
+	go func() {
+		for block := range e.event.NewBlockReader() {
+			e.log.Info("New block push")
+			mutex.Lock()
+			bytes := e.sendBlock(rw, block)
+			mutex.Unlock()
+
+			e.marshal(rw, bytes)
+		}
+	}()
+}
+
+func (e *EndPoint) marshal(rw *bufio.ReadWriter, bytes []byte) {
+	if len(bytes) == 0 {
+		return
+	}
+
+	mess := message{
+		Name:  event.NewBlock,
+		Value: bytes,
+	}
+
+	bytes, err := json.Marshal(mess)
+	if err != nil {
+		e.log.Error("fail to marshal message", zap.Error(err))
+		return
+	}
+
+	mutex.Lock()
+	rw.WriteString(fmt.Sprintf("%s\n", string(bytes)))
+	rw.Flush()
+	mutex.Unlock()
 }
 
 type callFiles struct {
@@ -62,6 +77,16 @@ func (e *EndPoint) callFiles(rw *bufio.ReadWriter) []byte {
 	bytes, err := json.Marshal(callFiles{
 		Token: e.cfg.P2P.Token,
 	})
+	if err != nil {
+		e.log.Error("fail to marshal blockChain", zap.Error(err))
+		return []byte{}
+	}
+
+	return bytes
+}
+
+func (e *EndPoint) sendBlock(rw *bufio.ReadWriter, block blockchain.Block) []byte {
+	bytes, err := json.Marshal(block)
 	if err != nil {
 		e.log.Error("fail to marshal blockChain", zap.Error(err))
 		return []byte{}

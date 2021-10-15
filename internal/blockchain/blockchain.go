@@ -100,8 +100,10 @@ func (tx *Transaction) SetID() {
 	tx.ID = hash[:]
 }
 
-var mutex = &sync.Mutex{}
-var BlockChain []Block
+var (
+	mutex      *sync.Mutex = &sync.Mutex{}
+	BlockChain []Block
+)
 
 /*
 type BlockchainConstrucktor struct {}
@@ -189,4 +191,10 @@ func AddBlock(lastHash []byte, index *big.Int, coinBase *Transaction) Block {
 func isHashValid(hash []byte, difficulty int) bool {
 	prefix := strings.Repeat("0", difficulty)
 	return strings.HasPrefix(string(hash), prefix)
+}
+
+// @todo parse all blockChain
+func IsValid(_ []Block) bool {
+
+	return true
 }

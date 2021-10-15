@@ -37,6 +37,7 @@ type EndPoint struct {
 	metrics     *metrics.Metrics
 	log         *zap.Logger
 	event       *event.Event
+	enabled     bool
 }
 
 func Init(
@@ -57,9 +58,14 @@ func Init(
 		metrics:     mtcs,
 		log:         logs.With(zap.String("service", "p2p")),
 		event:       evt,
+		enabled:     cfg.P2P.Enabled,
 	}
 
 	return e
+}
+
+func (e *EndPoint) Enabled() bool {
+	return e.enabled
 }
 
 func (e *EndPoint) Listen(stop chan error) {
