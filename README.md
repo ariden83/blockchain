@@ -137,7 +137,7 @@ Balance of xpub661MyMwAqRbcFTZYiEcSv4Qj2Qr2NzQ7rjYc3iv9c6VSTxoYsqA9AA6nNbp8e9nVR
 }
 ```
 
-#### 4) SEND ONE TOKEN TO THE 2nd WALLET
+#### 5) SEND ONE TOKEN TO THE 2nd WALLET
 
 a) On envoi la somme du compte A au compte B
 
@@ -171,7 +171,7 @@ retourne
 Balance of xpub661MyMwAqRbcG4VYfVo7ptRncn7wsGMjNubLNrm5Stu5ERP4RtJqo7sQgSQAESwyJKi442EJ6sNWRz5wWZ2ecFE8p1JEJs6qGkzPKncdkhb: 3
 ```
 
-#### 5) Communicate new update of blockChain / wallet with every blockChain
+#### 6) Communicate new update of blockChain / wallet with every blockChain
 
 Après la commande 
 
