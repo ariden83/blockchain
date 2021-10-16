@@ -34,8 +34,9 @@ type Gas struct {
 }
 
 type Wallet struct {
-	Path string `config:"wallet_path"`
-	File string `config:"wallet_file"`
+	Path     string `config:"wallet_path"`
+	File     string `config:"wallet_file"`
+	WithFile bool   `config:"wallet_with_file"`
 }
 
 type Metrics struct {
@@ -80,7 +81,8 @@ type P2P struct {
 }
 
 type Log struct {
-	Path string `config:"log_path"`
+	Path     string `config:"log_path"`
+	WithFile bool   `config:log_with_file"`
 }
 
 type Config struct {
@@ -111,8 +113,9 @@ func getDefaultConfig() *Config {
 			File: "./tmp/blocks/MANIFEST",
 		},
 		Wallet: Wallet{
-			Path: "./tmp/wallets",
-			File: "./tmp/wallets/wallets.data",
+			Path:     "./tmp/wallets",
+			File:     "./tmp/wallets/wallets.data",
+			WithFile: true,
 		},
 		Gas: Gas{
 			Price:          4000000000,

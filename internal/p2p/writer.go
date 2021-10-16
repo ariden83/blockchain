@@ -31,7 +31,7 @@ func (e *EndPoint) writeData(rw *bufio.ReadWriter) {
 			}
 			mutex.Unlock()
 
-			e.marshal(rw, bytes)
+			e.marshal(rw, data, bytes)
 		}
 	}()
 
@@ -42,18 +42,18 @@ func (e *EndPoint) writeData(rw *bufio.ReadWriter) {
 			bytes := e.sendBlock(rw, block)
 			mutex.Unlock()
 
-			e.marshal(rw, bytes)
+			e.marshal(rw, event.NewBlock, bytes)
 		}
 	}()
 }
 
-func (e *EndPoint) marshal(rw *bufio.ReadWriter, bytes []byte) {
+func (e *EndPoint) marshal(rw *bufio.ReadWriter, evt event.EventType, bytes []byte) {
 	if len(bytes) == 0 {
 		return
 	}
 
 	mess := message{
-		Name:  event.NewBlock,
+		Name:  evt,
 		Value: bytes,
 	}
 
@@ -75,7 +75,7 @@ type callFiles struct {
 
 func (e *EndPoint) callFiles(rw *bufio.ReadWriter) []byte {
 	bytes, err := json.Marshal(callFiles{
-		Token: e.cfg.P2P.Token,
+		Token: e.cfg.Token,
 	})
 	if err != nil {
 		e.log.Error("fail to marshal blockChain", zap.Error(err))
@@ -106,7 +106,7 @@ func (e *EndPoint) sendBlockChain(rw *bufio.ReadWriter) []byte {
 }
 
 func (e *EndPoint) sendWallets(rw *bufio.ReadWriter) []byte {
-	bytes, err := json.Marshal(e.wallets.Seeds)
+	bytes, err := json.Marshal(e.wallets.GetSeeds())
 	if err != nil {
 		e.log.Error("fail to marshal wallets", zap.Error(err))
 		return []byte{}

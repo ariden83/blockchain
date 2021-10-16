@@ -40,7 +40,6 @@ func main() {
 
 	logs := logger.Init(cfg.Log)
 	logs = logs.With(zap.String("v", cfg.Version))
-
 	defer logs.Sync()
 
 	per, err := persistence.Init(cfg.Database)
@@ -65,7 +64,7 @@ func main() {
 	server.ListenMetrics(stop)
 
 	var p *p2p.EndPoint
-	p = p2p.Init(cfg, per, trans, wallets, mtc, logs, evt)
+	p = p2p.Init(cfg.P2P, per, wallets, logs, evt)
 	if p.Enabled() {
 		p.Listen(stop)
 	}

@@ -22,8 +22,10 @@ func Init(conf config.Wallet) (*Wallets, error) {
 	}
 	wallets.Seeds = make([]Seed, 0)
 
-	err := wallets.LoadFile(conf)
-
+	var err error
+	if conf.WithFile {
+		err = wallets.LoadFile(conf)
+	}
 	return &wallets, err
 }
 

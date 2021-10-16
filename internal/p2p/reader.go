@@ -120,7 +120,7 @@ func (e *EndPoint) readNewBlock(chain []byte) {
 	var newBlock blockchain.Block
 
 	if err := json.Unmarshal(chain, &newBlock); err != nil {
-		e.log.Error("fail to unmarshal blockChain received", zap.Error(err))
+		e.log.Error("fail to unmarshal block received", zap.Error(err))
 		return
 	}
 
@@ -157,18 +157,19 @@ func (e *EndPoint) readNewBlock(chain []byte) {
 }
 
 func (e *EndPoint) readWallets(chain []byte) {
-	if len(chain) <= len(e.wallets.Seeds) {
+	if len(chain) <= len(*e.wallets.GetSeeds()) {
 		e.log.Info("blockChain received smaller than current")
 		return
 	}
 
 	mutex.Lock()
-	if err := json.Unmarshal(chain, &e.wallets.Seeds); err != nil {
+	if err := json.Unmarshal(chain, e.wallets.GetSeeds()); err != nil {
 		e.log.Error("fail to unmarshal blockChain received", zap.Error(err))
 		return
 	}
 	mutex.Unlock()
-	e.log.Info("received blockChain update")
+	e.log.Info("received wallets update")
+	spew.Dump(e.wallets.GetAllPublicSeeds())
 }
 
 func (e *EndPoint) readPool(_ []byte) {

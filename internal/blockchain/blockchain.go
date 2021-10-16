@@ -9,6 +9,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"log"
 	"math/big"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -20,7 +21,7 @@ const (
 
 type Block struct {
 	Index        *big.Int
-	Timestamp    string
+	Timestamp    int64
 	Transactions []*Transaction
 	Hash         []byte
 	PrevHash     []byte
@@ -127,7 +128,7 @@ func Genesis(coinBase *Transaction) *Block {
 
 // SHA256 hasing
 func calculateHash(block Block) []byte {
-	record := block.Index.String() + block.Timestamp + string(block.PrevHash) + block.Nonce
+	record := block.Index.String() + strconv.FormatInt(block.Timestamp, 16) + string(block.PrevHash) + block.Nonce
 	h := sha256.New()
 	h.Write([]byte(record))
 	hashed := h.Sum(nil)
@@ -160,12 +161,12 @@ func IsBlockValid(newBlock, oldBlock Block) bool {
 
 // create a new block using previous block's hash
 func AddBlock(lastHash []byte, index *big.Int, coinBase *Transaction) Block {
-	t := time.Now()
+	t := time.Now().UnixNano() / int64(time.Millisecond)
 	newIndex := index.Add(index, big.NewInt(1))
 
 	var newBlock Block = Block{
 		Index:        newIndex,
-		Timestamp:    t.String(),
+		Timestamp:    t,
 		PrevHash:     lastHash,
 		Difficulty:   difficulty,
 		Transactions: []*Transaction{coinBase},

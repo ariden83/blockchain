@@ -25,7 +25,11 @@ type SeedNoPrivKey struct {
 
 var mutex = &sync.Mutex{}
 
-func (ws *Wallets) GetAllSeeds() []SeedNoPrivKey {
+func (ws *Wallets) GetSeeds() *[]Seed {
+	return &ws.Seeds
+}
+
+func (ws *Wallets) GetAllPublicSeeds() []SeedNoPrivKey {
 	var allSeeds []SeedNoPrivKey
 	for _, j := range ws.Seeds {
 		allSeeds = append(allSeeds, SeedNoPrivKey{
