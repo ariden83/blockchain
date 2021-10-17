@@ -49,7 +49,7 @@ local-proof:
 	@echo "> Launch local proof of work ..."
 	go fmt ./...
 	export GO111MODULE=on;
-	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./cmd/proof-work/.
+	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./tutorial/proof-work/.
 	-cli_level=INFO ./bin/main
 
 local-p2p:
@@ -61,21 +61,21 @@ local-networking:
 	@echo "> Launch local networking ..."
 	go fmt ./...
 	export GO111MODULE=on;
-	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./cmd/networking/.
+	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./tutorial/networking/.
 	-cli_level=INFO ./bin/main
 
 local-proof-stake:
 	@echo "> Launch local proof of stake ..."
 	go fmt ./...
 	export GO111MODULE=on;
-	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./cmd/proof-stake/.
+	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./tutorial/proof-stake/.
 	-cli_level=INFO ./bin/main
 
 local-seed:
 	@echo "> Launch local seed ..."
 	go fmt ./...
 	export GO111MODULE=on;
-	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./cmd/seed/.
+	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./tutorial/seed/.
 	-cli_level=INFO ./bin/main
 
 local:
@@ -84,14 +84,6 @@ local:
 	export GO111MODULE=on;
 	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./cmd/app/.
 	-cli_level=INFO ./bin/main
-
-local-pod2:
-	@echo "> Launch local ..."
-	go fmt ./...
-	export GO111MODULE=on;
-	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./cmd/app/.
-	-cli_level=INFO  ./bin/main
-
 
 local-vendor:
 	@echo "> Regenerate vendor ..."

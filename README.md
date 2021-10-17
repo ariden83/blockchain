@@ -14,6 +14,7 @@ My first own blockchain
 * Ethereum block structure explained [ethereum-block-structure-explained](https://medium.com/@eiki1212/ethereum-block-structure-explained-1893bb226bd6)
 * Ethereum accounts transactions gas [accounts-transactions-gas-ethereum](https://hudsonjameson.com/2017-06-27-accounts-transactions-gas-ethereum/)
 * Le minage en 7 étapes [minage-7-etapes](http://www.ab-consulting.fr/blog/blockchain/minage-7-etapes=)
+* libp2p in go tutorial [libp2p-in-go-4hoa](https://dev.to/feliperosa/getting-started-with-libp2p-in-go-4hoa)
 
 ## Command
 
