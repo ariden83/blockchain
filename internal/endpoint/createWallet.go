@@ -15,7 +15,7 @@ func (e *EndPoint) handleCreateWallet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	e.event.Push(event.Wallet)
+	e.event.Push(event.Wallet, "")
 
 	e.respondWithJSON(w, r, http.StatusCreated, newSeed)
 }

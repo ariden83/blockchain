@@ -46,7 +46,7 @@ func (g *Genesis) Load(stop chan error) {
 	// si y'a une instance, on la load
 	if g.p2p.Enabled() && g.p2p.HasTarget() {
 		// on notifie la demande de récupération des fichiers
-		g.event.Push(event.Files)
+		g.event.Push(event.Files, "")
 		return
 	}
 

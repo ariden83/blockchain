@@ -1,13 +1,21 @@
 package event
 
-import "github.com/ariden83/blockchain/internal/blockchain"
+import (
+	"github.com/ariden83/blockchain/internal/blockchain"
+	"github.com/satori/go.uuid"
+)
+
+type Message struct {
+	Type EventType
+	ID   string
+}
 
 type EventType int
 
 type Event struct {
-	channel      chan EventType
+	channel      chan Message
 	channelBlock chan blockchain.Block
-	listChannel  []chan EventType
+	listChannel  []chan Message
 }
 
 const (
@@ -23,7 +31,7 @@ func (e EventType) String() string {
 }
 
 func New() *Event {
-	c := make(chan EventType)
+	c := make(chan Message)
 	e := &Event{
 		channel: c,
 	}
@@ -33,8 +41,15 @@ func New() *Event {
 	return e
 }
 
-func (e *Event) Push(evt EventType) {
-	e.channel <- evt
+func (e *Event) Push(evt EventType, ID string) {
+	m := Message{
+		Type: evt,
+		ID:   ID,
+	}
+	if ID == "" {
+		m.ID = uuid.NewV4().String()
+	}
+	e.channel <- m
 }
 
 func (e *Event) setConcurrence() {
@@ -45,8 +60,8 @@ func (e *Event) setConcurrence() {
 	}
 }
 
-func (e *Event) NewReader() chan EventType {
-	newChan := make(chan EventType)
+func (e *Event) NewReader() chan Message {
+	newChan := make(chan Message)
 	e.listChannel = append(e.listChannel, newChan)
 	return newChan
 }

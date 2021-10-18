@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/event"
+	"github.com/satori/go.uuid"
 	"go.uber.org/zap"
 )
 
@@ -16,10 +17,10 @@ func (e *EndPoint) writeData(rw *bufio.ReadWriter) {
 		var bytes []byte
 
 		for data := range e.event.NewReader() {
-			e.log.Info("New event push", zap.String("type", data.String()))
+			e.log.Info("New event push", zap.String("type", data.Type.String()), zap.String("ID", data.ID))
 			mutex.Lock()
 
-			switch data {
+			switch data.Type {
 			case event.BlockChain:
 				bytes = e.sendBlockChain(rw)
 			case event.Wallet:
@@ -42,19 +43,24 @@ func (e *EndPoint) writeData(rw *bufio.ReadWriter) {
 			bytes := e.sendBlock(rw, block)
 			mutex.Unlock()
 
-			e.marshal(rw, event.NewBlock, bytes)
+			e.marshal(rw, event.Message{Type: event.NewBlock}, bytes)
 		}
 	}()
 }
 
-func (e *EndPoint) marshal(rw *bufio.ReadWriter, evt event.EventType, bytes []byte) {
+func (e *EndPoint) marshal(rw *bufio.ReadWriter, evt event.Message, bytes []byte) {
 	if len(bytes) == 0 {
 		return
 	}
 
 	mess := message{
-		Name:  evt,
+		Name:  evt.Type,
 		Value: bytes,
+		ID:    evt.ID,
+	}
+
+	if mess.ID == "" {
+		mess.ID = uuid.NewV4().String()
 	}
 
 	bytes, err := json.Marshal(mess)

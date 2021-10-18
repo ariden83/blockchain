@@ -17,12 +17,10 @@ require (
 	github.com/libp2p/go-libp2p v0.15.1
 	github.com/libp2p/go-libp2p-core v0.9.0
 	github.com/libp2p/go-libp2p-peerstore v0.3.0 // indirect
-	github.com/miekg/dns v1.1.43
 	github.com/multiformats/go-multiaddr v0.4.1
 	github.com/prometheus/client_golang v1.11.0
+	github.com/satori/go.uuid v1.2.0
 	github.com/wemeetagain/go-hdwallet v0.1.0
-	github.com/whyrusleeping/mdns v0.0.0-20190826153040-b9b60ed33aa9
 	go.uber.org/zap v1.19.0
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
-	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d
 )

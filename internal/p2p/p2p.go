@@ -39,10 +39,12 @@ type EndPoint struct {
 	log         *zap.Logger
 	event       *event.Event
 	enabled     bool
+	msgReceived []string
 }
 
 type message struct {
 	Name  event.EventType
+	ID    string
 	Value []byte
 }
 
@@ -72,7 +74,6 @@ func (e *EndPoint) Enabled() bool {
 
 func (e *EndPoint) Listen(stop chan error) {
 	e.hasRequiredPort()
-
 	go func() {
 		if err := e.makeBasicHost(); err != nil {
 			e.log.Error("fail to listen p2p", zap.Error(err))

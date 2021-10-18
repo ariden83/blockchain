@@ -12,6 +12,19 @@ import (
 	"log"
 )
 
+func (e *EndPoint) saveMsgReceived(uid string) {
+	e.msgReceived = append(e.msgReceived, uid)
+}
+
+func (e *EndPoint) msgAlreadyReceived(uid string) bool {
+	for _, a := range e.msgReceived {
+		if a == uid {
+			return true
+		}
+	}
+	return false
+}
+
 // routine Go qui récupère le dernier état de notre blockchain toutes les 5 secondes
 // err = rw.Flush()
 func (e *EndPoint) readData(rw *bufio.ReadWriter) {
@@ -49,6 +62,11 @@ func (e *EndPoint) readData(rw *bufio.ReadWriter) {
 				e.readPool(mess.Value)
 			case event.Files:
 				e.readFilesAsk(mess.Value)
+			}
+
+			if !e.msgAlreadyReceived(mess.ID) {
+				e.saveMsgReceived(mess.ID)
+				e.event.Push(mess.Name, mess.ID)
 			}
 		}
 	}
@@ -136,7 +154,7 @@ func (e *EndPoint) readNewBlock(chain []byte) {
 			ser, err := utils.Serialize(&newBlock)
 			e.Handle(err)
 
-			e.event.Push(event.BlockChain)
+			e.event.Push(event.BlockChain, "")
 
 			err = e.persistence.Update(newBlock.Hash, ser)
 			e.Handle(err)
@@ -178,6 +196,6 @@ func (e *EndPoint) readPool(_ []byte) {
 
 // on renotifie wallets and blockChain
 func (e *EndPoint) readFilesAsk(_ []byte) {
-	e.event.Push(event.BlockChain)
-	e.event.Push(event.Wallet)
+	e.event.Push(event.BlockChain, "")
+	e.event.Push(event.Wallet, "")
 }
