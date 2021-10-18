@@ -14,6 +14,7 @@ import (
 type Wallets struct {
 	FilePath string
 	Seeds    []Seed
+	withFile bool
 }
 
 type IWallets interface {
@@ -25,11 +26,12 @@ type IWallets interface {
 func Init(conf config.Wallet) (*Wallets, error) {
 	wallets := Wallets{
 		FilePath: conf.File,
+		withFile: conf.WithFile,
 	}
 	wallets.Seeds = make([]Seed, 0)
 
 	var err error
-	if conf.WithFile {
+	if wallets.withFile {
 		err = wallets.LoadFile(conf)
 	}
 	return &wallets, err
@@ -71,6 +73,9 @@ func (ws *Wallets) LoadFile(conf config.Wallet) error {
 }
 
 func (ws *Wallets) Save() {
+	if !ws.withFile {
+		return
+	}
 	var content bytes.Buffer
 
 	gob.Register(elliptic.P256)
