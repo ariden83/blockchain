@@ -29,11 +29,11 @@ var mutex = &sync.Mutex{}
 
 type EndPoint struct {
 	cfg           *config.Config
-	persistence   *persistence.Persistence
-	transaction   *transactions.Transactions
+	persistence   persistence.IPersistence
+	transaction   transactions.ITransaction
 	server        *http.Server
 	metricsServer *http.Server
-	wallets       *wallet.Wallets
+	wallets       wallet.IWallets
 	metrics       *metrics.Metrics
 	log           *zap.Logger
 	event         *event.Event
@@ -47,9 +47,9 @@ type Healthz struct {
 
 func Init(
 	cfg *config.Config,
-	per *persistence.Persistence,
-	trans *transactions.Transactions,
-	wallets *wallet.Wallets,
+	per persistence.IPersistence,
+	trans transactions.ITransaction,
+	wallets wallet.IWallets,
 	mtcs *metrics.Metrics,
 	logs *zap.Logger,
 	evt *event.Event,

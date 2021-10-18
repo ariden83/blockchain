@@ -15,6 +15,7 @@ My first own blockchain
 * Ethereum accounts transactions gas [accounts-transactions-gas-ethereum](https://hudsonjameson.com/2017-06-27-accounts-transactions-gas-ethereum/)
 * Le minage en 7 étapes [minage-7-etapes](http://www.ab-consulting.fr/blog/blockchain/minage-7-etapes=)
 * libp2p in go tutorial [libp2p-in-go-4hoa](https://dev.to/feliperosa/getting-started-with-libp2p-in-go-4hoa)
+* p2p discovery mdns [p2p/discovery/mdns.go](https://gitlab.dms3.io/p2p/go-p2p/-/blob/master/p2p/discovery/mdns.go)
 
 ## Command
 

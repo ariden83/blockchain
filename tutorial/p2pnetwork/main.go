@@ -1,21 +1,21 @@
 package main
 
 import (
-"context"
-"encoding/binary"
-"flag"
-"fmt"
-"os"
-"os/signal"
-"syscall"
-"time"
+	"context"
+	"encoding/binary"
+	"flag"
+	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-"github.com/libp2p/go-libp2p"
-"github.com/libp2p/go-libp2p-core/host"
-"github.com/libp2p/go-libp2p-core/network"
-"github.com/libp2p/go-libp2p-core/peer"
+	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p-core/discovery"
-"github.com/multiformats/go-multiaddr"
+	"github.com/libp2p/go-libp2p-core/host"
+	"github.com/libp2p/go-libp2p-core/network"
+	"github.com/libp2p/go-libp2p-core/peer"
+	"github.com/multiformats/go-multiaddr"
 )
 
 const protocolID = "/example/1.0.0"

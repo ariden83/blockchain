@@ -17,11 +17,19 @@ var ErrNotEnoughFunds = errors.New("Not enough funds")
 
 type Transactions struct {
 	Reward      *big.Int
-	persistence *persistence.Persistence
+	persistence persistence.IPersistence
 	log         *zap.Logger
 }
 
-func Init(conf config.Transactions, per *persistence.Persistence, log *zap.Logger) *Transactions {
+type ITransaction interface {
+	New(string, string, *big.Int) (*blockchain.Transaction, error)
+	CoinBaseTx(string, string) *blockchain.Transaction
+	FindUserBalance(string) *big.Int
+	FindUserTokensSend(string) *big.Int
+	FindUserTokensReceived(pubKey string) *big.Int
+}
+
+func Init(conf config.Transactions, per persistence.IPersistence, log *zap.Logger) *Transactions {
 	return &Transactions{
 		Reward:      conf.Reward,
 		persistence: per,
@@ -138,7 +146,7 @@ func (t *Transactions) FindUnspentTransactions(pubKey string) []blockchain.Trans
 	spentTXOs := make(map[string][]int)
 
 	iter := iterator.BlockChainIterator{
-		CurrentHash: t.persistence.LastHash,
+		CurrentHash: t.persistence.LastHash(),
 		Persistence: t.persistence,
 	}
 
@@ -225,7 +233,7 @@ func (t *Transactions) FindUserTokensSend(pubKey string) *big.Int {
 	var tokensSend *big.Int = new(big.Int)
 
 	iter := iterator.BlockChainIterator{
-		CurrentHash: t.persistence.LastHash,
+		CurrentHash: t.persistence.LastHash(),
 		Persistence: t.persistence,
 	}
 
@@ -266,7 +274,7 @@ func (t *Transactions) FindUserTokensReceived(pubKey string) *big.Int {
 	var tokensReceived *big.Int = new(big.Int)
 
 	iter := iterator.BlockChainIterator{
-		CurrentHash: t.persistence.LastHash,
+		CurrentHash: t.persistence.LastHash(),
 		Persistence: t.persistence,
 	}
 

@@ -12,43 +12,44 @@ import (
 	"go.uber.org/zap"
 	"io"
 	mrand "math/rand"
-	"strings"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 
 	"github.com/ariden83/blockchain/internal/event"
+	"github.com/ariden83/blockchain/internal/persistence"
 	net "github.com/libp2p/go-libp2p-core"
 	host "github.com/libp2p/go-libp2p-core/host"
+	"github.com/libp2p/go-libp2p-core/network"
 	peer "github.com/libp2p/go-libp2p-core/peer"
 	pstore "github.com/libp2p/go-libp2p-core/peerstore"
+	"github.com/libp2p/go-libp2p-core/protocol"
 	ma "github.com/multiformats/go-multiaddr"
+	"strings"
 )
 
 var mutex = &sync.Mutex{}
 
 type EndPoint struct {
 	cfg         config.P2P
-	persistence iPersistence
+	persistence persistence.IPersistence
 	host        host.Host
-	wallets     iWallets
+	wallets     wallet.IWallets
 	log         *zap.Logger
 	event       *event.Event
 	enabled     bool
 }
 
-type iPersistence interface {
-	GetLastHash() ([]byte, error)
-	Update([]byte, []byte) error
-}
-
-type iWallets interface {
-	GetSeeds() *[]wallet.Seed
-	GetAllPublicSeeds() []wallet.SeedNoPrivKey
+type message struct {
+	Name  event.EventType
+	Value []byte
 }
 
 func Init(
 	cfg config.P2P,
-	per iPersistence,
-	wallets iWallets,
+	per persistence.IPersistence,
+	wallets wallet.IWallets,
 	logs *zap.Logger,
 	evt *event.Event,
 ) *EndPoint {
@@ -70,27 +71,38 @@ func (e *EndPoint) Enabled() bool {
 }
 
 func (e *EndPoint) Listen(stop chan error) {
+	e.hasRequiredPort()
+
 	go func() {
-		ha, err := e.makeBasicHost()
-		if err != nil {
+		if err := e.makeBasicHost(); err != nil {
 			e.log.Error("fail to listen p2p", zap.Error(err))
 			stop <- err
 			return
 		}
 
-		if e.cfg.Target == "" {
+		if !e.HasTarget() {
 			e.log.Info("listening for connections")
 			// Set a stream handler on host A. /p2p/1.0.0 is
 			// a user-defined protocol name.
-			ha.SetStreamHandler("/p2p/1.0.0", e.handleStream)
-
-			select {} // hang forever
+			e.host.SetStreamHandler("/p2p/1.0.0", e.handleStream)
+			// select {} // hang forever
 			/**** This is where the listener code ends ****/
 		} else {
-			ha.SetStreamHandler("/p2p/1.0.0", e.handleStream)
-			e.connectToIPFS(stop, ha)
+			// e.log.Fatal("fail, no peer address target found")
+			e.host.SetStreamHandler("/p2p/1.0.0", e.handleStream)
+			e.connectToIPFS(stop, e.host)
 		}
+
+		sigCh := make(chan os.Signal)
+		signal.Notify(sigCh, syscall.SIGKILL, syscall.SIGINT)
+		<-sigCh
 	}()
+}
+
+func (e *EndPoint) hasRequiredPort() {
+	if e.cfg.Port == 0 {
+		e.log.Fatal("Please provide a port to bind on with -l")
+	}
 }
 
 func (e *EndPoint) HasTarget() bool {
@@ -106,10 +118,21 @@ func (e *EndPoint) connectToIPFS(stop chan error, ha host.Host) {
 	// given multiaddress
 	ipfsAddr, err := ma.NewMultiaddr(e.cfg.Target)
 	if err != nil {
-		e.log.Error("fail to set new multi address to ipfs", zap.Error(err), zap.String("target", e.cfg.Target))
+		e.log.Error("fail to set new multi address", zap.Error(err), zap.String("target", e.cfg.Target))
 		stop <- err
 		return
 	}
+
+	/*
+		peerAddrInfo, err := peer.AddrInfoFromP2pAddr(ipfsAddr)
+		if err != nil {
+			panic(err)
+		}
+
+		// Connect to the node at the given address.
+		if err := host.Connect(context.Background(), *peerAddrInfo); err != nil {
+			panic(err)
+		}*/
 
 	pid, err := ipfsAddr.ValueForProtocol(ma.P_IPFS)
 	if err != nil {
@@ -117,7 +140,6 @@ func (e *EndPoint) connectToIPFS(stop chan error, ha host.Host) {
 		stop <- err
 		return
 	}
-
 	// Nous nous retrouvons avec le peerID et l'adresse cible targetAddr de l'hôte auquel nous voulons nous connecter
 	// et ajoutons cet enregistrement dans notre "magasin"
 	// afin que nous puissions garder une trace de qui nous sommes connectés.
@@ -128,10 +150,15 @@ func (e *EndPoint) connectToIPFS(stop chan error, ha host.Host) {
 		stop <- err
 		return
 	}
-
 	// Decapsulate the /ipfs/<peerID> part from the target
 	// /ip4/<a.b.c.d>/ipfs/<peer> becomes /ip4/<a.b.c.d>
-	targetPeerAddr, _ := ma.NewMultiaddr(fmt.Sprintf("/ipfs/%s", peer.Encode(peerid)))
+	targetPeerAddr, err := ma.NewMultiaddr(fmt.Sprintf("/ipfs/%s", peer.Encode(peerid)))
+	if err != nil {
+		e.log.Error("fail to set new multi address", zap.Error(err), zap.String("target", e.cfg.Target))
+		stop <- err
+		return
+	}
+
 	targetAddr := ipfsAddr.Decapsulate(targetPeerAddr)
 
 	// We have a peer ID and a targetAddr so we add it to the peerstore
@@ -142,9 +169,10 @@ func (e *EndPoint) connectToIPFS(stop chan error, ha host.Host) {
 	// make a new stream from host B to host A
 	// it should be handled on host A by the handler we set above because
 	// we use the same /p2p/1.0.0 protocol
-	s, err := ha.NewStream(context.Background(), peerid, "/p2p/1.0.0")
+	protocolID := protocol.ID(e.cfg.ProtocolID)
+	s, err := ha.NewStream(context.Background(), peerid, protocolID)
 	if err != nil {
-		e.log.Error("fail to set new stream", zap.Error(err))
+		e.log.Error("fail to set new stream", zap.Error(err), zap.Any("peer_id", peerid), zap.Any("protocol_id", protocolID))
 		stop <- err
 		return
 	}
@@ -154,32 +182,22 @@ func (e *EndPoint) connectToIPFS(stop chan error, ha host.Host) {
 	// Create a thread to read and write data.
 	go e.writeData(rw)
 	go e.readData(rw)
-
-	// select vide afin que notre programme ne se contente pas de se terminer et de s'arrêter
-	select {} // hang forever
 }
 
-func (e *EndPoint) makeBasicHost() (host.Host, error) {
-
-	if e.cfg.Port == 0 {
-		e.log.Fatal("Please provide a port to bind on with -l")
-	}
-
+func (e *EndPoint) makeBasicHost() error {
 	// If the seed is zero, use real cryptographic randomness. Otherwise, use a
 	// deterministic randomness source to make generated keys stay the same
 	// across multiple runs
-	var r io.Reader
-	if e.cfg.Seed == 0 {
-		r = rand.Reader
-	} else {
-		r = mrand.New(mrand.NewSource(e.cfg.Seed))
-	}
+	var (
+		r   io.Reader = e.setIoReader()
+		err error
+	)
 
 	// Generate a key pair for this host. We will use it
 	// to obtain a valid host ID.
 	priv, _, err := crypto.GenerateKeyPairWithReader(crypto.RSA, 2048, r)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	opts := []libp2p.Option{
@@ -187,15 +205,24 @@ func (e *EndPoint) makeBasicHost() (host.Host, error) {
 		libp2p.Identity(priv),
 	}
 
-	basicHost, err := libp2p.New(context.Background(), opts...)
+	e.host, err = libp2p.New(context.Background(), opts...)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	// Build host multiaddress
-	hostAddr, err := ma.NewMultiaddr(fmt.Sprintf("/ipfs/%s", basicHost.ID().Pretty()))
+	e.log.Info("P2P start:", zap.Any("address", e.host.Addrs()), zap.Any("host_id", e.host.ID()))
+	e.setStreamHandler()
+
+	basicHost, err := libp2p.New(context.Background(), opts...)
 	if err != nil {
-		return nil, err
+		return err
+	}
+
+	// Parse the multiaddr string.
+	peerMA, err := ma.NewMultiaddr(fmt.Sprintf("/ipfs/%s", basicHost.ID().Pretty()))
+	//peerMA, err := ma.NewMultiaddr(e.cfg.Target)
+	if err != nil {
+		return err
 	}
 
 	// Now we can build a full multiaddress to reach this host
@@ -210,16 +237,36 @@ func (e *EndPoint) makeBasicHost() (host.Host, error) {
 		}
 	}
 
-	fullAddr := addr.Encapsulate(hostAddr)
+	fullAddr := addr.Encapsulate(peerMA)
 	e.log.Info(fmt.Sprintf("I am %s\n", fullAddr))
 	if e.cfg.Secio {
-		e.log.Info(fmt.Sprintf("Now run \"go run main.go -p2p_port %d -p2p_target %s -secio\" on a different terminal", e.cfg.Port+101, fullAddr))
+		e.log.Info(fmt.Sprintf("Now run \"go run main.go -api_port %d -p2p_port %d -p2p_target %s -secio\" on a different terminal", e.cfg.Port+15, e.cfg.Port+16, fullAddr))
 	} else {
-		e.log.Info(fmt.Sprintf("Now run \"go run main.go -p2p_port %d -p2p_target %s\" on a different terminal", e.cfg.Port+101, fullAddr))
+		e.log.Info(fmt.Sprintf("Now run \"go run main.go -api_port %d -p2p_port %d -p2p_target %s\" on a different terminal", e.cfg.Port+15, e.cfg.Port+16, fullAddr))
 	}
 
-	e.host = basicHost
-	return basicHost, nil
+	return nil
+}
+
+// Setup a stream handler.
+//
+// This gets called every time a peer connects and opens a stream to this node.
+func (e *EndPoint) setStreamHandler() {
+	protocolID := protocol.ID(e.cfg.ProtocolID)
+	e.host.SetStreamHandler(protocolID, func(s network.Stream) {
+		go e.writeCounter(s)
+		go e.readCounter(s)
+	})
+}
+
+func (e *EndPoint) setIoReader() io.Reader {
+	var r io.Reader
+	if e.cfg.Seed == 0 {
+		r = rand.Reader
+	} else {
+		r = mrand.New(mrand.NewSource(e.cfg.Seed))
+	}
+	return r
 }
 
 func (e *EndPoint) handleStream(s net.Stream) {
@@ -235,7 +282,6 @@ func (e *EndPoint) handleStream(s net.Stream) {
 	// stream 's' will stay open until you close it (or the other side closes it).
 }
 
-type message struct {
-	Name  event.EventType
-	Value []byte
+func (e *EndPoint) Shutdown() {
+	e.host.Close()
 }

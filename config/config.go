@@ -77,12 +77,17 @@ type P2P struct {
 
 	TimeToCommunicate int `config:"p2p_time_to_communicate"`
 	// token utilisé pour assurer la sécurité de la connexion
-	Token string
+	Token string `config:"p2p_token"`
+
+	ProtocolID string `config:"p2p_protocol_ID"`
+
+	DiscoveryNamespace string `config:"blockchain"`
 }
 
 type Log struct {
 	Path     string `config:"log_path"`
-	WithFile bool   `config:log_with_file"`
+	WithFile bool   `config:"log_with_file"`
+	CLILevel string `config:"log_cli_level" yaml:"log_cli_level"`
 }
 
 type Config struct {
@@ -136,13 +141,15 @@ func getDefaultConfig() *Config {
 			Port:    8098,
 		},
 		P2P: P2P{
-			Port:              8097,
-			Enabled:           true,
-			TimeToCommunicate: 5,
-			Target:            "",
+			Port:               8097,
+			Enabled:            true,
+			TimeToCommunicate:  5,
+			ProtocolID:         "/p2p/1.0.0",
+			DiscoveryNamespace: "blockchain",
 		},
 		Log: Log{
-			Path: "./tmp/logs",
+			Path:     "./tmp/logs",
+			CLILevel: "info",
 		},
 	}
 }

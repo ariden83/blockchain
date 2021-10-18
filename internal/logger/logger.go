@@ -54,22 +54,35 @@ func Init(cfg config.Log) *zap.Logger {
 
 	// Optimize the Kafka output for machine consumption and the console output
 	// for human operators.
-	consoleEncoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
+	// consoleEncoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
 	fileProdEncoder := zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
 	fileEncoder := zapcore.NewJSONEncoder(zap.NewDevelopmentEncoderConfig())
+	consoleGELFEncoder := NewGELFEncoder()
 
 	// Join the outputs, encoders, and level-handling functions into
 	// zapcore.Cores, then tee the four cores together.
 	core := zapcore.NewTee(
-		zapcore.NewCore(consoleEncoder, consoleErrors, highPriority),
-		zapcore.NewCore(consoleEncoder, consoleDebugging, lowPriority),
+		zapcore.NewCore(consoleGELFEncoder, consoleErrors, highPriority),
+		zapcore.NewCore(consoleGELFEncoder, consoleDebugging, lowPriority),
 
 		zapcore.NewCore(fileProdEncoder, wsError, highPriority),
 		zapcore.NewCore(fileEncoder, wsAllLogs, lowPriority),
 	)
 
 	// From a zapcore.Core, it's easy to construct a Logger.
-	logger := zap.New(core)
+	//logger := zap.New(core)
+	c := zap.NewProductionConfig()
+	CLILevel := Level(LevelsMap[cfg.CLILevel])
+
+	c.Level = zap.NewAtomicLevelAt(zapcore.Level(CLILevel))
+	logger, err := c.Build()
+	if err != nil {
+		panic(err)
+	}
+
+	logger = logger.WithOptions(zap.WrapCore(func(c zapcore.Core) zapcore.Core {
+		return core
+	}))
 
 	return logger
 }
@@ -89,13 +102,14 @@ func InitLight(cfg config.Log) *zap.Logger {
 
 	// Optimize the Kafka output for machine consumption and the console output
 	// for human operators.
-	consoleEncoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
+	// consoleEncoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
+	consoleGELFEncoder := NewGELFEncoder()
 
 	// Join the outputs, encoders, and level-handling functions into
 	// zapcore.Cores, then tee the four cores together.
 	core := zapcore.NewTee(
-		zapcore.NewCore(consoleEncoder, consoleErrors, highPriority),
-		zapcore.NewCore(consoleEncoder, consoleDebugging, lowPriority),
+		zapcore.NewCore(consoleGELFEncoder, consoleErrors, highPriority),
+		zapcore.NewCore(consoleGELFEncoder, consoleDebugging, lowPriority),
 	)
 
 	// From a zapcore.Core, it's easy to construct a Logger.

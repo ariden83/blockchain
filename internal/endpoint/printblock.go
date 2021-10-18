@@ -33,7 +33,7 @@ func (e *EndPoint) handlePrintBlockChain(w http.ResponseWriter, _ *http.Request)
 // Iterator takes our BlockChain struct and returns it as a BlockCHainIterator struct
 func (e *EndPoint) Iterator() *iterator.BlockChainIterator {
 	iterator := iterator.BlockChainIterator{
-		CurrentHash: e.persistence.LastHash,
+		CurrentHash: e.persistence.LastHash(),
 		Persistence: e.persistence,
 	}
 

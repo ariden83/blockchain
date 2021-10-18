@@ -9,7 +9,17 @@ import (
 type Persistence struct {
 	db       *badger.DB
 	config   config.Database
-	LastHash []byte
+	lastHash []byte
+}
+
+type IPersistence interface {
+	GetLastHash() ([]byte, error)
+	Update([]byte, []byte) error
+	LastHash() []byte
+	GetCurrentHashSerialize(hash []byte) ([]byte, error)
+	DBExists() bool
+	SetLastHash(lastHash []byte)
+	Close()
 }
 
 // InitBlockChain will be what starts a new blockChain
@@ -36,8 +46,12 @@ func (p *Persistence) DBExists() bool {
 	return true
 }
 
+func (p *Persistence) LastHash() []byte {
+	return p.lastHash
+}
+
 func (p *Persistence) SetLastHash(lastHash []byte) {
-	p.LastHash = lastHash
+	p.lastHash = lastHash
 }
 
 func (p *Persistence) Update(lastHash []byte, hashSerialize []byte) error {
@@ -48,7 +62,7 @@ func (p *Persistence) Update(lastHash []byte, hashSerialize []byte) error {
 			return err
 		}
 		err = txn.Set([]byte("lh"), lastHash)
-		p.LastHash = lastHash
+		p.lastHash = lastHash
 		return err
 	})
 	return err

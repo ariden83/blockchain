@@ -8,7 +8,7 @@ import (
 
 type BlockChainIterator struct {
 	CurrentHash []byte
-	Persistence *persistence.Persistence
+	Persistence persistence.IPersistence
 	// Database    *badger.DB
 }
 

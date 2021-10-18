@@ -16,6 +16,12 @@ type Wallets struct {
 	Seeds    []Seed
 }
 
+type IWallets interface {
+	GetSeeds() *[]Seed
+	GetAllPublicSeeds() []SeedNoPrivKey
+	Create() (*Seed, error)
+}
+
 func Init(conf config.Wallet) (*Wallets, error) {
 	wallets := Wallets{
 		FilePath: conf.File,

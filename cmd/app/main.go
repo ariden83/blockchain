@@ -20,6 +20,7 @@ import (
 	"github.com/ariden83/blockchain/internal/wallet"
 	"go.uber.org/zap"
 	"runtime"
+	"syscall"
 )
 
 func main() {
@@ -81,14 +82,16 @@ func main() {
 	 */
 	go func() {
 		sig := make(chan os.Signal, 1)
-		signal.Notify(sig, os.Interrupt)
+		signal.Notify(sig, syscall.SIGKILL, syscall.SIGINT)
 		<-sig
 		stop <- fmt.Errorf("received Interrupt signal")
 	}()
 
 	err = <-stop
+	logs.Error("end service", zap.Error(err))
 
 	stopCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	server.Shutdown(stopCtx)
+	p.Shutdown()
 }
