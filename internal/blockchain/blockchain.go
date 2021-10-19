@@ -137,8 +137,10 @@ func calculateHash(block Block) []byte {
 
 // make sure block is valid by checking index, and comparing the hash of the previous block
 func IsBlockValid(newBlock, oldBlock Block) bool {
-	newIndexWaiting := oldBlock.Index.Add(oldBlock.Index, big.NewInt(1))
+	newIndexWaiting := big.NewInt(0)
+	newIndexWaiting = newIndexWaiting.Add(oldBlock.Index, big.NewInt(1))
 
+	fmt.Println(fmt.Sprintf("******************************* %+v = %+v", newIndexWaiting, newBlock.Index))
 	if newIndexWaiting.Cmp(newBlock.Index) != 0 {
 		fmt.Println(fmt.Sprintf("is block valid fail, with cmp %d", newIndexWaiting.Cmp(newBlock.Index)))
 		return false
@@ -162,7 +164,8 @@ func IsBlockValid(newBlock, oldBlock Block) bool {
 // create a new block using previous block's hash
 func AddBlock(lastHash []byte, index *big.Int, coinBase *Transaction) Block {
 	t := time.Now().UnixNano() / int64(time.Millisecond)
-	newIndex := index.Add(index, big.NewInt(1))
+	newIndex := big.NewInt(0)
+	newIndex = newIndex.Add(index, big.NewInt(1))
 
 	var newBlock Block = Block{
 		Index:        newIndex,
@@ -187,6 +190,10 @@ func AddBlock(lastHash []byte, index *big.Int, coinBase *Transaction) Block {
 
 	}
 	return newBlock
+}
+
+func GetLastBlock() Block {
+	return BlockChain[len(BlockChain)-1]
 }
 
 func isHashValid(hash []byte, difficulty int) bool {

@@ -16,6 +16,7 @@ func (e *EndPoint) writeData(rw *bufio.ReadWriter) {
 	go func() {
 		var bytes []byte
 
+		e.writerReady = true
 		for data := range e.event.NewReader() {
 			e.log.Info("New event push", zap.String("type", data.Type.String()), zap.String("ID", data.ID))
 			mutex.Lock()
@@ -29,17 +30,21 @@ func (e *EndPoint) writeData(rw *bufio.ReadWriter) {
 				bytes = e.sendPool(rw)
 			case event.Files:
 				bytes = e.callFiles(rw)
+			case event.Address:
+				bytes = e.sendAddress(rw)
 			}
 			mutex.Unlock()
 
 			e.marshal(rw, data, bytes)
 		}
+
 	}()
 
 	go func() {
 		for block := range e.event.NewBlockReader() {
 			e.log.Info("New block push")
 			mutex.Lock()
+			fmt.Println(fmt.Sprintf("************************************** before send block in reseau %+v", block))
 			bytes := e.sendBlock(rw, block)
 			mutex.Unlock()
 
@@ -53,8 +58,8 @@ func (e *EndPoint) marshal(rw *bufio.ReadWriter, evt event.Message, bytes []byte
 		return
 	}
 
-	mess := message{
-		Name:  evt.Type,
+	mess := event.Message{
+		Type:  evt.Type,
 		Value: bytes,
 		ID:    evt.ID,
 	}
@@ -63,14 +68,14 @@ func (e *EndPoint) marshal(rw *bufio.ReadWriter, evt event.Message, bytes []byte
 		mess.ID = uuid.NewV4().String()
 	}
 
-	bytes, err := json.Marshal(mess)
+	allBytes, err := json.Marshal(mess)
 	if err != nil {
 		e.log.Error("fail to marshal message", zap.Error(err))
 		return
 	}
 
 	mutex.Lock()
-	rw.WriteString(fmt.Sprintf("%s\n", string(bytes)))
+	rw.WriteString(fmt.Sprintf("%s\n", string(allBytes)))
 	rw.Flush()
 	mutex.Unlock()
 }
@@ -84,17 +89,22 @@ func (e *EndPoint) callFiles(rw *bufio.ReadWriter) []byte {
 		Token: e.cfg.Token,
 	})
 	if err != nil {
-		e.log.Error("fail to marshal blockChain", zap.Error(err))
+		e.log.Error("fail to marshal files message to send", zap.Error(err))
 		return []byte{}
 	}
 
 	return bytes
 }
 
+func (e *EndPoint) sendAddress(rw *bufio.ReadWriter) []byte {
+	return []byte{}
+}
+
 func (e *EndPoint) sendBlock(rw *bufio.ReadWriter, block blockchain.Block) []byte {
+	fmt.Println(fmt.Sprintf("************************************** before send block v2 in reseau %+v", block))
 	bytes, err := json.Marshal(block)
 	if err != nil {
-		e.log.Error("fail to marshal blockChain", zap.Error(err))
+		e.log.Error("fail to marshal block message to send", zap.Error(err))
 		return []byte{}
 	}
 

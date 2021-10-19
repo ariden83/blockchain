@@ -84,6 +84,15 @@ type P2P struct {
 	DiscoveryNamespace string `config:"blockchain"`
 }
 
+type XCache struct {
+	Size            int  `config:"cache_size"`
+	TTL             int  `config:"cache_ttl"`
+	MaxSizeAccepted int  `config:"cache_max_sized_accepted"`
+	NegSize         int  `config:"cache_neg_size"`
+	NegTTL          int  `config:"cache_neg_tll"`
+	Active          bool `config:"cache_active"`
+}
+
 type Log struct {
 	Path     string `config:"log_path"`
 	WithFile bool   `config:"log_with_file"`
@@ -105,11 +114,13 @@ type Config struct {
 	API          API
 	Log          Log
 	P2P          P2P
+	XCache       XCache
 }
 
 func getDefaultConfig() *Config {
 	return &Config{
-		Name: "blockChain",
+		Name:    "blockChain",
+		Version: "0.0.0",
 		Transactions: Transactions{
 			Reward: big.NewInt(100),
 		},
@@ -146,6 +157,14 @@ func getDefaultConfig() *Config {
 			TimeToCommunicate:  5,
 			ProtocolID:         "/p2p/1.0.0",
 			DiscoveryNamespace: "blockchain",
+		},
+		XCache: XCache{
+			Size:            5000,
+			TTL:             60,
+			MaxSizeAccepted: 60000,
+			NegSize:         500,
+			NegTTL:          30,
+			Active:          true,
 		},
 		Log: Log{
 			Path:     "./tmp/logs",

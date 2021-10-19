@@ -6,8 +6,9 @@ import (
 )
 
 type Message struct {
-	Type EventType
-	ID   string
+	Type  EventType
+	ID    string
+	Value []byte
 }
 
 type EventType int
@@ -24,10 +25,11 @@ const (
 	Wallet
 	Pool
 	Files
+	Address
 )
 
 func (e EventType) String() string {
-	return [...]string{"Blockchain", "Block", "Wallets", "Pool", "files"}[e]
+	return [...]string{"Blockchain", "Block", "Wallets", "Pool", "files", "Address"}[e]
 }
 
 func New() *Event {
@@ -41,12 +43,8 @@ func New() *Event {
 	return e
 }
 
-func (e *Event) Push(evt EventType, ID string) {
-	m := Message{
-		Type: evt,
-		ID:   ID,
-	}
-	if ID == "" {
+func (e *Event) Push(m Message) {
+	if m.ID == "" {
 		m.ID = uuid.NewV4().String()
 	}
 	e.channel <- m
@@ -71,6 +69,6 @@ func (e *Event) PushBlock(block blockchain.Block) {
 }
 
 func (e *Event) NewBlockReader() chan blockchain.Block {
-	newChan := make(chan blockchain.Block)
-	return newChan
+	e.channelBlock = make(chan blockchain.Block)
+	return e.channelBlock
 }

@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ariden83/blockchain/internal/blockchain"
+	//"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/utils"
+	//"github.com/davecgh/go-spew/spew"
+	"github.com/davecgh/go-spew/spew"
 	"io"
 	"math/big"
 	"net/http"
@@ -72,22 +75,22 @@ func (e *EndPoint) WriteBlock(p WriteBlockInput) blockchain.Block {
 	if blockchain.IsBlockValid(newBlock, blockchain.BlockChain[len(blockchain.BlockChain)-1]) {
 
 		mutex.Lock()
+		spew.Dump(newBlock)
 		e.event.PushBlock(newBlock)
 		mutex.Unlock()
 
-		/*
-			mutex.Lock()
-			blockchain.BlockChain = append(blockchain.BlockChain, newBlock)
-			mutex.Unlock()
+		/*mutex.Lock()
+		blockchain.BlockChain = append(blockchain.BlockChain, newBlock)
+		mutex.Unlock()
 
-			ser, err := utils.Serialize(&newBlock)
-			e.Handle(err)
+		ser, err := utils.Serialize(&newBlock)
+		e.Handle(err)
 
-			e.event.Push(event.BlockChain)
+		e.event.Push(event.BlockChain, "")
 
-			err = e.persistence.Update(newBlock.Hash, ser)
-			e.Handle(err)
-			spew.Dump(blockchain.BlockChain)*/
+		err = e.persistence.Update(newBlock.Hash, ser)
+		e.Handle(err)
+		spew.Dump(blockchain.BlockChain)*/
 	} else {
 		e.Handle(fmt.Errorf("new block created is invalid"))
 	}

@@ -19,6 +19,7 @@ import (
 
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/persistence"
+	"github.com/ariden83/blockchain/internal/xcache"
 	net "github.com/libp2p/go-libp2p-core"
 	host "github.com/libp2p/go-libp2p-core/host"
 	"github.com/libp2p/go-libp2p-core/network"
@@ -26,7 +27,9 @@ import (
 	pstore "github.com/libp2p/go-libp2p-core/peerstore"
 	"github.com/libp2p/go-libp2p-core/protocol"
 	ma "github.com/multiformats/go-multiaddr"
+	"github.com/satori/go.uuid"
 	"strings"
+	"time"
 )
 
 var mutex = &sync.Mutex{}
@@ -40,13 +43,13 @@ type EndPoint struct {
 	event       *event.Event
 	enabled     bool
 	msgReceived []string
+	xCache      *xcache.Cache
+	writerReady bool
+	readerReady bool
 }
 
-type message struct {
-	Name  event.EventType
-	ID    string
-	Value []byte
-}
+// Option is the type of option passed to the constructor.
+type Option func(e *EndPoint)
 
 func Init(
 	cfg config.P2P,
@@ -54,6 +57,7 @@ func Init(
 	wallets wallet.IWallets,
 	logs *zap.Logger,
 	evt *event.Event,
+	opts ...Option,
 ) *EndPoint {
 
 	e := &EndPoint{
@@ -65,7 +69,29 @@ func Init(
 		enabled:     cfg.Enabled,
 	}
 
+	for _, o := range opts {
+		o(e)
+	}
+
 	return e
+}
+
+func WithXCache(cfg config.XCache) Option {
+	return func(e *EndPoint) {
+		var err error
+
+		e.xCache, err = xcache.New(
+			xcache.WithSize(int32(cfg.Size)),
+			xcache.WithTTL(time.Duration(cfg.TTL)*time.Second),
+			xcache.WithNegSize(int32(cfg.NegSize)),
+			xcache.WithNegTTL(time.Duration(cfg.NegTTL)*time.Second),
+			xcache.WithStale(true),
+			xcache.WithPruneSize(int32(cfg.Size/20)+1))
+
+		if err != nil {
+			e.log.Error("fail to init xcache for p2p service", zap.Error(err))
+		}
+	}
 }
 
 func (e *EndPoint) Enabled() bool {
@@ -74,29 +100,44 @@ func (e *EndPoint) Enabled() bool {
 
 func (e *EndPoint) Listen(stop chan error) {
 	e.hasRequiredPort()
-	go func() {
-		if err := e.makeBasicHost(); err != nil {
-			e.log.Error("fail to listen p2p", zap.Error(err))
-			stop <- err
-			return
-		}
 
-		if !e.HasTarget() {
-			e.log.Info("listening for connections")
-			// Set a stream handler on host A. /p2p/1.0.0 is
-			// a user-defined protocol name.
-			e.host.SetStreamHandler("/p2p/1.0.0", e.handleStream)
-			// select {} // hang forever
-			/**** This is where the listener code ends ****/
-		} else {
-			// e.log.Fatal("fail, no peer address target found")
-			e.host.SetStreamHandler("/p2p/1.0.0", e.handleStream)
+	if err := e.makeBasicHost(); err != nil {
+		e.log.Error("fail to listen p2p", zap.Error(err))
+		stop <- err
+		return
+	}
+
+	go func() {
+		e.log.Info("listening for connections")
+		// Set a stream handler on host A. /p2p/1.0.0 is
+		// a user-defined protocol name.
+		e.host.SetStreamHandler("/p2p/1.0.0", e.handleStream)
+
+		if e.HasTarget() {
 			e.connectToIPFS(stop, e.host)
 		}
 
 		sigCh := make(chan os.Signal)
 		signal.Notify(sigCh, syscall.SIGKILL, syscall.SIGINT)
 		<-sigCh
+	}()
+
+}
+
+func (e *EndPoint) PushMsgForFiles() {
+	go func() {
+		for {
+			if e.writerReady && e.readerReady {
+				id := uuid.NewV4().String()
+				e.event.Push(event.Message{
+					Type: event.Files,
+					ID:   id,
+				})
+				e.saveMsgReceived(id)
+
+				break
+			}
+		}
 	}()
 }
 
@@ -181,8 +222,8 @@ func (e *EndPoint) connectToIPFS(stop chan error, ha host.Host) {
 	rw := bufio.NewReadWriter(bufio.NewReader(s), bufio.NewWriter(s))
 
 	// Create a thread to read and write data.
-	go e.writeData(rw)
-	go e.readData(rw)
+	e.writeData(rw)
+	e.readData(rw)
 }
 
 func (e *EndPoint) makeBasicHost() error {
@@ -255,8 +296,8 @@ func (e *EndPoint) makeBasicHost() error {
 func (e *EndPoint) setStreamHandler() {
 	protocolID := protocol.ID(e.cfg.ProtocolID)
 	e.host.SetStreamHandler(protocolID, func(s network.Stream) {
-		go e.writeCounter(s)
-		go e.readCounter(s)
+		e.writeCounter(s)
+		e.readCounter(s)
 	})
 }
 
@@ -277,8 +318,8 @@ func (e *EndPoint) handleStream(s net.Stream) {
 	// Create a buffer stream for non blocking read and write.
 	rw := bufio.NewReadWriter(bufio.NewReader(s), bufio.NewWriter(s))
 
-	go e.readData(rw)
-	go e.writeData(rw)
+	e.readData(rw)
+	e.writeData(rw)
 
 	// stream 's' will stay open until you close it (or the other side closes it).
 }

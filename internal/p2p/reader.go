@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/utils"
@@ -28,64 +29,71 @@ func (e *EndPoint) msgAlreadyReceived(uid string) bool {
 // routine Go qui récupère le dernier état de notre blockchain toutes les 5 secondes
 // err = rw.Flush()
 func (e *EndPoint) readData(rw *bufio.ReadWriter) {
-
-	for {
-		str, err := rw.ReadString('\n')
-		if err != nil {
-			// stream is closing
-			if err == err {
-				break
+	go func() {
+		e.readerReady = true
+		for {
+			str, err := rw.ReadString('\n')
+			if err != nil {
+				// stream is closing
+				if err == err {
+					break
+				}
+				e.log.Fatal("fail to read p2p data", zap.Error(err))
 			}
-			e.log.Fatal("fail to read p2p data", zap.Error(err))
+
+			if str == "" {
+				return
+			}
+			if str != "\n" {
+
+				mess := event.Message{}
+				if err := json.Unmarshal([]byte(str), &mess); err != nil {
+					log.Fatal(err)
+				}
+
+				e.log.Info("New event read", zap.String("type", mess.Type.String()))
+
+				switch mess.Type {
+				case event.BlockChain:
+					e.readBlockChain(mess.Value)
+				case event.NewBlock:
+					e.readNewBlock(mess.Value)
+				case event.Wallet:
+					e.readWallets(mess.Value)
+				case event.Pool:
+					e.readPool(mess.Value)
+				case event.Files:
+					e.readFilesAsk(mess)
+				}
+
+				if mess.Type != event.Files && !e.msgAlreadyReceived(mess.ID) {
+					e.saveMsgReceived(mess.ID)
+					e.event.Push(mess)
+				}
+			}
 		}
-
-		if str == "" {
-			return
-		}
-		if str != "\n" {
-
-			mess := message{}
-			if err := json.Unmarshal([]byte(str), &mess); err != nil {
-				log.Fatal(err)
-			}
-
-			e.log.Info("New event read", zap.String("type", mess.Name.String()))
-
-			switch mess.Name {
-			case event.BlockChain:
-				e.readBlockChain(mess.Value)
-			case event.NewBlock:
-				e.readNewBlock(mess.Value)
-			case event.Wallet:
-				e.readWallets(mess.Value)
-			case event.Pool:
-				e.readPool(mess.Value)
-			case event.Files:
-				e.readFilesAsk(mess.Value)
-			}
-
-			if !e.msgAlreadyReceived(mess.ID) {
-				e.saveMsgReceived(mess.ID)
-				e.event.Push(mess.Name, mess.ID)
-			}
-		}
-	}
+	}()
 }
 
 // get blockChain for the first time
 func (e *EndPoint) readBlockChain(chain []byte) {
-	// si la blockChain est déjà renseignée, on ne fait rien
-	if len(chain) <= len(blockchain.BlockChain) {
-		e.log.Info("blockChain received smaller than current")
-		return
-	}
-
 	mutex.Lock()
 
 	var newBlockChain []blockchain.Block
 	if err := json.Unmarshal(chain, &newBlockChain); err != nil {
 		e.log.Error("fail to unmarshal blockChain received", zap.Error(err))
 		return
+	}
+
+	// si la blockChain est déjà renseignée, on ne fait rien
+	if len(newBlockChain) <= len(blockchain.BlockChain) {
+		e.log.Info("blockChain received smaller or equal than current")
+		return
+	}
+
+	// surcharge tout si blockchain actuelle est vide
+	if len(blockchain.BlockChain) == 0 {
+		blockchain.BlockChain = newBlockChain
 	}
 
 	if isValid := blockchain.IsValid(newBlockChain); !isValid {
@@ -99,35 +107,54 @@ func (e *EndPoint) readBlockChain(chain []byte) {
 		return
 	}
 
-	// on recherche le dernier hash trouvé dans la blockChain reçue
+	// on recherche le nombre de blocks chez nous non trouvé dans la blockChain reçue
 	j := e.getNumOnNewBlockChain(newBlockChain, lastHashInDB)
+
+	fmt.Println(fmt.Sprintf("****************************************** blockchain.BlockChain %+v", blockchain.BlockChain))
+	spew.Dump(blockchain.BlockChain)
+	fmt.Println(fmt.Sprintf("****************************************** newBlockChain %+v", newBlockChain))
+	spew.Dump(newBlockChain)
+
+	// à partir de ce numéro, on itere sur les nouveau blocks reçus pour les ajouter
 	for i := j; i < len(newBlockChain); i++ {
 		current := newBlockChain[i]
-		prevBlock := newBlockChain[i-1]
+
+		// si genesis (normalement on passe pas ici, sauf dans la version light)
+		if i == 0 {
+			continue
+		}
+
+		prevBlock := blockchain.GetLastBlock()
 		serializeBLock, err := utils.Serialize(&current)
 		if err != nil {
 			e.log.Fatal("fail to Serialize block", zap.Error(err))
 			return
 		}
+
 		// revérifie la cohérence des données reçues
 		if blockchain.IsBlockValid(current, prevBlock) {
+			e.log.Info("new update of blockChain")
 			// on met à jour la blockChain
 			blockchain.BlockChain = append(blockchain.BlockChain, current)
 			// on met à jour la BDD avec ces nouveaux hash reçus
 			e.persistence.Update(current.Hash, serializeBLock)
 		} else {
-			e.log.Fatal("un block dans la blockchain reçue n'est pas valide")
+			e.log.Error("un block dans la blockchain reçue n'est pas valide")
 			return
 		}
 	}
-
 	mutex.Unlock()
+
 	e.log.Info("received blockChain update")
+	spew.Dump(blockchain.BlockChain)
 }
 
 func (e *EndPoint) getNumOnNewBlockChain(newBlockChain []blockchain.Block, lastHashInDB []byte) int {
-	for i := len(newBlockChain); i > 0; i-- {
-		if res := bytes.Compare(lastHashInDB, newBlockChain[i].Hash); res == 0 {
+	if len(newBlockChain) == 0 {
+		return 0
+	}
+	for i := range newBlockChain {
+		if res := bytes.Compare(lastHashInDB, newBlockChain[len(newBlockChain)-1-i].Hash); res == 0 {
 			return i
 		}
 	}
@@ -135,26 +162,40 @@ func (e *EndPoint) getNumOnNewBlockChain(newBlockChain []blockchain.Block, lastH
 }
 
 func (e *EndPoint) readNewBlock(chain []byte) {
+	fmt.Println("***************************************** end read new block v0", string(chain))
 	var newBlock blockchain.Block
-
 	if err := json.Unmarshal(chain, &newBlock); err != nil {
 		e.log.Error("fail to unmarshal block received", zap.Error(err))
 		return
 	}
+	fmt.Println(fmt.Sprintf("***************************************** before read new block v0.1 %+v", newBlock))
+
+	if len(blockchain.BlockChain) == 0 {
+		e.event.Push(event.Message{Type: event.BlockChain})
+		return
+	}
 
 	// test si le block est bien le suivant du block actuellement en base
+	fmt.Println("***************************************** compare", newBlock.PrevHash, blockchain.BlockChain[len(blockchain.BlockChain)-1].Hash)
 	res := bytes.Compare(newBlock.PrevHash, blockchain.BlockChain[len(blockchain.BlockChain)-1].Hash)
 	if res == 0 {
 
 		if blockchain.IsBlockValid(newBlock, blockchain.BlockChain[len(blockchain.BlockChain)-1]) {
+			fmt.Println("***************************************** before read new block v1")
+			spew.Dump(blockchain.BlockChain)
+			fmt.Println("***************************************** end read new block v1")
 			mutex.Lock()
 			blockchain.BlockChain = append(blockchain.BlockChain, newBlock)
 			mutex.Unlock()
 
+			fmt.Println("***************************************** before read new block v2")
+			spew.Dump(blockchain.BlockChain)
+			fmt.Println("***************************************** end read new block v2")
+
 			ser, err := utils.Serialize(&newBlock)
 			e.Handle(err)
 
-			e.event.Push(event.BlockChain, "")
+			e.event.Push(event.Message{Type: event.BlockChain})
 
 			err = e.persistence.Update(newBlock.Hash, ser)
 			e.Handle(err)
@@ -195,7 +236,7 @@ func (e *EndPoint) readPool(_ []byte) {
 }
 
 // on renotifie wallets and blockChain
-func (e *EndPoint) readFilesAsk(_ []byte) {
-	e.event.Push(event.BlockChain, "")
-	e.event.Push(event.Wallet, "")
+func (e *EndPoint) readFilesAsk(m event.Message) {
+	e.event.Push(event.Message{Type: event.BlockChain, ID: m.ID})
+	e.event.Push(event.Message{Type: event.Wallet, ID: m.ID})
 }
