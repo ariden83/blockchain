@@ -45,11 +45,35 @@ http://127.0.0.1:8082/readiness
 
 ### Test
 
+#### 1) Open services
 
-#### 1) GENERATE A SEED (WALLET)
+You have to open two terminal minimun.
+
+In the first terminal :
 
 ```
-make local-seed
+make local
+```
+
+return 
+
+```
+go run main.go -api_port 8112 -p2p_port 8113 -p2p_target /ip4/127.0.0.1/tcp/8097/p2p/QmWV1qKRBSy8vggYgMSWDGukmwcus8wbuSoru31oNaEWdd
+```
+
+Then launch one or more light service * 
+
+```
+cd example/light
+go run main.go -api_port 8112 -p2p_port 8113 -p2p_target /ip4/127.0.0.1/tcp/8097/p2p/QmWV1qKRBSy8vggYgMSWDGukmwcus8wbuSoru31oNaEWdd
+```
+
+* light service dont create files, it's just for tests
+
+#### 2) GENERATE A SEED (WALLET)
+
+```
+make local
 ```
 
 And call IT
@@ -70,13 +94,10 @@ Return
 }
 ```
 
-#### 2) GENERATE YOUR FIRST BLOCK 
 
-```
-make local-persistence
-```
+#### 3) GENERATE YOUR FIRST BLOCK 
 
-And call IT
+And call IT in the first terminal
 
 ```
 curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' 'http://127.0.0.1:8098/write' -d '{"address": "1P1aBegXRiTinJhhEYHHiMALfG26Wu9sG3", "key": "xpub661MyMwAqRbcFTZYiEcSv4Qj2Qr2NzQ7rjYc3iv9c6VSTxoYsqA9AA6nNbp8e9nVR9hRARXz5CApP6j5BxUnohyj89oSg3zZdDuKmGhdSFF"}'
@@ -113,7 +134,7 @@ Return
 }
 ```
 
-#### 3) YOUR BALANCE
+#### 4) YOUR BALANCE
 
 Call your balance :
 
@@ -127,7 +148,7 @@ return
 Balance of xpub661MyMwAqRbcFTZYiEcSv4Qj2Qr2NzQ7rjYc3iv9c6VSTxoYsqA9AA6nNbp8e9nVR9hRARXz5CApP6j5BxUnohyj89oSg3zZdDuKmGhdSFF: 1
 ```
 
-#### 4) GENERATE A SECOND WALLET 
+#### 5) GENERATE A SECOND WALLET 
 
 ```
 {
@@ -139,7 +160,7 @@ Balance of xpub661MyMwAqRbcFTZYiEcSv4Qj2Qr2NzQ7rjYc3iv9c6VSTxoYsqA9AA6nNbp8e9nVR
 }
 ```
 
-#### 5) SEND ONE TOKEN TO THE 2nd WALLET
+#### 6) SEND ONE TOKEN TO THE 2nd WALLET
 
 a) On envoi la somme du compte A au compte B
 
@@ -173,7 +194,7 @@ retourne
 Balance of xpub661MyMwAqRbcG4VYfVo7ptRncn7wsGMjNubLNrm5Stu5ERP4RtJqo7sQgSQAESwyJKi442EJ6sNWRz5wWZ2ecFE8p1JEJs6qGkzPKncdkhb: 3
 ```
 
-#### 6) Communicate new update of blockChain / wallet with every blockChain service
+#### 7) Communicate new update of blockChain / wallet with every blockChain service
 
 Après la commande 
 
