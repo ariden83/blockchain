@@ -214,7 +214,10 @@ func (e *EndPoint) connectToIPFS(stop chan error, ha host.Host) {
 	protocolID := protocol.ID(e.cfg.ProtocolID)
 	s, err := ha.NewStream(context.Background(), peerid, protocolID)
 	if err != nil {
-		e.log.Error("fail to set new stream", zap.Error(err), zap.Any("peer_id", peerid), zap.Any("protocol_id", protocolID))
+		e.log.Error("fail to set new stream",
+			zap.Error(err),
+			zap.Any("peer_id", peerid),
+			zap.Any("protocol_id", protocolID))
 		stop <- err
 		return
 	}

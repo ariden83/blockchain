@@ -162,6 +162,7 @@ func (e *EndPoint) readNewBlock(chain []byte) {
 	}
 
 	if len(blockchain.BlockChain) == 0 {
+		// on demande a recevoir la blockchain
 		e.event.Push(event.Message{Type: event.BlockChain})
 		return
 	}
@@ -178,10 +179,11 @@ func (e *EndPoint) readNewBlock(chain []byte) {
 			ser, err := utils.Serialize(&newBlock)
 			e.Handle(err)
 
-			e.event.Push(event.Message{Type: event.BlockChain})
-
+			blockchain.BlockChain = append(blockchain.BlockChain, newBlock)
 			err = e.persistence.Update(newBlock.Hash, ser)
 			e.Handle(err)
+
+			e.event.Push(event.Message{Type: event.BlockChain})
 			spew.Dump(blockchain.BlockChain)
 		}
 
