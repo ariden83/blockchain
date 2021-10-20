@@ -249,6 +249,9 @@ func (e *EndPoint) makeBasicHost() error {
 
 	e.host, err = libp2p.New(context.Background(), opts...)
 	if err != nil {
+		e.cfg.Port = e.cfg.Port + 1
+		e.log.Error("fail to set basic host", zap.Int("port", e.cfg.Port))
+		err := e.makeBasicHost()
 		return err
 	}
 

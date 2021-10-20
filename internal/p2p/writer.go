@@ -44,7 +44,6 @@ func (e *EndPoint) writeData(rw *bufio.ReadWriter) {
 		for block := range e.event.NewBlockReader() {
 			e.log.Info("New block push")
 			mutex.Lock()
-			fmt.Println(fmt.Sprintf("************************************** before send block in reseau %+v", block))
 			bytes := e.sendBlock(rw, block)
 			mutex.Unlock()
 
@@ -101,7 +100,6 @@ func (e *EndPoint) sendAddress(rw *bufio.ReadWriter) []byte {
 }
 
 func (e *EndPoint) sendBlock(rw *bufio.ReadWriter, block blockchain.Block) []byte {
-	fmt.Println(fmt.Sprintf("************************************** before send block v2 in reseau %+v", block))
 	bytes, err := json.Marshal(block)
 	if err != nil {
 		e.log.Error("fail to marshal block message to send", zap.Error(err))

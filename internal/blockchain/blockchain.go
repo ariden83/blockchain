@@ -140,7 +140,6 @@ func IsBlockValid(newBlock, oldBlock Block) bool {
 	newIndexWaiting := big.NewInt(0)
 	newIndexWaiting = newIndexWaiting.Add(oldBlock.Index, big.NewInt(1))
 
-	fmt.Println(fmt.Sprintf("******************************* %+v = %+v", newIndexWaiting, newBlock.Index))
 	if newIndexWaiting.Cmp(newBlock.Index) != 0 {
 		fmt.Println(fmt.Sprintf("is block valid fail, with cmp %d", newIndexWaiting.Cmp(newBlock.Index)))
 		return false
