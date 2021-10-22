@@ -67,7 +67,7 @@ func main() {
 	var p *p2p.EndPoint
 	p = p2p.Init(cfg.P2P, per, wallets, logs, evt)
 	if p.Enabled() {
-		p.Listen(stop)
+		p.Listen()
 	}
 
 	gen := genesis.New(cfg, per, trans, p, evt)
@@ -93,5 +93,4 @@ func main() {
 	stopCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	server.Shutdown(stopCtx)
-	p.Shutdown()
 }

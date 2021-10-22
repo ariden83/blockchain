@@ -46,7 +46,7 @@ type Transaction struct {
 	Inputs  []TxInput
 	Outputs []TxOutput
 	// le nonce dans la transaction est un nonce de compte qui représente un ordre de transaction qu'un compte crée.
-	Timestamp string
+	Timestamp int64
 }
 
 //TxOutput represents a transaction in the blockchain
@@ -141,19 +141,19 @@ func IsBlockValid(newBlock, oldBlock Block) bool {
 	newIndexWaiting = newIndexWaiting.Add(oldBlock.Index, big.NewInt(1))
 
 	if newIndexWaiting.Cmp(newBlock.Index) != 0 {
-		fmt.Println(fmt.Sprintf("is block valid fail, with cmp %d", newIndexWaiting.Cmp(newBlock.Index)))
+		fmt.Println(fmt.Sprintf("block is invalid, with index have %d want %d", newBlock.Index, newIndexWaiting))
 		return false
 	}
 
 	res := bytes.Compare(oldBlock.Hash, newBlock.PrevHash)
 	if res != 0 {
-		fmt.Println(fmt.Sprintf("is block valid fail %d with compare byte", res))
+		fmt.Println(fmt.Sprintf("block is invalid, prev hash is %s want %s", newBlock.PrevHash, oldBlock.Hash))
 		return false
 	}
 
 	res = bytes.Compare(calculateHash(newBlock), newBlock.Hash)
 	if res != 0 {
-		fmt.Println(fmt.Sprintf("is block valid fail %d with compare calculateHash", res))
+		fmt.Println(fmt.Sprintf("block is invalid %d with compare calculateHash", res))
 		return false
 	}
 

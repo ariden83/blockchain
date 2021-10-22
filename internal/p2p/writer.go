@@ -8,7 +8,10 @@ import (
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/satori/go.uuid"
 	"go.uber.org/zap"
+	"sync"
 )
+
+var mutex = &sync.Mutex{}
 
 // routine Go qui diffuse le dernier état de notre blockchain toutes les 5 secondes à nos pairs
 // Ils le recevront et le jetteront si la longueur est plus courte que la leur. Ils l'accepteront si c'est plus long
@@ -17,11 +20,10 @@ func (e *EndPoint) writeData(rw *bufio.ReadWriter) {
 		var bytes []byte
 
 		e.writerReady = true
-		for data := range e.event.NewReader() {
-			e.log.Info("New event push", zap.String("type", data.Type.String()), zap.String("ID", data.ID))
-			mutex.Lock()
+		for mess := range e.event.NewReader() {
+			e.log.Info("New event push", zap.String("type", mess.Type.String()), zap.String("ID", mess.ID))
 
-			switch data.Type {
+			switch mess.Type {
 			case event.BlockChain:
 				bytes = e.sendBlockChain(rw)
 			case event.Wallet:
@@ -32,21 +34,21 @@ func (e *EndPoint) writeData(rw *bufio.ReadWriter) {
 				bytes = e.callFiles(rw)
 			case event.Address:
 				bytes = e.sendAddress(rw)
+			case event.NewBlock:
+				// resend message only
+				bytes = mess.Value
+			default:
+				e.log.Error(fmt.Sprintf("Event type push not found %+v", mess))
 			}
-			mutex.Unlock()
 
-			e.marshal(rw, data, bytes)
+			e.marshal(rw, mess, bytes)
 		}
 
 	}()
 
 	go func() {
 		for block := range e.event.NewBlockReader() {
-			e.log.Info("New block push")
-			mutex.Lock()
 			bytes := e.sendBlock(rw, block)
-			mutex.Unlock()
-
 			e.marshal(rw, event.Message{Type: event.NewBlock}, bytes)
 		}
 	}()
@@ -66,6 +68,8 @@ func (e *EndPoint) marshal(rw *bufio.ReadWriter, evt event.Message, bytes []byte
 	if mess.ID == "" {
 		mess.ID = uuid.NewV4().String()
 	}
+
+	e.saveMsgReceived(mess.ID)
 
 	allBytes, err := json.Marshal(mess)
 	if err != nil {
@@ -99,13 +103,22 @@ func (e *EndPoint) sendAddress(rw *bufio.ReadWriter) []byte {
 	return []byte{}
 }
 
+func (e *EndPoint) resendBlock(rw *bufio.ReadWriter) []byte {
+	bytes, err := json.Marshal(blockchain.BlockChain)
+	if err != nil {
+		e.log.Error("fail to marshal blockChain", zap.Error(err))
+		return []byte{}
+	}
+
+	return bytes
+}
+
 func (e *EndPoint) sendBlock(rw *bufio.ReadWriter, block blockchain.Block) []byte {
 	bytes, err := json.Marshal(block)
 	if err != nil {
 		e.log.Error("fail to marshal block message to send", zap.Error(err))
 		return []byte{}
 	}
-
 	return bytes
 }
 

@@ -168,6 +168,7 @@ func writeData(rw *bufio.ReadWriter) {
 		}
 	}()
 
+	// permet de lire ce qui est écrit dans la console
 	stdReader := bufio.NewReader(os.Stdin)
 
 	for {

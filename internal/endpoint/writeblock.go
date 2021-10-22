@@ -4,10 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ariden83/blockchain/internal/blockchain"
-	//"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/utils"
-	//"github.com/davecgh/go-spew/spew"
-	"github.com/davecgh/go-spew/spew"
 	"io"
 	"math/big"
 	"net/http"
@@ -75,7 +72,6 @@ func (e *EndPoint) WriteBlock(p WriteBlockInput) blockchain.Block {
 	if blockchain.IsBlockValid(newBlock, blockchain.BlockChain[len(blockchain.BlockChain)-1]) {
 
 		mutex.Lock()
-		spew.Dump(newBlock)
 		e.event.PushBlock(newBlock)
 		mutex.Unlock()
 

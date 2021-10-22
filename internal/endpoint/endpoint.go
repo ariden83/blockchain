@@ -119,22 +119,32 @@ func (e *EndPoint) createGenesis() []byte {
 
 func (e *EndPoint) ListenHTTP(stop chan error) {
 	go func() {
-		mux := e.makeMuxRouter()
-
-		e.log.Info("Start listening HTTP Server", zap.Int("port", e.cfg.API.Port))
-
-		e.server = &http.Server{
-			Addr:           ":" + strconv.Itoa(e.cfg.API.Port),
-			Handler:        mux,
-			ReadTimeout:    10 * time.Second,
-			WriteTimeout:   10 * time.Second,
-			MaxHeaderBytes: 1 << 20,
-		}
-
-		if err := e.server.ListenAndServe(); err != nil {
+		if err := e.StartServer(); err != nil {
 			stop <- fmt.Errorf("cannot start server HTTP %s", err)
 		}
 	}()
+}
+
+func (e *EndPoint) StartServer() error {
+	e.log.Info("Start listening HTTP Server", zap.Int("port", e.cfg.API.Port))
+
+	mux := e.makeMuxRouter()
+
+	e.server = &http.Server{
+		Addr:           ":" + strconv.Itoa(e.cfg.API.Port),
+		Handler:        mux,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+
+	err := e.server.ListenAndServe()
+	if err != nil && err != http.ErrServerClosed {
+		e.log.Error("fail to listen http", zap.Error(err))
+		e.cfg.API.Port = e.cfg.API.Port + 1
+		return e.StartServer()
+	}
+	return err
 }
 
 func (e *EndPoint) makeMuxRouter() http.Handler {

@@ -11,16 +11,16 @@ import (
 // Seed represents each 'item' in the blockchain
 type Seed struct {
 	Address   string
-	Timestamp string
+	Timestamp int64
 	PubKey    string
 	PrivKey   string
 	Mnemonic  string
 }
 
 type SeedNoPrivKey struct {
-	Address   string
-	Timestamp string
+	Timestamp int64
 	PubKey    string
+	PrivKey   string
 }
 
 var mutex = &sync.Mutex{}
@@ -33,7 +33,7 @@ func (ws *Wallets) GetAllPublicSeeds() []SeedNoPrivKey {
 	var allSeeds []SeedNoPrivKey
 	for _, j := range ws.Seeds {
 		allSeeds = append(allSeeds, SeedNoPrivKey{
-			Address:   j.Address,
+			PrivKey:   j.PrivKey,
 			Timestamp: j.Timestamp,
 			PubKey:    j.PubKey,
 		})
@@ -58,13 +58,13 @@ func (ws *Wallets) Create() (*Seed, error) {
 	// Get your address
 	address := masterPub.Address()
 
-	t := time.Now()
+	t := time.Now().UnixNano() / int64(time.Millisecond)
 	newSeed := Seed{
 		Address:   address,
 		PubKey:    masterPub.String(),
 		PrivKey:   masterPrv.String(),
 		Mnemonic:  mnemonic.Sentence(),
-		Timestamp: t.String(),
+		Timestamp: t,
 	}
 
 	mutex.Lock()

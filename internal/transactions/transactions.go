@@ -66,8 +66,8 @@ func (t *Transactions) CoinBaseTx(toPubKey, data string) *blockchain.Transaction
 		PubKey: toPubKey,
 	} // You can see it follows {value, PubKey}
 
-	timestamp := time.Now()
-	tx := blockchain.Transaction{nil, []blockchain.TxInput{txIn}, []blockchain.TxOutput{txOut}, timestamp.String()}
+	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
+	tx := blockchain.Transaction{nil, []blockchain.TxInput{txIn}, []blockchain.TxOutput{txOut}, timestamp}
 
 	return &tx
 
@@ -106,8 +106,8 @@ func (t *Transactions) New(from, to string, amount *big.Int) (*blockchain.Transa
 	}
 
 	// Initialiser une nouvelle transaction avec toutes les nouvelles entrées et sorties que nous avons effectuées
-	timestamp := time.Now()
-	tx := blockchain.Transaction{nil, inputs, outputs, timestamp.String()}
+	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
+	tx := blockchain.Transaction{nil, inputs, outputs, timestamp}
 
 	// Définissez un nouvel identifiant et renvoyez-le.
 	tx.SetID()
