@@ -14,6 +14,7 @@ import (
 	mrand "math/rand"
 
 	"github.com/ariden83/blockchain/internal/event"
+	"github.com/ariden83/blockchain/internal/p2p/address"
 	"github.com/ariden83/blockchain/internal/persistence"
 	"github.com/ariden83/blockchain/internal/xcache"
 	net "github.com/libp2p/go-libp2p-core"
@@ -40,6 +41,7 @@ type EndPoint struct {
 	xCache      *xcache.Cache
 	writerReady bool
 	readerReady bool
+	address     []string
 }
 
 var (
@@ -311,12 +313,12 @@ func (e *EndPoint) makeBasicHost() error {
 		}
 	}
 
-	fullAddr := addr.Encapsulate(peerMA)
-	e.log.Info(fmt.Sprintf("I am %s\n", fullAddr))
+	address.SetIAM(addr.Encapsulate(peerMA).String())
+	e.log.Info(fmt.Sprintf("I am %s\n", address.IAM))
 	if e.cfg.Secio {
-		e.log.Info(fmt.Sprintf("Now run \"go run main.go -p2p_target %s -secio\" on a different terminal", fullAddr))
+		e.log.Info(fmt.Sprintf("Now run \"go run main.go -p2p_target %s -secio\" on a different terminal", address.IAM))
 	} else {
-		e.log.Info(fmt.Sprintf("Now run \"go run main.go -p2p_target %s\" on a different terminal", fullAddr))
+		e.log.Info(fmt.Sprintf("Now run \"go run main.go -p2p_target %s\" on a different terminal", address.IAM))
 	}
 
 	return nil
@@ -346,7 +348,7 @@ func (e *EndPoint) setIoReader() io.Reader {
 func (e *EndPoint) handleStream(s net.Stream) {
 
 	e.log.Info("Got a new stream p2p")
-
+	e.address = append(e.address)
 	// Create a buffer stream for non blocking read and write.
 	rw := bufio.NewReadWriter(bufio.NewReader(s), bufio.NewWriter(s))
 

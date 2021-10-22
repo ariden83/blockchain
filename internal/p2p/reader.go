@@ -9,6 +9,9 @@ import (
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/utils"
 	// "github.com/davecgh/go-spew/spew"
+	"github.com/ariden83/blockchain/internal/p2p/address"
+	"github.com/ariden83/blockchain/internal/wallet"
+	"github.com/davecgh/go-spew/spew"
 	"go.uber.org/zap"
 )
 
@@ -77,11 +80,14 @@ func (e *EndPoint) readData(rw *bufio.ReadWriter) {
 					e.readPool(mess.Value)
 				case event.Files:
 					e.readFilesAsk(mess)
+				case event.Address:
+					e.updateAddress(mess)
 				default:
 					e.log.Error(fmt.Sprintf("Event type received not found %+v", mess))
 				}
-
-				if mess.Type != event.Files {
+				// files must be send one time per service
+				// address has his own push management
+				if mess.Type != event.Files && mess.Type != event.Address {
 					e.event.Push(mess)
 				}
 			}
@@ -222,15 +228,18 @@ func (e *EndPoint) readNewBlock(msg event.Message) {
 }
 
 func (e *EndPoint) readWallets(chain []byte) {
-	if len(chain) <= len(*e.wallets.GetSeeds()) {
-		e.log.Info("blockChain received smaller than current")
-		return
-	}
+	seedsReceived := []wallet.Seed{}
 
-	if err := json.Unmarshal(chain, e.wallets.GetSeeds()); err != nil {
+	if err := json.Unmarshal(chain, &seedsReceived); err != nil {
 		e.log.Error("fail to unmarshal blockChain received", zap.Error(err))
 		return
 	}
+
+	if len(seedsReceived) <= len(*e.wallets.GetSeeds()) {
+		e.log.Info("seeds received smaller than current")
+		return
+	}
+	e.wallets.UpdateSeeds(seedsReceived)
 	e.log.Info("received wallets update")
 	//spew.Dump(e.wallets.GetAllPublicSeeds())
 }
@@ -243,4 +252,21 @@ func (e *EndPoint) readPool(_ []byte) {
 func (e *EndPoint) readFilesAsk(m event.Message) {
 	e.event.Push(event.Message{Type: event.BlockChain})
 	e.event.Push(event.Message{Type: event.Wallet})
+}
+
+func (e *EndPoint) updateAddress(m event.Message) {
+	addressReceived := []string{}
+	if err := json.Unmarshal(m.Value, &addressReceived); err != nil {
+		spew.Dump(string(m.Value))
+		e.log.Error("fail to unmarshal addresses received", zap.Error(err))
+		return
+	}
+
+	updateAddress := address.UpdateAddress(addressReceived)
+
+	if len(addressReceived) != len(updateAddress) {
+		e.event.Push(event.Message{
+			Type: event.Address,
+		})
+	}
 }

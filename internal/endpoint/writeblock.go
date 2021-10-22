@@ -18,7 +18,6 @@ type WriteBlockInput struct {
 
 // takes JSON payload as an input for heart rate (BPM)
 func (e *EndPoint) handleWriteBlock(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	var m WriteBlockInput
 
 	decoder := json.NewDecoder(r.Body)

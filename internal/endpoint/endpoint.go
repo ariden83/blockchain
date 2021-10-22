@@ -156,6 +156,7 @@ func (e *EndPoint) makeMuxRouter() http.Handler {
 	muxRouter.HandleFunc("/wallets", e.handlePrintWallets).Methods("GET")
 	muxRouter.HandleFunc("/wallet", e.handleCreateWallet).Methods("POST")
 	muxRouter.HandleFunc("/mywallet", e.handleMyWallet).Methods("POST")
+	muxRouter.HandleFunc("/address", e.handleGetServersAddress).Methods("GET")
 
 	muxRouter.Use(middleware.DefaultHeader)
 	muxRouter.Use(e.MetricsMiddleware)

@@ -10,6 +10,7 @@ import (
 	"math/big"
 	"reflect"
 	"strings"
+	"time"
 )
 
 type Database struct {
@@ -81,7 +82,9 @@ type P2P struct {
 
 	ProtocolID string `config:"p2p_protocol_ID"`
 
-	DiscoveryNamespace string `config:"blockchain"`
+	DiscoveryNamespace string `config:"p2p_discovery_name"`
+
+	AddressTimer time.Duration `config:"p2p_address_timer"`
 }
 
 type XCache struct {
@@ -157,6 +160,7 @@ func getDefaultConfig() *Config {
 			TimeToCommunicate:  5,
 			ProtocolID:         "/p2p/1.0.0",
 			DiscoveryNamespace: "blockchain",
+			AddressTimer:       time.Duration(5 * time.Minute),
 		},
 		XCache: XCache{
 			Size:            5000,

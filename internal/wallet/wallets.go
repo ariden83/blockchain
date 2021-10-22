@@ -21,6 +21,7 @@ type IWallets interface {
 	GetSeeds() *[]Seed
 	GetAllPublicSeeds() []SeedNoPrivKey
 	Create() (*Seed, error)
+	UpdateSeeds([]Seed)
 }
 
 func Init(conf config.Wallet) (*Wallets, error) {
@@ -70,6 +71,10 @@ func (ws *Wallets) LoadFile(conf config.Wallet) error {
 	ws.Seeds = wallets.Seeds
 
 	return nil
+}
+
+func (ws *Wallets) UpdateSeeds(seed []Seed) {
+	ws.Seeds = seed
 }
 
 func (ws *Wallets) Save() {

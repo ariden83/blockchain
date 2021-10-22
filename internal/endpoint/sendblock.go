@@ -19,7 +19,6 @@ type SendBlockInput struct {
 }
 
 func (e *EndPoint) handleSendBlock(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	var m SendBlockInput
 
 	decoder := json.NewDecoder(r.Body)

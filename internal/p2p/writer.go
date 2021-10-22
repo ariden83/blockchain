@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/event"
+	"github.com/ariden83/blockchain/internal/p2p/address"
 	"github.com/satori/go.uuid"
 	"go.uber.org/zap"
 	"sync"
+	"time"
 )
 
 var mutex = &sync.Mutex{}
@@ -16,6 +18,18 @@ var mutex = &sync.Mutex{}
 // routine Go qui diffuse le dernier état de notre blockchain toutes les 5 secondes à nos pairs
 // Ils le recevront et le jetteront si la longueur est plus courte que la leur. Ils l'accepteront si c'est plus long
 func (e *EndPoint) writeData(rw *bufio.ReadWriter) {
+
+	go func() {
+		for {
+			time.Sleep(e.cfg.AddressTimer)
+			e.log.Info("recreate address list")
+			e.event.Push(event.Message{
+				Type:  event.Address,
+				Value: address.RecreateAddress(),
+			})
+		}
+	}()
+
 	go func() {
 		var bytes []byte
 
@@ -100,7 +114,14 @@ func (e *EndPoint) callFiles(rw *bufio.ReadWriter) []byte {
 }
 
 func (e *EndPoint) sendAddress(rw *bufio.ReadWriter) []byte {
-	return []byte{}
+
+	bytes, err := json.Marshal(address.GetNewAddress())
+	if err != nil {
+		e.log.Error("fail to marshal new address", zap.Error(err))
+		return []byte{}
+	}
+
+	return bytes
 }
 
 func (e *EndPoint) resendBlock(rw *bufio.ReadWriter) []byte {
