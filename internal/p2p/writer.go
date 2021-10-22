@@ -21,13 +21,19 @@ func (e *EndPoint) writeData(rw *bufio.ReadWriter) {
 
 	go func() {
 		for {
-			time.Sleep(e.cfg.AddressTimer)
+			now := time.Now()
+			nextTick := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), 0, 0, time.Local)
+			nextTick = nextTick.Add(e.cfg.AddressTimer)
+			timer := nextTick.Sub(time.Now())
+
+			<-time.After(timer)
 			e.log.Info("recreate address list")
 			e.event.Push(event.Message{
 				Type:  event.Address,
 				Value: address.RecreateAddress(),
 			})
 		}
+
 	}()
 
 	go func() {
