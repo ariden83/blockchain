@@ -22,7 +22,7 @@ func (e *EndPoint) writeData(rw *bufio.ReadWriter) {
 	go func() {
 		for {
 			now := time.Now()
-			nextTick := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), 0, 0, time.Local)
+			nextTick := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), 0, 0, 0, time.Local)
 			nextTick = nextTick.Add(e.cfg.AddressTimer)
 			timer := nextTick.Sub(time.Now())
 

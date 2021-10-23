@@ -37,19 +37,13 @@ type EndPoint struct {
 	log         *zap.Logger
 	event       *event.Event
 	enabled     bool
+	linked      bool
 	msgReceived []string
 	xCache      *xcache.Cache
 	writerReady bool
 	readerReady bool
 	address     []string
 }
-
-var (
-	failNegociateError     = "failed to negotiate security protocol: peer id mismatch"
-	protocolError          = "protocol not supported"
-	addressAMReadyUseError = "bind: address already in use"
-	noGoodAddress          = "no good addresses"
-)
 
 // Option is the type of option passed to the constructor.
 type Option func(e *EndPoint)
@@ -108,7 +102,7 @@ func (e *EndPoint) Listen() {
 
 	if err := e.makeBasicHost(); err != nil {
 		if strings.Contains(fmt.Sprint(err), protocolError) || strings.Contains(fmt.Sprint(err), addressAMReadyUseError) {
-			// permet de laisse a l'utilisateur de killer le script sans rester dans une boucle
+			// permet de laisser a l'utilisateur de killer le script sans rester dans une boucle
 			time.Sleep(100 * time.Millisecond)
 			e.log.Error("fail to listen p2p", zap.Int("port", e.cfg.Port))
 			e.cfg.Port = e.cfg.Port + 1
@@ -122,6 +116,8 @@ func (e *EndPoint) Listen() {
 	go func() {
 		e.retryConnectToIPFS(stop)
 	}()
+
+	e.alertWaitFirstConnexion()
 
 	go func() {
 		time.Sleep(time.Second * 1)
@@ -324,6 +320,23 @@ func (e *EndPoint) makeBasicHost() error {
 	return nil
 }
 
+func (e *EndPoint) alertWaitFirstConnexion() {
+	go func() {
+		for {
+			if e.linked {
+				break
+			}
+			e.log.Warn("waiting for new P2P connexion ...")
+			if e.cfg.Secio {
+				e.log.Info(fmt.Sprintf("run \"go run main.go -p2p_target %s -secio\" on a different terminal", address.IAM))
+			} else {
+				e.log.Info(fmt.Sprintf("run \"go run main.go -p2p_target %s\" on a different terminal", address.IAM))
+			}
+			time.Sleep(30 * time.Second)
+		}
+	}()
+}
+
 // Setup a stream handler.
 //
 // This gets called every time a peer connects and opens a stream to this node.
@@ -346,7 +359,7 @@ func (e *EndPoint) setIoReader() io.Reader {
 }
 
 func (e *EndPoint) handleStream(s net.Stream) {
-
+	e.linked = true
 	e.log.Info("Got a new stream p2p")
 	e.address = append(e.address)
 	// Create a buffer stream for non blocking read and write.
