@@ -38,6 +38,7 @@ type EndPoint struct {
 	event       *event.Event
 	enabled     bool
 	linked      bool
+	dbLoad      bool
 	msgReceived []string
 	xCache      *xcache.Cache
 	writerReady bool

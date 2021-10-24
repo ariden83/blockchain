@@ -160,7 +160,7 @@ func getDefaultConfig() *Config {
 			TimeToCommunicate:  5,
 			ProtocolID:         "/p2p/1.0.0",
 			DiscoveryNamespace: "blockchain",
-			AddressTimer:       time.Duration(10 * time.Minute),
+			AddressTimer:       time.Duration(30 * time.Minute),
 		},
 		XCache: XCache{
 			Size:            5000,

@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/event"
+	"github.com/ariden83/blockchain/internal/iterator"
 	"github.com/ariden83/blockchain/internal/p2p/address"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/satori/go.uuid"
 	"go.uber.org/zap"
 	"sync"
@@ -48,6 +50,8 @@ func (e *EndPoint) writeData(rw *bufio.ReadWriter) {
 			switch mess.Type {
 			case event.BlockChain:
 				bytes = e.sendBlockChain(rw)
+			case event.BlockChainFull:
+				bytes = e.sendBlockChainFull(rw)
 			case event.Wallet:
 				bytes = e.sendWallets(rw)
 			case event.Pool:
@@ -152,7 +156,32 @@ func (e *EndPoint) sendBlock(rw *bufio.ReadWriter, block blockchain.Block) []byt
 }
 
 func (e *EndPoint) sendBlockChain(rw *bufio.ReadWriter) []byte {
+	spew.Dump(blockchain.BlockChain)
 	bytes, err := json.Marshal(blockchain.BlockChain)
+	if err != nil {
+		e.log.Error("fail to marshal blockChain", zap.Error(err))
+		return []byte{}
+	}
+
+	return bytes
+}
+
+func (e *EndPoint) sendBlockChainFull(rw *bufio.ReadWriter) []byte {
+
+	blocks := []blockchain.Block{}
+	iterator := iterator.New(e.persistence)
+	for {
+		block, err := iterator.Next()
+		if err != nil {
+			e.log.Error("fail to iterate next block", zap.Error(err))
+		}
+		blocks = append(blocks, *block)
+		if len(block.PrevHash) == 0 {
+			break
+		}
+	}
+
+	bytes, err := json.Marshal(&blocks)
 	if err != nil {
 		e.log.Error("fail to marshal blockChain", zap.Error(err))
 		return []byte{}

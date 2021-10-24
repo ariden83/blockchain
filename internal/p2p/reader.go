@@ -72,6 +72,8 @@ func (e *EndPoint) readData(rw *bufio.ReadWriter) {
 				switch mess.Type {
 				case event.BlockChain:
 					e.readBlockChain(mess.Value)
+				case event.BlockChainFull:
+					e.readBlockChainFull(mess.Value)
 				case event.NewBlock:
 					e.readNewBlock(mess)
 				case event.Wallet:
@@ -87,12 +89,18 @@ func (e *EndPoint) readData(rw *bufio.ReadWriter) {
 				}
 				// files must be send one time per service
 				// address has his own push management
-				if mess.Type != event.Files && mess.Type != event.Address {
+				if mess.Type != event.Files && mess.Type != event.Address && mess.Type != event.BlockChainFull {
 					e.event.Push(mess)
 				}
 			}
 		}
 	}()
+}
+
+func (e *EndPoint) readBlockChainFull(chain []byte) {
+	if !e.dbLoad {
+		e.readBlockChain(chain)
+	}
 }
 
 // get blockChain for the first time
@@ -250,7 +258,7 @@ func (e *EndPoint) readPool(_ []byte) {
 
 // on renotifie wallets and blockChain
 func (e *EndPoint) readFilesAsk(m event.Message) {
-	e.event.Push(event.Message{Type: event.BlockChain})
+	e.event.Push(event.Message{Type: event.BlockChainFull})
 	e.event.Push(event.Message{Type: event.Wallet})
 }
 

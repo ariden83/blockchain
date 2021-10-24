@@ -149,7 +149,7 @@ func (e *EndPoint) StartServer() error {
 
 func (e *EndPoint) makeMuxRouter() http.Handler {
 	muxRouter := mux.NewRouter()
-	muxRouter.HandleFunc("/blockchain", e.handlePrintBlockChain).Methods("GET")
+	muxRouter.HandleFunc("/blockchain", e.handleGetBlockChain).Methods("GET")
 	muxRouter.HandleFunc("/balance", e.handleGetBalance).Methods("POST")
 	muxRouter.HandleFunc("/write", e.handleWriteBlock).Methods("POST")
 	muxRouter.HandleFunc("/send", e.handleSendBlock).Methods("POST")

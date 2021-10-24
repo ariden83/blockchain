@@ -21,6 +21,7 @@ type Event struct {
 
 const (
 	BlockChain EventType = iota
+	BlockChainFull
 	NewBlock
 	Wallet
 	Pool
@@ -29,7 +30,7 @@ const (
 )
 
 func (e EventType) String() string {
-	return [...]string{"Blockchain", "Block", "Wallets", "Pool", "files", "Address"}[e]
+	return [...]string{"Blockchain", "BlockChainFull", "Block", "Wallets", "Pool", "files", "Address"}[e]
 }
 
 func New() *Event {

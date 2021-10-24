@@ -26,3 +26,13 @@ func (b *BlockChainIterator) Next() (*blockchain.Block, error) {
 	b.CurrentHash = block.PrevHash
 	return block, nil
 }
+
+// Iterator takes our BlockChain struct and returns it as a BlockCHainIterator struct
+func New(p persistence.IPersistence) *BlockChainIterator {
+	iterator := BlockChainIterator{
+		CurrentHash: p.LastHash(),
+		Persistence: p,
+	}
+
+	return &iterator
+}
