@@ -321,6 +321,9 @@ func (e *EndPoint) makeBasicHost() error {
 }
 
 func (e *EndPoint) alertWaitFirstConnexion() {
+	if e.cfg.Target != "" {
+		return
+	}
 	go func() {
 		for {
 			if e.linked {
