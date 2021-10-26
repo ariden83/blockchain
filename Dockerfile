@@ -8,7 +8,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$GIT_TAG_NAME" -o bin/main ./cmd/app
 
 #Meant for building the deployment container
-FROM alpine:3.10.1
+FROM golang:1.17
 ARG PROJECT_ROOT
 
 WORKDIR /go

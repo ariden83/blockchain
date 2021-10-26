@@ -1,20 +1,49 @@
+# github.com/AndreasBriese/bbloom v0.0.0-20190825152654-46b345b51c96
+github.com/AndreasBriese/bbloom
+# github.com/LuisAcerv/btchdwallet v0.0.0-20200802014842-cc7fde1007e3
+## explicit
+github.com/LuisAcerv/btchdwallet/crypt
 # github.com/beorn7/perks v1.0.1
 github.com/beorn7/perks/quantile
+# github.com/blockcypher/gobcy v2.0.1+incompatible
+## explicit
+github.com/blockcypher/gobcy
+# github.com/brianium/mnemonic v0.0.0-20180124190051-72af92c51f88
+## explicit
+github.com/brianium/mnemonic
+github.com/brianium/mnemonic/entropy
 # github.com/btcsuite/btcd v0.22.0-beta
 github.com/btcsuite/btcd/btcec
+# github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce
+github.com/btcsuite/btcutil/base58
 # github.com/cespare/xxhash/v2 v2.1.1
 github.com/cespare/xxhash/v2
-# github.com/coreos/go-semver v0.3.0
-github.com/coreos/go-semver/semver
 # github.com/davecgh/go-spew v1.1.1
 ## explicit
 github.com/davecgh/go-spew/spew
 # github.com/davidlazar/go-crypto v0.0.0-20200604182044-b73af7476f6c
 github.com/davidlazar/go-crypto/salsa20
+# github.com/dgraph-io/badger v1.6.2
+## explicit
+github.com/dgraph-io/badger
+github.com/dgraph-io/badger/options
+github.com/dgraph-io/badger/pb
+github.com/dgraph-io/badger/skl
+github.com/dgraph-io/badger/table
+github.com/dgraph-io/badger/trie
+github.com/dgraph-io/badger/y
+# github.com/dgraph-io/ristretto v0.1.0
+## explicit
+github.com/dgraph-io/ristretto/z
+github.com/dgraph-io/ristretto/z/simd
+# github.com/dustin/go-humanize v1.0.0
+github.com/dustin/go-humanize
 # github.com/flynn/noise v1.0.0
 github.com/flynn/noise
 # github.com/gogo/protobuf v1.3.2
 github.com/gogo/protobuf/proto
+# github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
+github.com/golang/glog
 # github.com/golang/protobuf v1.5.2
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes
@@ -31,6 +60,12 @@ github.com/gorilla/websocket
 # github.com/hashicorp/golang-lru v0.5.4
 github.com/hashicorp/golang-lru
 github.com/hashicorp/golang-lru/simplelru
+# github.com/heetch/confita v0.10.0
+## explicit
+github.com/heetch/confita
+github.com/heetch/confita/backend
+github.com/heetch/confita/backend/env
+github.com/heetch/confita/backend/flags
 # github.com/huin/goupnp v1.0.2
 github.com/huin/goupnp
 github.com/huin/goupnp/dcps/internetgateway1
@@ -62,6 +97,13 @@ github.com/jbenet/goprocess/periodic
 # github.com/joho/godotenv v1.4.0
 ## explicit
 github.com/joho/godotenv
+# github.com/karlseguin/ccache v2.0.3+incompatible
+## explicit
+github.com/karlseguin/ccache
+# github.com/karlseguin/expect v1.0.8
+## explicit
+# github.com/klauspost/compress v1.12.3
+## explicit
 # github.com/klauspost/cpuid/v2 v2.0.9
 github.com/klauspost/cpuid/v2
 # github.com/koron/go-ssdp v0.0.2
@@ -95,13 +137,14 @@ github.com/libp2p/go-libp2p-blankhost
 github.com/libp2p/go-libp2p-circuit
 github.com/libp2p/go-libp2p-circuit/pb
 # github.com/libp2p/go-libp2p-core v0.9.0
+## explicit
+github.com/libp2p/go-libp2p-core
 github.com/libp2p/go-libp2p-core/connmgr
 github.com/libp2p/go-libp2p-core/control
 github.com/libp2p/go-libp2p-core/crypto
 github.com/libp2p/go-libp2p-core/crypto/pb
 github.com/libp2p/go-libp2p-core/discovery
 github.com/libp2p/go-libp2p-core/event
-github.com/libp2p/go-libp2p-core/helpers
 github.com/libp2p/go-libp2p-core/host
 github.com/libp2p/go-libp2p-core/introspection
 github.com/libp2p/go-libp2p-core/introspection/pb
@@ -120,27 +163,15 @@ github.com/libp2p/go-libp2p-core/sec
 github.com/libp2p/go-libp2p-core/sec/insecure
 github.com/libp2p/go-libp2p-core/sec/insecure/pb
 github.com/libp2p/go-libp2p-core/transport
-# github.com/libp2p/go-libp2p-crypto v0.1.0
-## explicit
-github.com/libp2p/go-libp2p-crypto
 # github.com/libp2p/go-libp2p-discovery v0.5.1
 github.com/libp2p/go-libp2p-discovery
-# github.com/libp2p/go-libp2p-host v0.1.0
-## explicit
-github.com/libp2p/go-libp2p-host
 # github.com/libp2p/go-libp2p-mplex v0.4.1
 github.com/libp2p/go-libp2p-mplex
 # github.com/libp2p/go-libp2p-nat v0.0.6
 github.com/libp2p/go-libp2p-nat
-# github.com/libp2p/go-libp2p-net v0.1.0
-## explicit
-github.com/libp2p/go-libp2p-net
 # github.com/libp2p/go-libp2p-noise v0.2.2
 github.com/libp2p/go-libp2p-noise
 github.com/libp2p/go-libp2p-noise/pb
-# github.com/libp2p/go-libp2p-peer v0.2.0
-## explicit
-github.com/libp2p/go-libp2p-peer
 # github.com/libp2p/go-libp2p-peerstore v0.3.0
 ## explicit
 github.com/libp2p/go-libp2p-peerstore
@@ -235,8 +266,11 @@ github.com/opentracing/opentracing-go/log
 # github.com/pkg/errors v0.9.1
 github.com/pkg/errors
 # github.com/prometheus/client_golang v1.11.0
+## explicit
 github.com/prometheus/client_golang/prometheus
 github.com/prometheus/client_golang/prometheus/internal
+github.com/prometheus/client_golang/prometheus/promauto
+github.com/prometheus/client_golang/prometheus/promhttp
 # github.com/prometheus/client_model v0.2.0
 github.com/prometheus/client_model/go
 # github.com/prometheus/common v0.30.0
@@ -247,11 +281,14 @@ github.com/prometheus/common/model
 github.com/prometheus/procfs
 github.com/prometheus/procfs/internal/fs
 github.com/prometheus/procfs/internal/util
+# github.com/satori/go.uuid v1.2.0
+## explicit
+github.com/satori/go.uuid
 # github.com/spacemonkeygo/spacelog v0.0.0-20180420211403-2296661a0572
 github.com/spacemonkeygo/spacelog
-# github.com/whyrusleeping/go-logging v0.0.1
+# github.com/wemeetagain/go-hdwallet v0.1.0
 ## explicit
-github.com/whyrusleeping/go-logging
+github.com/wemeetagain/go-hdwallet
 # github.com/whyrusleeping/multiaddr-filter v0.0.0-20160516205228-e903e4adabd7
 github.com/whyrusleeping/multiaddr-filter
 # go.uber.org/atomic v1.9.0
@@ -259,30 +296,37 @@ go.uber.org/atomic
 # go.uber.org/multierr v1.7.0
 go.uber.org/multierr
 # go.uber.org/zap v1.19.0
+## explicit
 go.uber.org/zap
 go.uber.org/zap/buffer
 go.uber.org/zap/internal/bufferpool
 go.uber.org/zap/internal/color
 go.uber.org/zap/internal/exit
 go.uber.org/zap/zapcore
-# golang.org/x/crypto v0.0.0-20210813211128-0a44fdfbc16e
+# golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
+## explicit
 golang.org/x/crypto/blake2b
 golang.org/x/crypto/blake2s
 golang.org/x/crypto/chacha20
 golang.org/x/crypto/chacha20poly1305
 golang.org/x/crypto/curve25519
 golang.org/x/crypto/curve25519/internal/field
+golang.org/x/crypto/internal/poly1305
 golang.org/x/crypto/internal/subtle
+golang.org/x/crypto/pbkdf2
 golang.org/x/crypto/poly1305
+golang.org/x/crypto/ripemd160
 golang.org/x/crypto/salsa20/salsa
 golang.org/x/crypto/sha3
 # golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d
 golang.org/x/net/bpf
 golang.org/x/net/internal/iana
 golang.org/x/net/internal/socket
+golang.org/x/net/internal/timeseries
 golang.org/x/net/ipv4
 golang.org/x/net/ipv6
 golang.org/x/net/route
+golang.org/x/net/trace
 # golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 golang.org/x/sync/errgroup
 # golang.org/x/sys v0.0.0-20210816183151-1e6c022a8912
