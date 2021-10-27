@@ -286,13 +286,8 @@ func (e *EndPoint) makeBasicHost() error {
 	e.log.Info("P2P start:", zap.Any("address", e.host.Addrs()), zap.Any("host_id", e.host.ID()))
 	e.setStreamHandler()
 
-	basicHost, err := libp2p.New(context.Background(), opts...)
-	if err != nil {
-		return err
-	}
-
 	// Parse the multiaddr string.
-	peerMA, err := ma.NewMultiaddr(fmt.Sprintf("/ipfs/%s", basicHost.ID().Pretty()))
+	peerMA, err := ma.NewMultiaddr(fmt.Sprintf("/ipfs/%s", e.host.ID().Pretty()))
 	//peerMA, err := ma.NewMultiaddr(e.cfg.Target)
 	if err != nil {
 		return err
@@ -300,7 +295,7 @@ func (e *EndPoint) makeBasicHost() error {
 
 	// Now we can build a full multiaddress to reach this host
 	// by encapsulating both addresses:
-	addrs := basicHost.Addrs()
+	addrs := e.host.Addrs()
 	var addr ma.Multiaddr
 	// select the address starting with "ip4"
 	for _, i := range addrs {
