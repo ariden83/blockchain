@@ -58,14 +58,14 @@ make local
 return 
 
 ```
-go run main.go -api_port 8112 -p2p_port 8113 -p2p_target /ip4/127.0.0.1/tcp/8097/p2p/QmWV1qKRBSy8vggYgMSWDGukmwcus8wbuSoru31oNaEWdd
+go run main.go -p2p_target /ip4/127.0.0.1/tcp/8097/p2p/QmWV1qKRBSy8vggYgMSWDGukmwcus8wbuSoru31oNaEWdd
 ```
 
 Then launch one or more light service * 
 
 ```
 cd example/light
-go run main.go -api_port 8112 -p2p_port 8113 -p2p_target /ip4/127.0.0.1/tcp/8097/p2p/QmWV1qKRBSy8vggYgMSWDGukmwcus8wbuSoru31oNaEWdd
+go run main.go -p2p_target /ip4/127.0.0.1/tcp/8097/p2p/QmWV1qKRBSy8vggYgMSWDGukmwcus8wbuSoru31oNaEWdd
 ```
 
 * light service dont create files, it's just for tests
