@@ -16,9 +16,10 @@ import (
 var ErrNotEnoughFunds = errors.New("Not enough funds")
 
 type Transactions struct {
-	Reward      *big.Int
-	persistence persistence.IPersistence
-	log         *zap.Logger
+	Reward          *big.Int
+	serverPublicKey string
+	persistence     persistence.IPersistence
+	log             *zap.Logger
 }
 
 type ITransaction interface {
@@ -31,9 +32,10 @@ type ITransaction interface {
 
 func Init(conf config.Transactions, per persistence.IPersistence, log *zap.Logger) *Transactions {
 	return &Transactions{
-		Reward:      conf.Reward,
-		persistence: per,
-		log:         log.With(zap.String("service", "transactions")),
+		Reward:          conf.Reward,
+		persistence:     per,
+		serverPublicKey: conf.PubKey,
+		log:             log.With(zap.String("service", "transactions")),
 	}
 }
 
@@ -77,6 +79,10 @@ func (t *Transactions) New(from, to string, amount *big.Int) (*blockchain.Transa
 	var inputs []blockchain.TxInput
 	var outputs []blockchain.TxOutput
 
+	if t.canPayTransactionFees(amount) {
+		return nil, ErrNotEnoughFunds
+	}
+
 	// Trouver des sorties utilisables
 	acc, validOutputs := t.FindSpendableOutputs(from, amount)
 
@@ -84,6 +90,7 @@ func (t *Transactions) New(from, to string, amount *big.Int) (*blockchain.Transa
 	if acc.Cmp(amount) < 0 {
 		return nil, ErrNotEnoughFunds
 	}
+
 	// Si nous le faisons, créez des inputs qui indiquent les outputs que nous dépensons
 	for txID, outs := range validOutputs {
 		decodeTxID, err := hex.DecodeString(txID)
@@ -97,7 +104,11 @@ func (t *Transactions) New(from, to string, amount *big.Int) (*blockchain.Transa
 		}
 	}
 
-	outputs = append(outputs, blockchain.TxOutput{amount, to})
+	amountLessFees := t.setTransactionFees(amount)
+
+	outputs = append(outputs, blockchain.TxOutput{amountLessFees, to})
+
+	outputs = t.payTransactionFees(outputs)
 
 	// S'il reste de l'argent, faites de nouvelles sorties à partir de la différence.
 	if acc.Cmp(amount) > 0 {

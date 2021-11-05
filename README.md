@@ -43,6 +43,18 @@ and
 http://127.0.0.1:8082/readiness
 `
 
+### Features
+
+- Generate a new seed
+- Access to your wallet
+- Mine a new bloc
+- Send tokens to another
+- Access to your balance
+- Les blocs créés sont obligatoirement validés par un autre serveur
+- Le service requiert minimum deux serveurs pour fonctionner
+- Liste les serveurs actuellement actifs
+- Ajout des frais de transactions en faveur du mineur
+
 ### Test
 
 #### 1) Open services

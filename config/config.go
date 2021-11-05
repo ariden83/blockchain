@@ -48,6 +48,7 @@ type Metrics struct {
 
 type Transactions struct {
 	Reward *big.Int
+	Miner
 }
 
 // address of actual user which mine on this server
@@ -112,7 +113,6 @@ type Config struct {
 	Wallet       Wallet
 	Metrics      Metrics
 	Transactions Transactions
-	Miner        Miner
 	Database     Database
 	API          API
 	Log          Log
@@ -126,6 +126,9 @@ func getDefaultConfig() *Config {
 		Version: "0.0.0",
 		Transactions: Transactions{
 			Reward: big.NewInt(100),
+			Miner: Miner{
+				PubKey: "xpub661MyMwAqRbcFTZYiEcSv4Qj2Qr2NzQ7rjYc3iv9c6VSTxoYsqA9AA6nNbp8e9nVR9hRARXz5CApP6j5BxUnohyj89oSg3zZdDuKmGhdSFF",
+			},
 		},
 		Database: Database{
 			Path: "./tmp/blocks",
@@ -149,7 +152,6 @@ func getDefaultConfig() *Config {
 			Name:      "chain",
 			Port:      8099,
 		},
-		Miner: Miner{},
 		API: API{
 			Enabled: true,
 			Port:    8098,
