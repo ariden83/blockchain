@@ -79,7 +79,7 @@ func (t *Transactions) New(from, to string, amount *big.Int) (*blockchain.Transa
 	var inputs []blockchain.TxInput
 	var outputs []blockchain.TxOutput
 
-	if t.canPayTransactionFees(amount) {
+	if !t.canPayTransactionFees(amount) {
 		return nil, ErrNotEnoughFunds
 	}
 
