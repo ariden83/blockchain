@@ -16,6 +16,7 @@ My first own blockchain
 * Le minage en 7 étapes [minage-7-etapes](http://www.ab-consulting.fr/blog/blockchain/minage-7-etapes=)
 * libp2p in go tutorial [libp2p-in-go-4hoa](https://dev.to/feliperosa/getting-started-with-libp2p-in-go-4hoa)
 * p2p discovery mdns [p2p/discovery/mdns.go](https://gitlab.dms3.io/p2p/go-p2p/-/blob/master/p2p/discovery/mdns.go)
+* p2P examples [examples](https://github.com/libp2p/go-libp2p/tree/master/examples/)
 
 ## Command
 
@@ -45,6 +46,7 @@ http://127.0.0.1:8082/readiness
 
 ### Features
 
+- Récupère l'ensemble des seeds et la blockchain complète lors de la conexion avec le premier server
 - Generate a new seed
 - Access to your wallet
 - Mine a new bloc
