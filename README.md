@@ -21,10 +21,6 @@ My first own blockchain
 ## Command
 
 - `make local` - launch the app
-- `make local-proof` - launch the for pprof of work
-- `make local-p2p` - launch the app for p2p
-- `make local-proof-stake` - launch the app for pprof of stake
-- `make local-seed` - launch the app for seed (key generator)
 
 ### Metrics
 
