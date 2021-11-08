@@ -78,6 +78,13 @@ local-seed:
 	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./tutorial/seed/.
 	-cli_level=INFO ./bin/main
 
+local-relay:
+	@echo "> Launch local seed ..."
+	go fmt ./...
+	export GO111MODULE=on;
+	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./tutorial/relay/.
+	-cli_level=INFO ./bin/main
+
 local:
 	@echo "> Launch local ..."
 	go fmt ./...
