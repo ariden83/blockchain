@@ -24,18 +24,18 @@ func unixToHuman(unix int64) string {
 	return time.Unix(unix, 0).Format(time.UnixDate)
 }
 
-func homeURL() string {
-	return baseURL
+func (e *Explorer) homeURL() string {
+	return e.baseURL
 }
 
-func blockURL(hash string) string {
-	return baseURL + "/blocks/" + hash
+func (e *Explorer) blockURL(hash string) string {
+	return e.baseURL + "/blocks/" + hash
 }
 
-func txURL(hash string) string {
-	return baseURL + "/transactions/" + hash
+func (e *Explorer) txURL(hash string) string {
+	return e.baseURL + "/transactions/" + hash
 }
 
-func walletURL(hash string) string {
-	return baseURL + "/wallets/" + hash
+func (e *Explorer) walletURL(hash string) string {
+	return e.baseURL + "/wallets/" + hash
 }

@@ -4,38 +4,39 @@ import (
 	"text/template"
 )
 
-const (
-	templatesDir string = "cmd/web/internal/explorer/templates/"
-)
-
 var templates *template.Template
 
-var templateFunctions template.FuncMap = template.FuncMap{
-	"debug":       debug,
-	"increment":   increment,
-	"add":         add,
-	"unixToHuman": unixToHuman,
-	"homeURL":     homeURL,
-	"blockURL":    blockURL,
-	"txURL":       txURL,
-	"walletURL":   walletURL,
+var templateFunctions template.FuncMap
+
+func (e *Explorer) initTemplates() {
+	templateFunctions = template.FuncMap{
+		"debug":       debug,
+		"increment":   increment,
+		"add":         add,
+		"unixToHuman": unixToHuman,
+		"homeURL":     e.homeURL,
+		"blockURL":    e.blockURL,
+		"txURL":       e.txURL,
+		"walletURL":   e.walletURL,
+	}
 }
 
-func loadTemplates() {
-	loadPages()
-	loadPartials()
+func (e *Explorer) loadTemplates() {
+	e.initTemplates()
+	e.loadPages()
+	e.loadPartials()
 }
 
-func loadPages() {
+func (e *Explorer) loadPages() {
 	templates = template.Must(
 		template.
 			New("templates").
 			Funcs(templateFunctions).
-			ParseGlob(templatesDir + "pages/*.gohtml"))
+			ParseGlob(e.cfg.TemplatesDir + "pages/*.gohtml"))
 }
 
-func loadPartials() {
+func (e *Explorer) loadPartials() {
 	templates = template.Must(
 		templates.
-			ParseGlob(templatesDir + "partials/*.gohtml"))
+			ParseGlob(e.cfg.TemplatesDir + "partials/*.gohtml"))
 }

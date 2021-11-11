@@ -2,8 +2,6 @@ package explorer
 
 import (
 	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
 const (
@@ -11,27 +9,23 @@ const (
 	staticRoute string = "/static/"
 )
 
-var (
-	router *mux.Router = mux.NewRouter()
-)
-
-func loadFileServer() {
+func (e *Explorer) loadFileServer() {
 	fileServer := http.FileServer(http.Dir(staticDir))
-	router.Handle(staticRoute, http.StripPrefix(staticRoute, fileServer))
+	e.router.Handle(staticRoute, http.StripPrefix(staticRoute, fileServer))
 }
 
-func loadRoutes() {
-	router.HandleFunc("/", home).Methods("GET")
-	router.HandleFunc("/404", notFound).Methods("GET")
+func (e *Explorer) loadRoutes() {
+	e.router.HandleFunc("/", home).Methods("GET")
+	e.router.HandleFunc("/404", notFound).Methods("GET")
 
-	router.HandleFunc("/blocks", blocksIndex).Methods("GET")
-	router.HandleFunc("/blocks/{hash:[0-9a-f]+}", blocksShow).Methods("GET")
-	router.HandleFunc("/blocks", blocksCreate).Methods("POST")
-	router.HandleFunc("/blocks/mine", blocksMine).Methods("GET")
+	e.router.HandleFunc("/blocks", blocksIndex).Methods("GET")
+	e.router.HandleFunc("/blocks/{hash:[0-9a-f]+}", blocksShow).Methods("GET")
+	e.router.HandleFunc("/blocks", blocksCreate).Methods("POST")
+	e.router.HandleFunc("/blocks/mine", blocksMine).Methods("GET")
 
-	router.HandleFunc("/transactions/{id:[0-9a-f]+}", txsShow).Methods("GET")
+	e.router.HandleFunc("/transactions/{id:[0-9a-f]+}", txsShow).Methods("GET")
 
-	router.HandleFunc("/wallets", walletsIndex).Methods("GET")
-	router.HandleFunc("/wallets/server", walletsServer).Methods("GET")
-	router.HandleFunc("/wallets/{address:[0-9a-f]+}", walletsShow).Methods("GET")
+	e.router.HandleFunc("/wallets", walletsIndex).Methods("GET")
+	e.router.HandleFunc("/wallets/server", walletsServer).Methods("GET")
+	e.router.HandleFunc("/wallets/{address:[0-9a-f]+}", walletsShow).Methods("GET")
 }
