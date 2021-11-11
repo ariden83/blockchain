@@ -42,16 +42,30 @@ http://127.0.0.1:8082/readiness
 
 ### Features
 
-- Récupère l'ensemble des seeds et la blockchain complète lors de la conexion avec le premier server
-- Generate a new seed
-- Access to your wallet
-- Mine a new bloc
-- Send tokens to another
-- Access to your balance
-- Les blocs créés sont obligatoirement validés par un autre serveur
-- Le service requiert minimum deux serveurs pour fonctionner
-- Liste les serveurs actuellement actifs
-- Ajout des frais de transactions en faveur du mineur
+- [x] Récupère l'ensemble des seeds et la blockchain complète lors de la conexion avec le premier server
+- [x] Generate a new seed
+- [x] Access to your wallet
+- [x] Mine a new bloc
+- [x] Send tokens to another
+- [x] Access to your balance
+- [x] Les blocs créés sont obligatoirement validés par un autre serveur
+- [x] Le service requiert minimum deux serveurs pour fonctionner
+- [x] Liste les serveurs actuellement actifs
+- [x] Ajout des frais de transactions en faveur du mineur
+
+### Future
+- [x] Fully Tested
+- ...
+
+### Godocs
+You can browse the documentation of all local packages and projects with the Godocs package:
+
+```
+go install golang.org/x/tools/godoc
+godoc -http=:6060
+```
+
+This will install the executable and start a server listening on http://localhost:6060
 
 ### Test
 
@@ -68,14 +82,14 @@ make local
 return 
 
 ```
-go run main.go -p2p_target /ip4/127.0.0.1/tcp/8097/p2p/QmWV1qKRBSy8vggYgMSWDGukmwcus8wbuSoru31oNaEWdd
+go run main.go -p2p_target /ip4/127.0.0.1/tcp/8098/p2p/QmWV1qKRBSy8vggYgMSWDGukmwcus8wbuSoru31oNaEWdd
 ```
 
 Then launch one or more light service * 
 
 ```
 cd example/light
-go run main.go -p2p_target /ip4/127.0.0.1/tcp/8097/p2p/QmWV1qKRBSy8vggYgMSWDGukmwcus8wbuSoru31oNaEWdd
+go run main.go -p2p_target /ip4/127.0.0.1/tcp/8098/p2p/QmWV1qKRBSy8vggYgMSWDGukmwcus8wbuSoru31oNaEWdd
 ```
 
 * light service dont create files, it's just for tests
@@ -89,7 +103,7 @@ make local
 And call IT
 
 ```
-curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' 'http://127.0.0.1:8092/create' -d ''
+curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' 'http://127.0.0.1:8098/wallet' -d ''
 ```
 
 Return 

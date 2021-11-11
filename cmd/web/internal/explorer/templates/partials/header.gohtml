@@ -1,0 +1,33 @@
+{{ define "header" }}
+
+<header>
+  <nav>
+    <a href="/"><h1>Blockchain Coin</h1></a>
+
+    <ul>
+      <li>
+        <a href="/">Home</a>
+      </li>
+
+      <li>
+        <a href="/blocks">Blocks</a>
+      </li>
+
+      <li>
+        <a href="/blocks/mine">Mine Block</a>
+      </li>
+
+      <li>
+        <a href="/wallets">Wallets</a>
+      </li>
+
+      <li>
+        <a href="/wallets/server">Server Wallet</a>
+      </li>
+    </ul>
+  </nav>
+
+  <h1>{{ . }}</h1>
+</header>
+
+{{ end }}

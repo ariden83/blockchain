@@ -92,6 +92,13 @@ local:
 	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./cmd/app/.
 	-cli_level=INFO ./bin/main
 
+local-web:
+	@echo "> Launch local web itnerface ..."
+	go fmt ./...
+	export GO111MODULE=on;
+	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/web ./cmd/web/.
+	-cli_level=INFO ./bin/web
+
 local-vendor:
 	@echo "> Regenerate vendor ..."
 	# dep init

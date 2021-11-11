@@ -17,19 +17,19 @@ func main() {
 	run()
 }
 
+// https://docs.libp2p.io/concepts/circuit-relay/
 func run() {
-	// Create three libp2p hosts, enable relay client capabilities on all
-	// of them.
+	// Créez trois hôtes libp2p, activez les capacités de client de relais sur chacun d'eux
 	ctx := context.Background()
-	// Tell the host use relays
+	// Dites à l'hôte d'utiliser des relais
 	h1, err := libp2p.New(ctx, libp2p.EnableRelay())
 	if err != nil {
 		log.Printf("Failed to create h1: %v", err)
 		return
 	}
 
-	// Tell the host to relay connections for other peers (The ability to *use*
-	// a relay vs the ability to *be* a relay)
+	// Dites à l'hôte de relayer les connexions pour d'autres pairs (la possibilité d'*utiliser*
+	// un relais vs la capacité d'*être* un relais)
 	h2, err := libp2p.New(ctx, libp2p.DisableRelay())
 	if err != nil {
 		log.Printf("Failed to create h2: %v", err)
@@ -41,8 +41,7 @@ func run() {
 		return
 	}
 
-	// Zero out the listen addresses for the host, so it can only communicate
-	// via p2p-circuit for our example
+	// Mettez à zéro les adresses d'écoute pour l'hôte, afin qu'il ne puisse communiquer que via le circuit p2p pour notre exemple
 	h3, err := libp2p.New(ctx, libp2p.ListenAddrs(), libp2p.EnableRelay())
 	if err != nil {
 		log.Printf("Failed to create h3: %v", err)
@@ -54,7 +53,8 @@ func run() {
 		Addrs: h2.Addrs(),
 	}
 
-	// Connect both h1 and h3 to h2, but not to each other
+	log.Printf("h2info: %v", h2info)
+	// Connectez à la fois h1 et h3 à h2, mais pas l'un à l'autre
 	if err := h1.Connect(context.Background(), h2info); err != nil {
 		log.Printf("Failed to connect h1 and h2: %v", err)
 		return
@@ -65,7 +65,7 @@ func run() {
 		return
 	}
 
-	// Now, to test things, let's set up a protocol handler on h3
+	// Maintenant, pour tester les choses, configurons un gestionnaire de protocole sur h3
 	h3.SetStreamHandler("/cats", func(s network.Stream) {
 		log.Println("Meow! It worked!")
 		s.Close()
@@ -79,23 +79,24 @@ func run() {
 	log.Printf("Okay, no connection from h1 to h3: %v", err)
 	log.Println("Just as we suspected")
 
-	// Creates a relay address to h3 using h2 as the relay
+	// Crée une adresse de relais vers h3 en utilisant h2 comme relais
 	relayaddr, err := ma.NewMultiaddr("/p2p/" + h2.ID().Pretty() + "/p2p-circuit/ipfs/" + h3.ID().Pretty())
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	// Since we just tried and failed to dial, the dialer system will, by default
-	// prevent us from redialing again so quickly. Since we know what we're doing, we
-	// can use this ugly hack (it's on our TODO list to make it a little cleaner)
-	// to tell the dialer "no, its okay, let's try this again"
+	// Étant donné que nous venons d'essayer et que nous n'avons pas réussi à composer le numéro,
+	// le système de numérotation nous empêchera par défaut de recomposer si rapidement.
+	// Puisque nous savons ce que nous faisons, nous pouvons utiliser ce vilain hack
+	// (il est sur notre liste <TODO pour le rendre un peu plus propre) pour dire au numéroteur "non, ça va, essayons à nouveau"
 	h1.Network().(*swarm.Swarm).Backoff().Clear(h3.ID())
 
 	h3relayInfo := peer.AddrInfo{
 		ID:    h3.ID(),
 		Addrs: []ma.Multiaddr{relayaddr},
 	}
+	log.Printf("h3relayInfo: %v", h3relayInfo)
 	if err := h1.Connect(context.Background(), h3relayInfo); err != nil {
 		log.Printf("Failed to connect h1 and h3: %v", err)
 		return
