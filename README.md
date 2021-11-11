@@ -17,6 +17,7 @@ My first own blockchain
 * libp2p in go tutorial [libp2p-in-go-4hoa](https://dev.to/feliperosa/getting-started-with-libp2p-in-go-4hoa)
 * p2p discovery mdns [p2p/discovery/mdns.go](https://gitlab.dms3.io/p2p/go-p2p/-/blob/master/p2p/discovery/mdns.go)
 * p2P examples [examples](https://github.com/libp2p/go-libp2p/tree/master/examples/)
+* blockchain go project by Nomad [nc_nomadcoin](https://github.com/librity/nc_nomadcoin)
 
 ## Command
 
