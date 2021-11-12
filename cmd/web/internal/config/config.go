@@ -20,6 +20,12 @@ type Config struct {
 	TemplatesDir string `config:"template_dir"`
 	Port         int    `config:"port"`
 	Log          config.Log
+	Api          Api
+}
+
+type Api struct {
+	Port    int `config:"api_port"`
+	TimeOut float64
 }
 
 func getDefaultConfig() *Config {
@@ -31,6 +37,9 @@ func getDefaultConfig() *Config {
 		Log: config.Log{
 			CLILevel: "info",
 			WithFile: false,
+		},
+		Api: Api{
+			Port: 8098,
 		},
 	}
 }
@@ -119,9 +128,8 @@ func (c *Config) DeepStructFields(s *string, parentKey string, iface interface{}
 }
 
 // BuildPort buils a port string from a port number.
-func (c *Config) BuildPort() string {
-	port := fmt.Sprintf(":%d", c.Port)
-	return port
+func (c *Config) BuildPort(port int) string {
+	return fmt.Sprintf(":%d", port)
 }
 
 func (c *Config) GetExplorerPort() int {

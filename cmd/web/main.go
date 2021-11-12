@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/ariden83/blockchain/cmd/web/internal/api"
 	"github.com/ariden83/blockchain/cmd/web/internal/config"
 	"github.com/ariden83/blockchain/cmd/web/internal/explorer"
 	"github.com/ariden83/blockchain/internal/logger"
@@ -19,7 +20,10 @@ func main() {
 	logs := logger.InitLight(cfg.Log)
 	logs = logs.With(zap.String("v", cfg.Version))
 	defer logs.Sync()
-	explorer.New(cfg, logs).Start()
+
+	m := api.New(cfg, logs)
+
+	explorer.New(cfg, logs, m).Start()
 }
 
 func cleanExit() {

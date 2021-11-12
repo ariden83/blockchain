@@ -1,6 +1,7 @@
 package explorer
 
 import (
+	"github.com/ariden83/blockchain/cmd/web/internal/api"
 	"github.com/ariden83/blockchain/cmd/web/internal/config"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
@@ -16,14 +17,16 @@ type Explorer struct {
 	baseURL string
 	server  *http.Server
 	router  *mux.Router
+	model   *api.Model
 }
 
-func New(cfg *config.Config, log *zap.Logger) *Explorer {
+func New(cfg *config.Config, log *zap.Logger, m *api.Model) *Explorer {
 	return &Explorer{
 		log:     log,
 		cfg:     cfg,
-		baseURL: "http://localhost" + cfg.BuildPort(),
+		baseURL: "http://localhost" + cfg.BuildPort(cfg.Port),
 		router:  mux.NewRouter(),
+		model:   m,
 	}
 }
 

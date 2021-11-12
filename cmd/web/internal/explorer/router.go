@@ -28,4 +28,6 @@ func (e *Explorer) loadRoutes() {
 	e.router.HandleFunc("/wallets", walletsIndex).Methods("GET")
 	e.router.HandleFunc("/wallets/server", walletsServer).Methods("GET")
 	e.router.HandleFunc("/wallets/{address:[0-9a-f]+}", walletsShow).Methods("GET")
+
+	e.router.HandleFunc("/wallets/create", e.walletsCreate).Methods("GET")
 }
