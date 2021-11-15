@@ -1,8 +1,8 @@
 package main
 
 import (
+	"github.com/ariden83/blockchain/cmd/web/config"
 	"github.com/ariden83/blockchain/cmd/web/internal/api"
-	"github.com/ariden83/blockchain/cmd/web/internal/config"
 	"github.com/ariden83/blockchain/cmd/web/internal/explorer"
 	"github.com/ariden83/blockchain/cmd/web/internal/token"
 	"github.com/ariden83/blockchain/internal/logger"

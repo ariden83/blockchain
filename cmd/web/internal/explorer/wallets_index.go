@@ -1,7 +1,6 @@
 package explorer
 
 import (
-	"fmt"
 	"net/http"
 )
 
@@ -11,7 +10,6 @@ type walletsIndexData struct {
 }
 
 func walletsIndex(rw http.ResponseWriter, r *http.Request) {
-	fmt.Println("***************************************** walletsIndex")
 	addresses := []string{}
 	data := walletsIndexData{"Wallets", addresses}
 

@@ -1,13 +1,15 @@
 package explorer
 
 import (
+	"github.com/ariden83/blockchain/cmd/web/config"
 	"github.com/ariden83/blockchain/cmd/web/internal/api"
-	"github.com/ariden83/blockchain/cmd/web/internal/config"
 	"github.com/ariden83/blockchain/cmd/web/internal/token"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 )
@@ -36,7 +38,6 @@ func New(cfg *config.Config, log *zap.Logger, m *api.Model, t *token.Token) *Exp
 func (e *Explorer) Start() {
 	e.log.Info("start")
 	e.loadTemplates()
-	e.loadFileServer()
 	e.loadRoutes()
 	e.loadMiddleware()
 	e.listenOrDie()
@@ -47,9 +48,21 @@ func (Explorer) loadMiddleware() {}
 func (e *Explorer) listenOrDie() {
 	e.log.Info("Start listening HTTP Server", zap.Int("port", e.cfg.Port))
 
+	_, err := os.Stat(filepath.Join(e.cfg.StaticDir, "index.css"))
+	if err != nil {
+		e.log.Fatal("fail to read index.css")
+	}
+
+	mux := http.NewServeMux()
+
+	fileServer := http.FileServer(http.Dir(e.cfg.StaticDir))
+
+	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+	mux.Handle("/", e.router)
+
 	e.server = &http.Server{
 		Addr:           ":" + strconv.Itoa(e.cfg.Port),
-		Handler:        e.router,
+		Handler:        mux,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,

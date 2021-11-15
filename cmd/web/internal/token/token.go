@@ -1,7 +1,7 @@
 package token
 
 import (
-	"github.com/ariden83/blockchain/cmd/web/internal/config"
+	"github.com/ariden83/blockchain/cmd/web/config"
 	jwt "github.com/dgrijalva/jwt-go"
 	"time"
 )

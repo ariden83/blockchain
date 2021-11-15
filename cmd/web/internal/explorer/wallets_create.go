@@ -2,7 +2,6 @@ package explorer
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/ariden83/blockchain/internal/wallet"
 	"net/http"
 )
@@ -19,15 +18,16 @@ type walletsCreateData struct {
 }
 
 func (e *Explorer) walletsCreate(rw http.ResponseWriter, r *http.Request) {
-	fmt.Println("***************************************** walletsCreate")
 	var (
-		params apiParamInput = apiParamInput{}
-		path   string        = "/wallet"
-		data   apiParamOutput
+		params    apiParamInput = apiParamInput{}
+		path      string        = "/wallet"
+		data      apiParamOutput
+		pageTitle string = "Seed creation"
 	)
 
 	body, err := e.model.Post(path, params)
 	if err != nil {
+		templates.ExecuteTemplate(rw, "error", Error{http.StatusUnauthorized, err, pageTitle})
 		return
 	}
 
@@ -35,11 +35,11 @@ func (e *Explorer) walletsCreate(rw http.ResponseWriter, r *http.Request) {
 
 	token, err := e.token.CreateToken(data.PubKey)
 	if err != nil {
-		templates.ExecuteTemplate(rw, "error", Error{http.StatusUnauthorized, err})
+		templates.ExecuteTemplate(rw, "error", Error{http.StatusUnauthorized, err, pageTitle})
 		return
 	}
 
-	frontData := walletsCreateData{"Wallets", data.Mnemonic, token}
+	frontData := walletsCreateData{pageTitle, data.Mnemonic, token}
 
 	templates.ExecuteTemplate(rw, "wallets_create", frontData)
 }

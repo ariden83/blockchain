@@ -1,20 +1,23 @@
-{{ define "blocks_show" }}
-
+{{ define "error" }}
 <!DOCTYPE html>
 <html lang="en">
 {{ template "head" .PageTitle }}
-
 <body>
 {{ template "header" .PageTitle }}
-
-<main>
-
-Error
-
-</main>
+<div class="main-container-wrapper">
+    <div class="first-time-flow">
+        <div class="first-time-flow__wrapper">
+            <div class="reveal-seed-phrase">
+                <div class="seed-phrase__sections">
+                    <div class="seed-phrase__main">
+                        <div class="first-time-flow__header">Error</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 {{ template "footer" }}
 </body>
-</html>
-
-{{ end }}
+</html>{{ end }}

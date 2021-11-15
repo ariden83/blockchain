@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/ariden83/blockchain/cmd/web/internal/config"
+	"github.com/ariden83/blockchain/cmd/web/config"
 	"go.uber.org/zap"
 	"io"
 	"net/http"

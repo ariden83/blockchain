@@ -41,7 +41,7 @@ func getDefaultConfig() *Config {
 		Version:      "0.0.0",
 		Port:         4000,
 		TemplatesDir: "cmd/web/internal/explorer/templates/",
-		StaticDir:    "/home/adrien.parrochia/go/src/github.com/ariden83/blockchain/cmd/web/internal/explorer/static",
+		StaticDir:    "./cmd/web/static/",
 		StaticRoute:  "/static/",
 		Log: config.Log{
 			CLILevel: "info",

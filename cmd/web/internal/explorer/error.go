@@ -1,6 +1,7 @@
 package explorer
 
 type Error struct {
-	Status int
-	Error  error
+	Status    int
+	Error     error
+	PageTitle string
 }
