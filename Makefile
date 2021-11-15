@@ -88,6 +88,7 @@ local-relay:
 local:
 	@echo "> Launch local ..."
 	go fmt ./...
+	gosec -tests ./...
 	export GO111MODULE=on;
 	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./cmd/app/.
 	-cli_level=INFO ./bin/main

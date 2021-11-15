@@ -19,6 +19,10 @@ My first own blockchain
 * p2P examples [examples](https://github.com/libp2p/go-libp2p/tree/master/examples/)
 * blockchain go project by Nomad [nc_nomadcoin](https://github.com/librity/nc_nomadcoin)
 
+## Installation
+
+- COde verification with [gosec](https://github.com/securego/gosec)
+
 ## Command
 
 - `make local` - launch the app
@@ -55,7 +59,8 @@ http://127.0.0.1:8082/readiness
 - [x] Ajout des frais de transactions en faveur du mineur
 
 ### Future
-- [x] Fully Tested
+- [] Fully Tested
+- [] GRPC endpoint
 - ...
 
 ### Godocs
