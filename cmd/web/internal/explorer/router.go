@@ -1,17 +1,17 @@
 package explorer
 
 import (
+	"fmt"
 	"net/http"
 )
 
-const (
-	staticDir   string = "explorer/static"
-	staticRoute string = "/static/"
-)
-
 func (e *Explorer) loadFileServer() {
-	fileServer := http.FileServer(http.Dir(staticDir))
-	e.router.Handle(staticRoute, http.StripPrefix(staticRoute, fileServer))
+	fmt.Println(e.cfg.StaticDir)
+	// fileServer := http.FileServer(http.Dir(e.cfg.StaticDir))
+
+	fs := http.FileServer(http.Dir("./static"))
+	e.router.Handle(e.cfg.StaticRoute, fs)
+	// e.router.Handle(e.cfg.StaticRoute, http.StripPrefix(e.cfg.StaticDir, fileServer))
 }
 
 func (e *Explorer) loadRoutes() {
@@ -26,8 +26,9 @@ func (e *Explorer) loadRoutes() {
 	e.router.HandleFunc("/transactions/{id:[0-9a-f]+}", txsShow).Methods("GET")
 
 	e.router.HandleFunc("/wallets", walletsIndex).Methods("GET")
+	e.router.HandleFunc("/wallets/create", e.walletsCreate).Methods("GET")
+	e.router.HandleFunc("/wallets/login", e.walletsLoginForm).Methods("GET")
 	e.router.HandleFunc("/wallets/server", walletsServer).Methods("GET")
 	e.router.HandleFunc("/wallets/{address:[0-9a-f]+}", walletsShow).Methods("GET")
 
-	e.router.HandleFunc("/wallets/create", e.walletsCreate).Methods("GET")
 }

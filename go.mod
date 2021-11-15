@@ -8,6 +8,7 @@ require (
 	github.com/brianium/mnemonic v0.0.0-20180124190051-72af92c51f88
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dgraph-io/badger v1.6.2
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gorilla/mux v1.8.0
 	github.com/heetch/confita v0.10.0
 	github.com/ipfs/go-log v1.0.5

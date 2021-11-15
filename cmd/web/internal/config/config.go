@@ -14,18 +14,25 @@ import (
 	"strings"
 )
 
-type Config struct {
-	Name         string `config:"name"`
-	Version      string `config:"version"`
-	TemplatesDir string `config:"template_dir"`
-	Port         int    `config:"port"`
-	Log          config.Log
-	Api          Api
+type Token struct {
+	SecretKey string `config:"token_secret_key"`
 }
 
 type Api struct {
 	Port    int `config:"api_port"`
 	TimeOut float64
+}
+
+type Config struct {
+	Name         string `config:"name"`
+	Version      string `config:"version"`
+	TemplatesDir string `config:"template_dir"`
+	StaticDir    string `config:"static_dir"`
+	StaticRoute  string `config:"static_route"`
+	Port         int    `config:"port"`
+	Log          config.Log
+	Api          Api
+	Token        Token
 }
 
 func getDefaultConfig() *Config {
@@ -34,12 +41,17 @@ func getDefaultConfig() *Config {
 		Version:      "0.0.0",
 		Port:         4000,
 		TemplatesDir: "cmd/web/internal/explorer/templates/",
+		StaticDir:    "/home/adrien.parrochia/go/src/github.com/ariden83/blockchain/cmd/web/internal/explorer/static",
+		StaticRoute:  "/static/",
 		Log: config.Log{
 			CLILevel: "info",
 			WithFile: false,
 		},
 		Api: Api{
 			Port: 8098,
+		},
+		Token: Token{
+			SecretKey: "chihuahua",
 		},
 	}
 }

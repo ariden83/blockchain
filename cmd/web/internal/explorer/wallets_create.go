@@ -2,6 +2,7 @@ package explorer
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/ariden83/blockchain/internal/wallet"
 	"net/http"
 )
@@ -14,9 +15,11 @@ type apiParamOutput struct {
 type walletsCreateData struct {
 	PageTitle string
 	Phrase    string
+	Token     string
 }
 
 func (e *Explorer) walletsCreate(rw http.ResponseWriter, r *http.Request) {
+	fmt.Println("***************************************** walletsCreate")
 	var (
 		params apiParamInput = apiParamInput{}
 		path   string        = "/wallet"
@@ -30,7 +33,13 @@ func (e *Explorer) walletsCreate(rw http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(body).Decode(&data)
 
-	frontData := walletsCreateData{"Wallets", data.Mnemonic}
+	token, err := e.token.CreateToken(data.PubKey)
+	if err != nil {
+		templates.ExecuteTemplate(rw, "error", Error{http.StatusUnauthorized, err})
+		return
+	}
 
-	templates.ExecuteTemplate(rw, "wallets_index", frontData)
+	frontData := walletsCreateData{"Wallets", data.Mnemonic, token}
+
+	templates.ExecuteTemplate(rw, "wallets_create", frontData)
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/ariden83/blockchain/cmd/web/internal/api"
 	"github.com/ariden83/blockchain/cmd/web/internal/config"
 	"github.com/ariden83/blockchain/cmd/web/internal/explorer"
+	"github.com/ariden83/blockchain/cmd/web/internal/token"
 	"github.com/ariden83/blockchain/internal/logger"
 	"go.uber.org/zap"
 	"log"
@@ -23,7 +24,9 @@ func main() {
 
 	m := api.New(cfg, logs)
 
-	explorer.New(cfg, logs, m).Start()
+	t := token.New(cfg.Token)
+
+	explorer.New(cfg, logs, m, t).Start()
 }
 
 func cleanExit() {

