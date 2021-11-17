@@ -1,7 +1,7 @@
 package explorer
 
 import (
-	"encoding/json"
+	//	"encoding/json"
 	"github.com/ariden83/blockchain/internal/wallet"
 	"net/http"
 )
@@ -18,28 +18,29 @@ type walletsCreateData struct {
 }
 
 func (e *Explorer) walletsCreate(rw http.ResponseWriter, r *http.Request) {
-	var (
-		params    apiParamInput = apiParamInput{}
-		path      string        = "/wallet"
-		data      apiParamOutput
-		pageTitle string = "Seed creation"
-	)
+	/*	var (
+			params    apiParamInput = apiParamInput{}
+			path      string        = "/wallet"
+			data      apiParamOutput
+			pageTitle string = "Seed creation"
+		)
 
-	body, err := e.model.Post(path, params)
-	if err != nil {
-		templates.ExecuteTemplate(rw, "error", Error{http.StatusUnauthorized, err, pageTitle})
-		return
-	}
+		body, err := e.model.Post(path, params)
+		if err != nil {
+			templates.ExecuteTemplate(rw, "error", Error{http.StatusUnauthorized, err, pageTitle})
+			return
+		}
 
-	json.NewDecoder(body).Decode(&data)
+		json.NewDecoder(body).Decode(&data)
 
-	token, err := e.token.CreateToken(data.PubKey)
-	if err != nil {
-		templates.ExecuteTemplate(rw, "error", Error{http.StatusUnauthorized, err, pageTitle})
-		return
-	}
-
-	frontData := walletsCreateData{pageTitle, data.Mnemonic, token}
+		token, err := e.token.CreateToken(data.PubKey)
+		if err != nil {
+			templates.ExecuteTemplate(rw, "error", Error{http.StatusUnauthorized, err, pageTitle})
+			return
+		}
+		frontData := walletsCreateData{pageTitle, data.Mnemonic, token}
+	*/
+	frontData := walletsCreateData{"Seed creation", "eihf iefhiehfi eifh iehf eifhiehfih ehifhiehf eifhiehf", "ozijefojzeiofhioef"}
 
 	templates.ExecuteTemplate(rw, "wallets_create", frontData)
 }

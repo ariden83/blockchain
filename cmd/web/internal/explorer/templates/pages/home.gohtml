@@ -1,18 +1,18 @@
-{{ define "home" }}
-
-<!DOCTYPE html>
+{{ define "home" }}<!DOCTYPE html>
 <html lang="en">
   {{ template "head" .PageTitle }}
-
   <body>
+  <div id="app-content" class="dark">
     {{ template "header" .PageTitle }}
-
-    <main>
-      <section>Welcome to blockchain Coin 1.0!</section>
-    </main>
-
+    <div class="main-container-wrapper">
+      <div class="unlock-page__container">
+        <div class="unlock-page">
+          <h1 class="unlock-page__title">Bienvenue !</h1>
+          <div>Le web décentralisé vous attend</div>
+        </div>
+      </div>
+    </div>
     {{ template "footer" }}
+  </div>
   </body>
-</html>
-
-{{ end }}
+</html>{{ end }}

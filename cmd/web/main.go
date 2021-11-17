@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/ariden83/blockchain/cmd/web/config"
-	"github.com/ariden83/blockchain/cmd/web/internal/model"
 	"github.com/ariden83/blockchain/cmd/web/internal/explorer"
+	"github.com/ariden83/blockchain/cmd/web/internal/model"
 	"github.com/ariden83/blockchain/cmd/web/internal/token"
 	"github.com/ariden83/blockchain/internal/logger"
 	"go.uber.org/zap"
