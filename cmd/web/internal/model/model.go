@@ -1,4 +1,4 @@
-package api
+package model
 
 import (
 	"bytes"
@@ -11,6 +11,10 @@ import (
 	"os"
 	"time"
 )
+
+type IModel interface {
+	Post(string, PostInput) (io.ReadCloser, error)
+}
 
 type Model struct {
 	log     *zap.Logger

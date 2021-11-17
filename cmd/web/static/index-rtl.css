@@ -17547,7 +17547,6 @@ div.message-container > div:first-child {
  * Brave Generic Font Rules
  */
 button {
-    font-family: Muli;
     font-weight: bold; }
 
 p,
@@ -17556,7 +17555,6 @@ label,
 div,
 a,
 input {
-    font-family: Muli;
     font-weight: normal; }
 
 h1,
@@ -17564,7 +17562,6 @@ h2,
 h3,
 h4,
 h5 {
-    font-family: Poppins;
     font-weight: normal; }
 
 /*

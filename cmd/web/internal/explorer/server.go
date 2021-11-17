@@ -2,7 +2,7 @@ package explorer
 
 import (
 	"github.com/ariden83/blockchain/cmd/web/config"
-	"github.com/ariden83/blockchain/cmd/web/internal/api"
+	"github.com/ariden83/blockchain/cmd/web/internal/model"
 	"github.com/ariden83/blockchain/cmd/web/internal/token"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
@@ -20,11 +20,11 @@ type Explorer struct {
 	baseURL string
 	server  *http.Server
 	router  *mux.Router
-	model   *api.Model
+	model   *model.Model
 	token   *token.Token
 }
 
-func New(cfg *config.Config, log *zap.Logger, m *api.Model, t *token.Token) *Explorer {
+func New(cfg *config.Config, log *zap.Logger, m *model.Model, t *token.Token) *Explorer {
 	return &Explorer{
 		log:     log,
 		cfg:     cfg,

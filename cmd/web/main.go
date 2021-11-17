@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/ariden83/blockchain/cmd/web/config"
-	"github.com/ariden83/blockchain/cmd/web/internal/api"
+	"github.com/ariden83/blockchain/cmd/web/internal/model"
 	"github.com/ariden83/blockchain/cmd/web/internal/explorer"
 	"github.com/ariden83/blockchain/cmd/web/internal/token"
 	"github.com/ariden83/blockchain/internal/logger"
@@ -22,7 +22,7 @@ func main() {
 	logs = logs.With(zap.String("v", cfg.Version))
 	defer logs.Sync()
 
-	m := api.New(cfg, logs)
+	m := model.New(cfg, logs)
 
 	t := token.New(cfg.Token)
 

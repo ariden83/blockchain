@@ -4698,18 +4698,6 @@ readers do not read off random characters that represent icons */
     position: static;
     width: auto; }
 
-/*!
- * Font Awesome Free 5.15.2 by @fontawesome - https://fontawesome.com
- * License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
- */
-@font-face {
-    font-family: 'Font Awesome 5 Free';
-    font-style: normal;
-    font-weight: 900;
-    font-display: block;
-    src: url("fonts/fontawesome/fa-solid-900.eot");
-    src: url("fonts/fontawesome/fa-solid-900.eot?#iefix") format("embedded-opentype"), url("fonts/fontawesome/fa-solid-900.woff2") format("woff2"), url("fonts/fontawesome/fa-solid-900.woff") format("woff"), url("fonts/fontawesome/fa-solid-900.ttf") format("truetype"), url("fonts/fontawesome/fa-solid-900.svg#fontawesome") format("svg"); }
-
 .fa,
 .fas {
     font-family: 'Font Awesome 5 Free';
@@ -4719,53 +4707,9 @@ readers do not read off random characters that represent icons */
  * Font Awesome Free 5.15.2 by @fontawesome - https://fontawesome.com
  * License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
  */
-@font-face {
-    font-family: 'Font Awesome 5 Free';
-    font-style: normal;
-    font-weight: 400;
-    font-display: block;
-    src: url("fonts/fontawesome/fa-regular-400.eot");
-    src: url("fonts/fontawesome/fa-regular-400.eot?#iefix") format("embedded-opentype"), url("fonts/fontawesome/fa-regular-400.woff2") format("woff2"), url("fonts/fontawesome/fa-regular-400.woff") format("woff"), url("fonts/fontawesome/fa-regular-400.ttf") format("truetype"), url("fonts/fontawesome/fa-regular-400.svg#fontawesome") format("svg"); }
-
 .far {
     font-family: 'Font Awesome 5 Free';
     font-weight: 400; }
-
-@font-face {
-    font-family: 'Roboto';
-    font-style: normal;
-    font-weight: 100;
-    src: local("Roboto Thin"), local("Roboto-Thin"), url("fonts/Roboto/Roboto-Thin.ttf") format("truetype"); }
-
-@font-face {
-    font-family: 'Roboto';
-    font-style: normal;
-    font-weight: 300;
-    src: local("Roboto Light"), local("Roboto-Light"), url("fonts/Roboto/Roboto-Light.ttf") format("truetype"); }
-
-@font-face {
-    font-family: 'Roboto';
-    font-style: normal;
-    font-weight: 400;
-    src: local("Roboto"), local("Roboto-Regular"), url("fonts/Roboto/Roboto-Regular.ttf") format("truetype"); }
-
-@font-face {
-    font-family: 'Roboto';
-    font-style: normal;
-    font-weight: 500;
-    src: local("Roboto Medium"), local("Roboto-Medium"), url("fonts/Roboto/Roboto-Medium.ttf") format("truetype"); }
-
-@font-face {
-    font-family: 'Roboto';
-    font-style: normal;
-    font-weight: 700;
-    src: local("Roboto Bold"), local("Roboto-Bold"), url("fonts/Roboto/Roboto-Bold.ttf") format("truetype"); }
-
-@font-face {
-    font-family: 'Roboto';
-    font-style: normal;
-    font-weight: 900;
-    src: local("Roboto Black"), local("Roboto-Black"), url("fonts/Roboto/Roboto-Black.ttf") format("truetype"); }
 
 /*
   Utility Classes
@@ -5160,7 +5104,8 @@ body {
     margin: 0;
     padding: 0;
     font-size: 16px;
-    overflow: auto; }
+    overflow: auto;
+}
 
 html {
     min-height: 500px; }
@@ -17572,7 +17517,6 @@ div.message-container > div:first-child {
  * Brave Generic Font Rules
  */
 button {
-    font-family: Muli;
     font-weight: bold; }
 
 p,
@@ -17581,7 +17525,6 @@ label,
 div,
 a,
 input {
-    font-family: Muli;
     font-weight: normal; }
 
 h1,
@@ -17589,7 +17532,6 @@ h2,
 h3,
 h4,
 h5 {
-    font-family: Poppins;
     font-weight: normal; }
 
 /*
