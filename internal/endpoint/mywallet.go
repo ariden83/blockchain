@@ -48,7 +48,7 @@ func (e *EndPoint) handleMyWallet(w http.ResponseWriter, r *http.Request) {
 
 	// Get your address
 	address := masterpub.Address()
-	e.respondWithJSON(w, r, http.StatusCreated, getWalletOutput{
+	e.respondWithJSON(w, http.StatusCreated, getWalletOutput{
 		Address:    address,
 		PubKey:     masterpub.String(),
 		PrivateKey: masterprv.String(),

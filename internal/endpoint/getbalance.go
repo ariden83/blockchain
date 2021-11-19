@@ -27,14 +27,14 @@ func (e *EndPoint) handleGetBalance(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, 1048)
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
-	err := dec.Decode(&input)
-	if err != nil {
+
+	if err := dec.Decode(&input); err != nil {
 		e.log.Error("Request body must only contain a single JSON object", zap.Error(err))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	err = dec.Decode(&struct{}{})
-	if err != io.EOF {
+
+	if err := dec.Decode(&struct{}{}); err != io.EOF {
 		msg := "Request body must only contain a single JSON object"
 		e.log.Error("Request body must only contain a single JSON object")
 		http.Error(w, msg, http.StatusBadRequest)
@@ -45,7 +45,7 @@ func (e *EndPoint) handleGetBalance(w http.ResponseWriter, r *http.Request) {
 	tokensSend := e.transaction.FindUserTokensSend(input.PubKey)
 	tokensReceived := e.transaction.FindUserTokensReceived(input.PubKey)
 
-	e.respondWithJSON(w, r, http.StatusOK, getBalanceOutput{
+	e.respondWithJSON(w, http.StatusOK, getBalanceOutput{
 		Address:       input.PubKey,
 		Balance:       balance,
 		TotalReceived: tokensReceived,

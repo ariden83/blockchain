@@ -6,5 +6,5 @@ import (
 )
 
 func (e *EndPoint) handleGetServersAddress(w http.ResponseWriter, r *http.Request) {
-	e.respondWithJSON(w, r, http.StatusCreated, address.GetCurrentAddress())
+	e.respondWithJSON(w, http.StatusCreated, address.GetCurrentAddress())
 }

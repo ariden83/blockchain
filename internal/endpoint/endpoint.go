@@ -188,19 +188,26 @@ func (e *EndPoint) MetricsMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func (e *EndPoint) respondWithJSON(w http.ResponseWriter, r *http.Request, code int, payload interface{}) {
+func (e *EndPoint) respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	response, err := json.MarshalIndent(payload, "", "  ")
 	if err != nil {
 		e.log.Error("HTTP 500: Internal Server Error", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("HTTP 500: Internal Server Error"))
+		if _, err = w.Write([]byte("HTTP 500: Internal Server Error")); err != nil {
+			e.log.Error("fail to write response", zap.Error(err))
+		}
 		return
 	}
 	w.WriteHeader(code)
-	w.Write(response)
+	if _, err = w.Write(response); err != nil {
+		e.log.Error("fail to write response", zap.Error(err))
+	}
 }
 
 func (e *EndPoint) Shutdown(ctx context.Context) {
 	e.persistence.Close()
-	e.server.Shutdown(ctx)
+	err := e.server.Shutdown(ctx)
+	if err != nil {
+		e.log.Error("fail to shutdown server", zap.Error(err))
+	}
 }

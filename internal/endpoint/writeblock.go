@@ -22,7 +22,7 @@ func (e *EndPoint) handleWriteBlock(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&m); err != nil {
-		e.respondWithJSON(w, r, http.StatusBadRequest, r.Body)
+		e.respondWithJSON(w, http.StatusBadRequest, r.Body)
 		return
 	}
 	defer r.Body.Close()
@@ -38,7 +38,7 @@ func (e *EndPoint) handleWriteBlock(w http.ResponseWriter, r *http.Request) {
 	}
 
 	newBlock := e.WriteBlock(m)
-	e.respondWithJSON(w, r, http.StatusCreated, newBlock)
+	e.respondWithJSON(w, http.StatusCreated, newBlock)
 
 }
 

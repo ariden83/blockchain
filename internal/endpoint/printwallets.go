@@ -6,5 +6,5 @@ import (
 
 func (e *EndPoint) handlePrintWallets(w http.ResponseWriter, r *http.Request) {
 	allSeeds := e.wallets.GetAllPublicSeeds()
-	e.respondWithJSON(w, r, http.StatusBadRequest, allSeeds)
+	e.respondWithJSON(w, http.StatusBadRequest, allSeeds)
 }

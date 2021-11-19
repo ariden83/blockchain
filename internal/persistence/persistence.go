@@ -107,6 +107,6 @@ func (p *Persistence) GetCurrentHashSerialize(hash []byte) ([]byte, error) {
 	return currentHashSerialize, err
 }
 
-func (p *Persistence) Close() {
-	p.db.Close()
+func (p *Persistence) Close() error {
+	return p.db.Close()
 }

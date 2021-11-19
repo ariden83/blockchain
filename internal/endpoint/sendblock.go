@@ -24,7 +24,7 @@ func (e *EndPoint) handleSendBlock(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&m); err != nil {
 		e.log.Error("fail to decode input", zap.Error(err), zap.String("input", "sendBlock"))
-		e.respondWithJSON(w, r, http.StatusBadRequest, r.Body)
+		e.respondWithJSON(w, http.StatusBadRequest, r.Body)
 		return
 	}
 	defer r.Body.Close()
@@ -41,7 +41,9 @@ func (e *EndPoint) sendBlock(w http.ResponseWriter, input SendBlockInput) {
 			zap.Any("param", input),
 			zap.String("input", "sendBlock"))
 
-		io.WriteString(w, "Transaction failed, not enough funds")
+		if _, err := io.WriteString(w, "Transaction failed, not enough funds"); err != nil {
+			e.log.Error("fail to write string", zap.Error(err))
+		}
 		return
 
 	} else {
@@ -73,5 +75,7 @@ func (e *EndPoint) sendBlock(w http.ResponseWriter, input SendBlockInput) {
 		e.Handle(fmt.Errorf("new block is invalid"))
 	}
 
-	io.WriteString(w, "Transaction done")
+	if _, err := io.WriteString(w, "Transaction done"); err != nil {
+		e.log.Error("fail to write string", zap.Error(err))
+	}
 }

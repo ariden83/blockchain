@@ -18,12 +18,15 @@ func (e *EndPoint) handlePrintBlockChain(w http.ResponseWriter, _ *http.Request)
 			e.log.Fatal("fail to iterate next block", zap.Error(err))
 		}
 
-		io.WriteString(w, fmt.Sprintf("Previous hash: %x\n", block.PrevHash))
-		io.WriteString(w, fmt.Sprintf("data: %+v\n", block))
-		io.WriteString(w, fmt.Sprintf("hash: %x\n", block.Hash))
+		if _, err := io.WriteString(w, fmt.Sprintf("Previous hash: %x\ndata: %+v\nhash: %x\n",
+			block.PrevHash,
+			block,
+			block.Hash)); err != nil {
+			e.log.Error("fail to write string", zap.Error(err))
+		}
+
 		/*pow := blockchain.NewProofOfWork(block)
 		io.WriteString(w, fmt.Sprintf("Pow: %s\n", strconv.FormatBool(pow.Validate())))*/
-		io.WriteString(w, "")
 		// This works because the Genesis block has no PrevHash to point to.
 		if len(block.PrevHash) == 0 {
 			break
