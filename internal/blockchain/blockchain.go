@@ -19,8 +19,15 @@ const (
 	difficulty int = 1
 )
 
+type Validation struct {
+	Total   int64
+	Refused int64
+	Ok      int64
+}
+
 type Block struct {
 	Index        *big.Int
+	Validation   Validation
 	Timestamp    int64
 	Transactions []*Transaction
 	Hash         []byte

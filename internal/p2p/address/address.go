@@ -14,6 +14,10 @@ var (
 	mutex      = &sync.Mutex{}
 )
 
+func GetMe() string {
+	return IAM
+}
+
 func SetIAM(iam string) {
 	IAM = iam
 	NewAddress = []string{iam}

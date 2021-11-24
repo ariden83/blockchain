@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ariden83/blockchain/internal/blockchain"
+	"github.com/ariden83/blockchain/internal/p2p/address"
+	"github.com/ariden83/blockchain/internal/p2p/validation"
 	"github.com/ariden83/blockchain/internal/utils"
 	"io"
 	"math/big"
@@ -71,7 +73,7 @@ func (e *EndPoint) WriteBlock(p WriteBlockInput) blockchain.Block {
 	if blockchain.IsBlockValid(newBlock, blockchain.BlockChain[len(blockchain.BlockChain)-1]) {
 
 		mutex.Lock()
-		e.event.PushBlock(newBlock)
+		e.event.PushBlock(validation.New(newBlock, address.GetCurrentAddress()))
 		mutex.Unlock()
 
 		/*mutex.Lock()

@@ -1,7 +1,7 @@
 package event
 
 import (
-	"github.com/ariden83/blockchain/internal/blockchain"
+	"github.com/ariden83/blockchain/internal/p2p/validation"
 	"github.com/satori/go.uuid"
 )
 
@@ -15,7 +15,7 @@ type EventType int
 
 type Event struct {
 	channel      chan Message
-	channelBlock chan blockchain.Block
+	channelBlock chan validation.Validator
 	listChannel  []chan Message
 }
 
@@ -65,11 +65,11 @@ func (e *Event) NewReader() chan Message {
 	return newChan
 }
 
-func (e *Event) PushBlock(block blockchain.Block) {
+func (e *Event) PushBlock(block validation.Validator) {
 	e.channelBlock <- block
 }
 
-func (e *Event) NewBlockReader() chan blockchain.Block {
-	e.channelBlock = make(chan blockchain.Block)
+func (e *Event) NewBlockReader() chan validation.Validator {
+	e.channelBlock = make(chan validation.Validator)
 	return e.channelBlock
 }

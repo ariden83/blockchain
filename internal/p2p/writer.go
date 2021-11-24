@@ -8,6 +8,7 @@ import (
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/iterator"
 	"github.com/ariden83/blockchain/internal/p2p/address"
+	"github.com/ariden83/blockchain/internal/p2p/validation"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/satori/go.uuid"
 	"go.uber.org/zap"
@@ -146,7 +147,7 @@ func (e *EndPoint) resendBlock(rw *bufio.ReadWriter) []byte {
 	return bytes
 }
 
-func (e *EndPoint) sendBlock(rw *bufio.ReadWriter, block blockchain.Block) []byte {
+func (e *EndPoint) sendBlock(rw *bufio.ReadWriter, block validation.Validator) []byte {
 	bytes, err := json.Marshal(block)
 	if err != nil {
 		e.log.Error("fail to marshal block message to send", zap.Error(err))

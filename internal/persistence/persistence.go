@@ -19,7 +19,7 @@ type IPersistence interface {
 	GetCurrentHashSerialize(hash []byte) ([]byte, error)
 	DBExists() bool
 	SetLastHash(lastHash []byte)
-	Close()
+	Close() error
 }
 
 // InitBlockChain will be what starts a new blockChain

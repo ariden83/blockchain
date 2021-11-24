@@ -53,7 +53,7 @@ http://127.0.0.1:8082/readiness
 - [x] Mine a new bloc
 - [x] Send tokens to another
 - [x] Access to your balance
-- [x] Les blocs créés sont obligatoirement validés par un autre serveur
+- [x] Les blocs créés sont obligatoirement validés par plus de 50% des serveurs connectés
 - [x] Le service requiert minimum deux serveurs pour fonctionner
 - [x] Liste les serveurs actuellement actifs
 - [x] Ajout des frais de transactions en faveur du mineur

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/event"
+	"github.com/ariden83/blockchain/internal/p2p/validation"
 	"github.com/ariden83/blockchain/internal/utils"
 	// "github.com/davecgh/go-spew/spew"
 	"github.com/ariden83/blockchain/internal/p2p/address"
@@ -180,9 +181,9 @@ func (e *EndPoint) getNumOnNewBlockChain(newBlockChain []blockchain.Block, lastH
 
 func (e *EndPoint) readNewBlock(msg event.Message) {
 	var (
-		newBlock blockchain.Block
+		validator validation.Validator
 	)
-	if err := json.Unmarshal(msg.Value, &newBlock); err != nil {
+	if err := json.Unmarshal(msg.Value, &validator); err != nil {
 		e.log.Error("fail to unmarshal block received", zap.Error(err))
 		//spew.Dump(string(msg.Value))
 		return
@@ -202,26 +203,44 @@ func (e *EndPoint) readNewBlock(msg event.Message) {
 	spew.Dump(newBlock)*/
 
 	// test si le block est bien le suivant du block actuellement en base
-	res := bytes.Compare(newBlock.PrevHash, blockchain.BlockChain[len(blockchain.BlockChain)-1].Hash)
+	res := bytes.Compare(validator.Block.PrevHash, blockchain.BlockChain[len(blockchain.BlockChain)-1].Hash)
 	if res == 0 {
 
-		if blockchain.IsBlockValid(newBlock, blockchain.BlockChain[len(blockchain.BlockChain)-1]) {
+		if blockchain.IsBlockValid(validator.Block, blockchain.BlockChain[len(blockchain.BlockChain)-1]) {
+			validator.Accept()
 
-			ser, err := utils.Serialize(&newBlock)
-			e.Handle(err)
+			// si le block est accepté par la majorité
+			if validator.IsAcceptedByMajority() {
+				ser, err := utils.Serialize(&validator.Block)
+				e.Handle(err)
 
-			blockchain.BlockChain = append(blockchain.BlockChain, newBlock)
-			err = e.persistence.Update(newBlock.Hash, ser)
-			e.Handle(err)
+				blockchain.BlockChain = append(blockchain.BlockChain, validator.Block)
+				err = e.persistence.Update(validator.Block.Hash, ser)
+				e.Handle(err)
 
-			e.event.Push(event.Message{Type: event.BlockChain})
+				e.event.Push(event.Message{Type: event.BlockChain})
+				return
+			}
+
+			// on laisse qql d'autre de finir de le valider
+			bytes, err := json.Marshal(validator)
+			if err != nil {
+				e.log.Error("fail to marshal new address", zap.Error(err))
+				return
+			}
+			e.event.Push(event.Message{
+				Type:  event.NewBlock,
+				ID:    msg.ID + "validation",
+				Value: bytes,
+			})
 			//spew.Dump(blockchain.BlockChain)
 		}
 
 		// sinon, on test si c'est un ancien block, dans ce cas, on ne fait rien
 	} else {
 		for _, block := range blockchain.BlockChain {
-			if res := bytes.Compare(block.Hash, newBlock.PrevHash); res == 0 {
+			if res := bytes.Compare(block.Hash, validator.Block.PrevHash); res == 0 {
+				// on propose aux serveurs qui nous écoutent de nous réactualiser
 				e.event.Push(event.Message{
 					Type: event.BlockChain,
 					ID:   msg.ID + "link",
@@ -230,6 +249,26 @@ func (e *EndPoint) readNewBlock(msg event.Message) {
 				return
 			}
 		}
+
+		validator.Refuse()
+
+		if validator.IsRefusedByMajority() {
+			e.log.Error("a new block is refused by community", zap.Any("block", validator.Block))
+			return
+		}
+
+		// si c'est pas nous qui sommes old school, on refuse le block
+		bytes, err := json.Marshal(validator)
+		if err != nil {
+			e.log.Error("fail to marshal new address", zap.Error(err))
+			return
+		}
+		e.event.Push(event.Message{
+			Type:  event.NewBlock,
+			ID:    msg.ID + "validation",
+			Value: bytes,
+		})
+
 		e.log.Error("cannot insert new block, old hash not found")
 		return
 	}
