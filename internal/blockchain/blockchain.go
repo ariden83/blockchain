@@ -20,9 +20,9 @@ const (
 )
 
 type Validation struct {
-	Total   int64
-	Refused int64
-	Ok      int64
+	Total   int
+	Refused int
+	Ok      int
 }
 
 type Block struct {

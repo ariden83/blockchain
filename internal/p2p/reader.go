@@ -211,6 +211,11 @@ func (e *EndPoint) readNewBlock(msg event.Message) {
 
 			// si le block est accepté par la majorité
 			if validator.IsAcceptedByMajority() {
+				validator.Block.Validation = blockchain.Validation{
+					Total:   len(validator.Servers),
+					Refused: len(validator.Refused),
+					Ok:      len(validator.Accepted),
+				}
 				ser, err := utils.Serialize(&validator.Block)
 				e.Handle(err)
 
