@@ -6,6 +6,7 @@ import (
 	"encoding/gob"
 	"encoding/hex"
 	"fmt"
+	"github.com/ariden83/blockchain/internal/blockchain/difficulty"
 	"github.com/davecgh/go-spew/spew"
 	"log"
 	"math/big"
@@ -13,10 +14,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-)
-
-const (
-	difficulty int = 1
 )
 
 type Validation struct {
@@ -133,7 +130,7 @@ func Genesis(coinBase *Transaction) *Block {
 	return &genesisBlock
 }
 
-// SHA256 hasing
+// calculateHash SHA256 hasing
 func calculateHash(block Block) []byte {
 	record := block.Index.String() + strconv.FormatInt(block.Timestamp, 16) + string(block.PrevHash) + block.Nonce
 	h := sha256.New()
@@ -142,7 +139,7 @@ func calculateHash(block Block) []byte {
 	return []byte(hex.EncodeToString(hashed))
 }
 
-// make sure block is valid by checking index, and comparing the hash of the previous block
+// IsBlockValid make sure block is valid by checking index, and comparing the hash of the previous block
 func IsBlockValid(newBlock, oldBlock Block) bool {
 	newIndexWaiting := big.NewInt(0)
 	newIndexWaiting = newIndexWaiting.Add(oldBlock.Index, big.NewInt(1))
@@ -167,17 +164,21 @@ func IsBlockValid(newBlock, oldBlock Block) bool {
 	return true
 }
 
-// create a new block using previous block's hash
+// AddBlock create a new block using previous block's hash
 func AddBlock(lastHash []byte, index *big.Int, coinBase *Transaction) Block {
-	t := time.Now().UnixNano() / int64(time.Millisecond)
-	newIndex := big.NewInt(0)
+	var (
+		t        int64    = time.Now().UnixNano() / int64(time.Millisecond)
+		newIndex *big.Int = big.NewInt(0)
+		newBlock Block
+		i        uint
+	)
 	newIndex = newIndex.Add(index, big.NewInt(1))
 
-	var newBlock Block = Block{
+	newBlock = Block{
 		Index:        newIndex,
 		Timestamp:    t,
 		PrevHash:     lastHash,
-		Difficulty:   difficulty,
+		Difficulty:   difficulty.Diff.Int(),
 		Transactions: []*Transaction{coinBase},
 	}
 
@@ -186,15 +187,15 @@ func AddBlock(lastHash []byte, index *big.Int, coinBase *Transaction) Block {
 		newBlock.Nonce = hex
 		if !isHashValid(calculateHash(newBlock), newBlock.Difficulty) {
 			fmt.Println(calculateHash(newBlock), " do more work!")
-			time.Sleep(10 * time.Millisecond)
+			// time.Sleep(10 * time.Millisecond)
 			continue
 		} else {
 			fmt.Println(calculateHash(newBlock), " work done!")
 			newBlock.Hash = calculateHash(newBlock)
 			break
 		}
-
 	}
+	difficulty.Diff.Update(i)
 	return newBlock
 }
 

@@ -57,6 +57,7 @@ http://127.0.0.1:8082/readiness
 - [x] Le service requiert minimum deux serveurs pour fonctionner
 - [x] Liste les serveurs actuellement actifs
 - [x] Ajout des frais de transactions en faveur du mineur
+- [x] Evolution de la difficulté
 
 ### Future
 - [] Fully Tested
