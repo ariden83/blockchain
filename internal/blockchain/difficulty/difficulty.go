@@ -3,7 +3,7 @@ package difficulty
 type Difficulty int
 
 var (
-	Diff         Difficulty = 1
+	Current Difficulty = 1
 	nbTryWaiting uint       = 500
 )
 

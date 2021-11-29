@@ -178,11 +178,11 @@ func AddBlock(lastHash []byte, index *big.Int, coinBase *Transaction) Block {
 		Index:        newIndex,
 		Timestamp:    t,
 		PrevHash:     lastHash,
-		Difficulty:   difficulty.Diff.Int(),
+		Difficulty:   difficulty.Current.Int(),
 		Transactions: []*Transaction{coinBase},
 	}
 
-	for i := 0; ; i++ {
+	for i = 0; ; i++ {
 		hex := fmt.Sprintf("%x", i)
 		newBlock.Nonce = hex
 		if !isHashValid(calculateHash(newBlock), newBlock.Difficulty) {
@@ -195,7 +195,8 @@ func AddBlock(lastHash []byte, index *big.Int, coinBase *Transaction) Block {
 			break
 		}
 	}
-	difficulty.Diff.Update(i)
+	difficulty.Current.Update(i)
+	newBlock.Difficulty = difficulty.Current.Int()
 	return newBlock
 }
 
