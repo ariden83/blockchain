@@ -3,7 +3,7 @@ package difficulty
 type Difficulty int
 
 var (
-	Current Difficulty = 1
+	Current      Difficulty = 1
 	nbTryWaiting uint       = 500
 )
 
@@ -24,4 +24,8 @@ func (Difficulty) pourcent(i uint) uint {
 
 func (d *Difficulty) Int() int {
 	return int(*d)
+}
+
+func (d *Difficulty) Save(difficulty int) {
+	*d = Difficulty(difficulty)
 }

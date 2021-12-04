@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ariden83/blockchain/internal/blockchain"
+	"github.com/ariden83/blockchain/internal/blockchain/difficulty"
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/p2p/validation"
 	"github.com/ariden83/blockchain/internal/utils"
@@ -138,9 +139,9 @@ func (e *EndPoint) readBlockChain(chain []byte) {
 	// on recherche le nombre de blocks chez nous non trouvé dans la blockChain reçue
 	j := e.getNumOnNewBlockChain(newBlockChain, lastHashInDB)
 
-	// à partir de ce numéro, on itere sur les nouveau blocks reçus pour les ajouter
+	// à partir de ce numéro, on itère sur les nouveaux blocks reçus pour les ajouter
 	for i := len(newBlockChain) - j; i < len(newBlockChain); i++ {
-		// si genesis (normalement on passe pas ici, sauf dans la version light)
+		// si genesis (normalement on ne passe pas ici, sauf dans la version light)
 		if i-1 < 0 {
 			continue
 		}
@@ -156,6 +157,8 @@ func (e *EndPoint) readBlockChain(chain []byte) {
 		// revérifie la cohérence des données reçues
 		if blockchain.IsBlockValid(current, prevBlock) {
 			e.log.Info("received blockChain update")
+			// update new difficulty
+			difficulty.Current.Save(current.Difficulty)
 			// on met à jour la blockChain
 			blockchain.BlockChain = append(blockchain.BlockChain, current)
 			// on met à jour la BDD avec ces nouveaux hash reçus
