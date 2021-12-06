@@ -25,8 +25,8 @@ func main() {
 	m := model.New(cfg, logs)
 
 	t := token.New(cfg.Token)
-
 	explorer.New(cfg, logs, m, t).Start()
+	logs.Info("Close web server")
 }
 
 func cleanExit() {

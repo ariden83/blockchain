@@ -16,6 +16,7 @@ WORKDIR /go
 RUN apk update && \
     apk add ca-certificates && \
     apk add --no-cache bash && \
+    apk add --no-cache make && \
     rm -rf /var/cache/apk/*
 
 COPY --from=builder $PROJECT_ROOT/bin ./

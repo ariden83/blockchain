@@ -15,7 +15,7 @@ import (
 )
 
 type Token struct {
-	SecretKey string `config:"token_secret_key"`
+	SecretKey string `config:"token_secret_key,obfuscate"`
 }
 
 type Api struct {

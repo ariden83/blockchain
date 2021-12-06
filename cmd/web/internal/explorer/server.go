@@ -36,7 +36,7 @@ func New(cfg *config.Config, log *zap.Logger, m *model.Model, t *token.Token) *E
 }
 
 func (e *Explorer) Start() {
-	e.log.Info("start")
+	e.log.Info("start web server")
 	e.loadTemplates()
 	e.loadRoutes()
 	e.loadMiddleware()

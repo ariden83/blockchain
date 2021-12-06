@@ -22,8 +22,6 @@
 /*
   Z-Indicies
  */
-@import url("fonts/muli.css");
-@import url("fonts/poppins.css");
 .add-to-address-book-modal__footer, .new-account-modal__footer, .send__select-recipient-wrapper__list__link, .send__select-recipient-wrapper__group-item, .send__select-recipient-wrapper__group-item--selected, .ens-input, .ens-input__wrapper, .swap__select-recipient-wrapper__list__link, .swap__select-recipient-wrapper__group-item, .swap__select-recipient-wrapper__group-item--selected {
     display: flex;
     flex-flow: row nowrap; }
@@ -17784,7 +17782,8 @@ div.menu.account-menu > div:nth-child(10):not(.address-book__view-contact__group
     color: #00a8ee; }
 #app-content.dark .unlock-page__links div,
 #popover-content.dark .unlock-page__links div {
-    color: #00a8ee; }
+    color: #00a8ee;
+}
 #app-content.dark .gas-price-button-group--small .button-group__button--active,
 #popover-content.dark .gas-price-button-group--small .button-group__button--active {
     border: 1px solid #3099f2; }
