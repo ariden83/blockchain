@@ -39,5 +39,3 @@ var walletLoginForm = new Vue({
         }
     }
 })
-CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/we
--cli_level=INFO ./bin/web
