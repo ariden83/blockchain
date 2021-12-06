@@ -1,5 +1,5 @@
 # blockchain
-My first own blockchain
+My first own blockchain. See website of project [blockchain-altcoin.com](https://www.blockchain-altcoin.com/)
 
 ## Resources
 

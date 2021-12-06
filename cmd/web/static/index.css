@@ -1,28 +1,13 @@
 @charset "UTF-8";
-/*
-  MetaMask design system imports
-  The variables declared here should take precedence.
-  They are included first because they will be used to replace bad variable names in itcss
-  prior to it being fully removed from the system.
-*/
-/*
-  ITCSS
-  http://www.creativebloq.com/web-design/manage-large-css-projects-itcss-101517528
-  https://www.xfive.co/blog/itcss-scalable-maintainable-css-architecture/
-  DEPRECATED: This CSS architecture is deprecated. The following imports will be removed
-  overtime.
- */
-/*
-  Variables
- */
-/*
-  Colors
-  http://chir.ag/projects/name-that-color
- */
-/*
-  Z-Indicies
- */
-.add-to-address-book-modal__footer, .new-account-modal__footer, .send__select-recipient-wrapper__list__link, .send__select-recipient-wrapper__group-item, .send__select-recipient-wrapper__group-item--selected, .ens-input, .ens-input__wrapper, .swap__select-recipient-wrapper__list__link, .swap__select-recipient-wrapper__group-item, .swap__select-recipient-wrapper__group-item--selected {
+.add-to-address-book-modal__footer,
+.new-account-modal__footer,
+.send__select-recipient-wrapper__list__link,
+.send__select-recipient-wrapper__group-item,
+.send__select-recipient-wrapper__group-item--selected,
+.ens-input, .ens-input__wrapper,
+.swap__select-recipient-wrapper__list__link,
+.swap__select-recipient-wrapper__group-item,
+.swap__select-recipient-wrapper__group-item--selected {
     display: flex;
     flex-flow: row nowrap; }
 
@@ -45,13 +30,6 @@
     border-radius: 10px;
     box-shadow: 0 5px 16px rgba(0, 0, 0, 0.25); }
 
-/*
-  Z Indicies - Current
-  app - 11
-  hex/bn as decimal input - 1 - remove?
-  dropdown - 11
-  loading - 10 - higher?
- */
 /*
   Responsive Breakpoints
  */
