@@ -32,6 +32,7 @@ func (e *Explorer) loadPages() {
 		template.
 			New("templates").
 			Funcs(templateFunctions).
+			// Delims("[[", "]]").
 			ParseGlob(e.cfg.TemplatesDir + "pages/*.gohtml"))
 }
 

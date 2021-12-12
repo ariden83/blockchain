@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
+	"time"
 )
 
 type Token struct {
@@ -21,6 +22,16 @@ type Token struct {
 type Api struct {
 	Port    int `config:"api_port"`
 	TimeOut float64
+}
+
+type Metrics struct {
+	Port int    `config:"metrics_port"`
+	Host string `config:"metrics_host"`
+}
+
+type Healthz struct {
+	ReadTimeout  time.Duration `config:"healthz_read_timeout"`
+	WriteTimeout time.Duration `config:"healthz_write_timeout"`
 }
 
 type Config struct {
@@ -33,14 +44,17 @@ type Config struct {
 	Log          config.Log
 	Api          Api
 	Token        Token
+	Metrics      Metrics
+	Healthz 	Healthz
 }
+
 
 func getDefaultConfig() *Config {
 	return &Config{
 		Name:         "blockChain",
 		Version:      "0.0.0",
 		Port:         4000,
-		TemplatesDir: "cmd/web/internal/explorer/templates/",
+		TemplatesDir: "cmd/web/templates/",
 		StaticDir:    "./cmd/web/static/",
 		StaticRoute:  "/static/",
 		Log: config.Log{
@@ -52,6 +66,10 @@ func getDefaultConfig() *Config {
 		},
 		Token: Token{
 			SecretKey: "chihuahua",
+		},
+		Metrics: Metrics{
+			Port:      8101,
+			Host: "0.0.0.0",
 		},
 	}
 }

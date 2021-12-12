@@ -1,9 +1,9 @@
 package metrics
 
 import (
-	"github.com/ariden83/blockchain/cmd/web/config"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"go.uber.org/zap"
 )
 
 type Metrics struct {
@@ -13,17 +13,19 @@ type Metrics struct {
 	RequestSize      *prometheus.SummaryVec
 	ResponseSize     *prometheus.SummaryVec
 	ApiParamsCounter *prometheus.CounterVec
+	log              *zap.Logger
 }
 
-func New(c config.Metrics) *Metrics {
-	namespace := c.Namespace
+func New(name string) *Metrics {
+	namespace := "fizzbuzz_api"
 	metric := &Metrics{
+
 		RouteCountReqs: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
 				Name:        "http_requests_total",
 				Namespace:   namespace,
 				Help:        "How many HTTP requests processed, partitioned by status code, method and HTTP path.",
-				ConstLabels: prometheus.Labels{"app": c.Name},
+				ConstLabels: prometheus.Labels{"app": name},
 			},
 			[]string{"code", "service"},
 		),
@@ -34,7 +36,7 @@ func New(c config.Metrics) *Metrics {
 				Namespace:   namespace,
 				Help:        "HTTP request size",
 				Objectives:  map[float64]float64{0.1: 0.01, 0.5: 0.05, 0.9: 0.01},
-				ConstLabels: prometheus.Labels{"app": c.Name},
+				ConstLabels: prometheus.Labels{"app": name},
 			},
 			[]string{"service"},
 		),
@@ -45,7 +47,7 @@ func New(c config.Metrics) *Metrics {
 				Namespace:   namespace,
 				Help:        "HTTP response size",
 				Objectives:  map[float64]float64{0.1: 0.01, 0.5: 0.05, 0.9: 0.01},
-				ConstLabels: prometheus.Labels{"app": c.Name},
+				ConstLabels: prometheus.Labels{"app": name},
 			},
 			[]string{"service"},
 		),
@@ -57,7 +59,7 @@ func New(c config.Metrics) *Metrics {
 				Name:        "duration_seconds",
 				Help:        "Run duration for each route",
 				Buckets:     prometheus.ExponentialBuckets(0.01, 2, 25),
-				ConstLabels: prometheus.Labels{"app": c.Name},
+				ConstLabels: prometheus.Labels{"app": name},
 			},
 			[]string{"service", "code"},
 		),
