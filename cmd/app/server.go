@@ -26,7 +26,7 @@ func (s *Server) Start(stop chan error) {
 	s.startMetricsServer(stop)
 }
 
-// Start Set classic routes
+// startHTTPServer Set http server
 func (s *Server) startHTTPServer(stop chan error) {
 	go func() {
 		if err := s.httpServer.Listen(); err != nil {
@@ -35,7 +35,7 @@ func (s *Server) startHTTPServer(stop chan error) {
 	}()
 }
 
-// StartGRPC Start GRPC server
+// startGRPCServer Start GRPC server
 func (s *Server) startGRPCServer(stop chan error) {
 	go func() {
 		if err := s.grpcServer.Listen(); err != nil {
@@ -44,7 +44,7 @@ func (s *Server) startGRPCServer(stop chan error) {
 	}()
 }
 
-// StartGRPC Start GRPC server
+// startMetricsServer Start Metrics server
 func (s *Server) startMetricsServer(stop chan error) {
 	go func() {
 		if err := s.metricsServer.Listen(); err != nil {
