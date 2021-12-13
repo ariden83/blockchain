@@ -52,10 +52,11 @@ local-proof:
 	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./tutorial/proof-work/.
 	-cli_level=INFO ./bin/main
 
-local-p2p:
+local-light:
 	@echo "> Launch local p2p ..."
 	go fmt ./...
-	go run ./cmd/p2p/main.go -l 10000 -secio
+	# make p2p_target=/ip4/127.0.0.1/tcp/8098/p2p/QmWV1qKRBSy8vggYgMSWDGukmwcus8wbuSoru31oNaEWdd local-light
+	go run ./cmd/light/main.go -p2p_target $(p2p_target)
 
 local-networking:
 	@echo "> Launch local networking ..."
@@ -104,6 +105,11 @@ local-vendor:
 	@echo "> Regenerate vendor ..."
 	# dep init
 	dep ensure -update
+
+proto:
+	docker run -v $(MAKEFILE_DIRECTORY):/app -w /app --rm jaegertracing/protobuf -I./api api.proto \
+		--go_out=plugins=grpc:./pkg/api
+	# sudo chmod u+x ./pkg/api/api.pb.go
 
 print-%:
 	@echo '$($*)'

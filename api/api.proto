@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+import "google/protobuf/wrappers.proto";
+
+package api;
+
+service Api {
+    rpc SendPing (Ping) returns (Pong) {}
+}
+
+// Ping
+message Ping {
+    string message = 1;
+    float delaySeconds = 2;
+}
+
+// Pong
+message Pong {
+    string message = 1;
+}

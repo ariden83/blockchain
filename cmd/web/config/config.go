@@ -45,9 +45,8 @@ type Config struct {
 	Api          Api
 	Token        Token
 	Metrics      Metrics
-	Healthz 	Healthz
+	Healthz      Healthz
 }
-
 
 func getDefaultConfig() *Config {
 	return &Config{
@@ -68,7 +67,7 @@ func getDefaultConfig() *Config {
 			SecretKey: "chihuahua",
 		},
 		Metrics: Metrics{
-			Port:      8101,
+			Port: 8101,
 			Host: "0.0.0.0",
 		},
 	}

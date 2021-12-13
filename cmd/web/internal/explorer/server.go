@@ -1,6 +1,9 @@
 package explorer
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
 	"github.com/ariden83/blockchain/cmd/web/config"
 	"github.com/ariden83/blockchain/cmd/web/internal/metrics"
 	"github.com/ariden83/blockchain/cmd/web/internal/model"
@@ -9,26 +12,23 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 	"net/http"
+	"net/http/pprof"
 	"os"
 	"path/filepath"
 	"strconv"
-	"encoding/json"
-	"net/http/pprof"
 	"time"
-	"context"
-	"fmt"
 )
 
 type Explorer struct {
-	log     *zap.Logger
-	cfg     *config.Config
-	baseURL string
-	server  *http.Server
-	router  *mux.Router
-	model   *model.Model
-	token   *token.Token
+	log           *zap.Logger
+	cfg           *config.Config
+	baseURL       string
+	server        *http.Server
+	router        *mux.Router
+	model         *model.Model
+	token         *token.Token
 	metricsServer *http.Server
-	metrics *metrics.Metrics
+	metrics       *metrics.Metrics
 }
 
 type Healthz struct {
@@ -119,7 +119,7 @@ func (e *Explorer) StartMetricsServer(stop chan error) {
 	mux.Handle("/metrics", promhttp.Handler())
 	e.PProf(mux)
 
-	addr := fmt.Sprintf("%s:%d",e.cfg.Metrics.Host, e.cfg.Metrics.Port)
+	addr := fmt.Sprintf("%s:%d", e.cfg.Metrics.Host, e.cfg.Metrics.Port)
 	e.metricsServer = &http.Server{
 		Addr:           addr,
 		Handler:        mux,
@@ -136,7 +136,7 @@ func (e *Explorer) StartMetricsServer(stop chan error) {
 	}()
 }
 
-func (e *Explorer)  PProf(mux *http.ServeMux) {
+func (e *Explorer) PProf(mux *http.ServeMux) {
 	mux.HandleFunc("/debug/pprof/", pprof.Index)
 	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
 	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
@@ -150,7 +150,7 @@ func (e *Explorer)  PProf(mux *http.ServeMux) {
 	mux.Handle("/debug/pprof/trace", pprof.Handler("trace"))
 }
 
-func (e *Explorer)  Shutdown(ctx context.Context) {
+func (e *Explorer) Shutdown(ctx context.Context) {
 	e.server.Shutdown(ctx)
 	e.metricsServer.Shutdown(ctx)
 }

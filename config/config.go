@@ -63,6 +63,11 @@ type API struct {
 	Port    int  `config:"api_port"`
 }
 
+type GRPC struct {
+	Enabled bool `config:"grpc_enabled"`
+	Port    int  `config:"grpc_port" yaml:"grpc_port"`
+}
+
 type P2P struct {
 	Enabled bool `config:"p2p_enabled"`
 	// Parse options from the command line
@@ -118,6 +123,7 @@ type Config struct {
 	Log          Log
 	P2P          P2P
 	XCache       XCache
+	GRPC         GRPC
 }
 
 func getDefaultConfig() *Config {
@@ -155,6 +161,10 @@ func getDefaultConfig() *Config {
 		API: API{
 			Enabled: true,
 			Port:    8098,
+		},
+		GRPC: GRPC{
+			Enabled: true,
+			Port:    8100,
 		},
 		P2P: P2P{
 			Port:               8097,

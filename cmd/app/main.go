@@ -9,7 +9,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/ariden83/blockchain/config"
-	"github.com/ariden83/blockchain/internal/endpoint"
+	grpcEndpoint "github.com/ariden83/blockchain/internal/endpoint/grpc"
+	httpEndpoint "github.com/ariden83/blockchain/internal/endpoint/http"
+	metricsEndpoint "github.com/ariden83/blockchain/internal/endpoint/metrics"
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/genesis"
 	"github.com/ariden83/blockchain/internal/logger"
@@ -59,10 +61,12 @@ func main() {
 
 	evt := event.New()
 
-	server := endpoint.Init(cfg, per, trans, wallets, mtc, logs, evt)
-	stop := make(chan error, 1)
+	s := Server{cfg: cfg}
+	s.httpServer = httpEndpoint.New(cfg.API, per, trans, wallets, mtc, logs, evt, cfg.Address)
+	s.grpcServer = grpcEndpoint.New(cfg.GRPC, per, trans, wallets, mtc, logs, evt, cfg.Address)
+	s.metricsServer = metricsEndpoint.New(cfg.Metrics, logs)
 
-	server.ListenMetrics(stop)
+	stop := make(chan error, 1)
 
 	var p *p2p.EndPoint
 	p = p2p.Init(cfg.P2P, per, wallets, logs, evt)
@@ -73,9 +77,7 @@ func main() {
 	gen := genesis.New(cfg, per, trans, p, evt)
 	gen.Load(stop)
 
-	if cfg.API.Enabled {
-		server.ListenHTTP(stop)
-	}
+	s.Start(stop)
 
 	/**
 	 * And wait for shutdown via signal or error.
@@ -92,6 +94,6 @@ func main() {
 
 	stopCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	server.Shutdown(stopCtx)
+	s.Shutdown(stopCtx)
 
 }

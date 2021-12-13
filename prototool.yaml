@@ -1,0 +1,21 @@
+excludes:
+  - internal
+  - config
+  - configuration
+  - vendor
+  - testing
+  - cmd
+  - .git
+
+protoc:
+  version: 3.8.0
+
+generate:
+  go_options:
+    import_path: "api"
+
+  plugins:
+    - name: go
+      type: go
+      flags: plugins=grpc
+      output: pkg
