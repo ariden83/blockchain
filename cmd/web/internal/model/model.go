@@ -51,7 +51,7 @@ func (m *Model) ShutDown() {
 	}
 }
 
-func (m *Model) GetWallet(seed string) (*api.GetWalletOutput, error) {
+func (m *Model) GetWallet(ctx context.Context, mnemonic string) (*api.GetWalletOutput, error) {
 	c := api.NewApiClient(m.client)
 
 	// Contact the server and print out its response.
@@ -59,7 +59,7 @@ func (m *Model) GetWallet(seed string) (*api.GetWalletOutput, error) {
 	defer cancel()
 
 	search := api.GetWalletInput{
-		Seed: seed,
+		Mnemonic: mnemonic,
 	}
 	data, err := c.GetWallet(ctx, &search)
 	if err != nil {

@@ -9,7 +9,13 @@ import (
 	"github.com/ariden83/blockchain/internal/transactions"
 	"github.com/ariden83/blockchain/internal/wallet"
 	"github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
+	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
+	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	"github.com/grpc-ecosystem/go-grpc-prometheus"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	protoAPI "github.com/ariden83/blockchain/pkg/api"
 	"go.uber.org/zap"
@@ -56,32 +62,51 @@ func New(
 }
 
 // Listen start the server.
-func (s *EndPoint) Listen() error {
-	address := fmt.Sprintf(":%d", s.cfg.Port)
+func (e *EndPoint) Listen() error {
+	address := fmt.Sprintf(":%d", e.cfg.Port)
 
-	s.server = grpc.NewServer(
+	optsMiddleWare := []grpc_recovery.Option{
+		grpc_recovery.WithRecoveryHandler(func(p interface{}) (err error) {
+			return status.Errorf(codes.Unknown, "panic triggered: %v", p)
+		}),
+	}
+
+	e.server = grpc.NewServer(
+		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
+			grpc_ctxtags.StreamServerInterceptor(),
+			grpc_opentracing.StreamServerInterceptor(),
+			grpc_prometheus.StreamServerInterceptor,
+			grpc_zap.StreamServerInterceptor(e.log),
+			// grpc_auth.StreamServerInterceptor(customFunc),
+			grpc_recovery.StreamServerInterceptor(optsMiddleWare...),
+		)),
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
+			grpc_ctxtags.UnaryServerInterceptor(),
+			grpc_opentracing.UnaryServerInterceptor(),
 			grpc_prometheus.UnaryServerInterceptor,
+			grpc_zap.UnaryServerInterceptor(e.log),
+			// grpc_auth.StreamServerInterceptor(customFunc),
+			grpc_recovery.UnaryServerInterceptor(optsMiddleWare...),
 		)),
 	)
 	//Register the server :
-	protoAPI.RegisterApiServer(s.server, s)
+	protoAPI.RegisterApiServer(e.server, e)
 
-	reflection.Register(s.server)
+	reflection.Register(e.server)
 	grpc_prometheus.EnableHandlingTimeHistogram()
-	grpc_prometheus.Register(s.server)
+	grpc_prometheus.Register(e.server)
 
 	lis, err := net.Listen("tcp", address)
 	if err != nil {
 		return fmt.Errorf("failed to listen to port %s : %s", address, err.Error())
 	}
 
-	s.log.Info("Listening GRPC server", zap.String("address", address))
-	s.ready = true
+	e.log.Info("Listening GRPC server", zap.String("address", address))
+	e.ready = true
 
-	if err := s.server.Serve(lis); err != nil {
-		s.ready = false
-		s.log.Error("failed to serve : %w", zap.Error(err))
+	if err := e.server.Serve(lis); err != nil {
+		e.ready = false
+		e.log.Error("failed to serve : %w", zap.Error(err))
 	}
 
 	return nil

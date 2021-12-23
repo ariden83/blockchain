@@ -8,7 +8,7 @@ import (
 
 func (EndPoint) GetWallet(_ context.Context, req *api.GetWalletInput) (*api.GetWalletOutput, error) {
 
-	keys := wallet.GetKeys(req.GetSeed())
+	keys := wallet.GetKeys(req.GetMnemonic())
 
 	return &api.GetWalletOutput{
 		Address: keys.Address,

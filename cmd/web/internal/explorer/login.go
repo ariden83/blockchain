@@ -88,9 +88,7 @@ type postLoginAPIReq struct {
 //        412: genericError
 //        500: genericError
 func (e *Explorer) loginAPI(rw http.ResponseWriter, r *http.Request) {
-	var (
-		req postLoginAPIBodyReq
-	)
+	var req postLoginAPIBodyReq
 
 	r.Body = http.MaxBytesReader(rw, r.Body, 1048)
 	dec := json.NewDecoder(r.Body)
@@ -108,7 +106,7 @@ func (e *Explorer) loginAPI(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	wallet, err := e.model.GetWallet(req.Mnemonic)
+	wallet, err := e.model.GetWallet(r.Context(), req.Mnemonic)
 	if err != nil {
 		e.fail(http.StatusNotFound, err, rw)
 		return

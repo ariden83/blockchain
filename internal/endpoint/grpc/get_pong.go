@@ -6,6 +6,6 @@ import (
 )
 
 // GetPong service
-func (EndPoint) GetPong(_ context.Context, in *protoAPI.Ping) (*protoAPI.Pong, error) {
+func (EndPoint) GetPong(_ context.Context, _ *protoAPI.Ping) (*protoAPI.Pong, error) {
 	return &protoAPI.Pong{Message: "pong"}, nil
 }
