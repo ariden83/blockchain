@@ -101,7 +101,8 @@ document.addEventListener("DOMContentLoaded", () => {
             },
 
             callAPILogin() {
-                axios.post('/api/seed/login', this.newTodo)
+                this.errorTodo = 'Current connection...';
+                axios.post('/api/login', this.newTodo)
                     .then(function (response) {
                         console.log(response);
                         this.errorTodo.push(_.capitalize(response.data.message));

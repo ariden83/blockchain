@@ -9,7 +9,7 @@ type walletsIndexData struct {
 	Addresses []string
 }
 
-func walletsIndex(rw http.ResponseWriter, r *http.Request) {
+func walletsIndexPage(rw http.ResponseWriter, r *http.Request) {
 	addresses := []string{}
 	data := walletsIndexData{"Wallets", addresses}
 

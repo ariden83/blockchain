@@ -3,18 +3,16 @@ package http
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/metrics"
-	"github.com/ariden83/blockchain/internal/middleware"
 	"github.com/ariden83/blockchain/internal/persistence"
 	"github.com/ariden83/blockchain/internal/transactions"
 	"github.com/ariden83/blockchain/internal/utils"
 	"github.com/ariden83/blockchain/internal/wallet"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
@@ -70,7 +68,7 @@ func (e *EndPoint) Genesis() {
 
 		// si les fichiers locaux n'existent pas
 		if !e.persistence.DBExists() {
-			e.Handle(fmt.Errorf("fail to open DB files"))
+			e.Handle(errors.New("fail to open DB files"))
 		}
 
 		lastHash, err := e.persistence.GetLastHash()
@@ -102,7 +100,7 @@ func (e *EndPoint) createGenesis() []byte {
 	var genesisData string = "First Transaction from Genesis" // This is arbitrary public key for our genesis data
 	cbtx := e.transaction.CoinBaseTx(e.userAddress, genesisData)
 	genesis := blockchain.Genesis(cbtx)
-	fmt.Println("Genesis proved")
+	e.log.Info("Genesis proved")
 
 	firstHash := genesis.Hash
 
@@ -134,23 +132,6 @@ func (e *EndPoint) Listen() error {
 		return e.Listen()
 	}
 	return err
-}
-
-func (e *EndPoint) makeMuxRouter() http.Handler {
-	muxRouter := mux.NewRouter()
-	muxRouter.HandleFunc("/blockchain", e.handleGetBlockChain).Methods("GET")
-	muxRouter.HandleFunc("/balance", e.handleGetBalance).Methods("POST")
-	muxRouter.HandleFunc("/write", e.handleWriteBlock).Methods("POST")
-	muxRouter.HandleFunc("/send", e.handleSendBlock).Methods("POST")
-	muxRouter.HandleFunc("/wallets", e.handlePrintWallets).Methods("GET")
-	muxRouter.HandleFunc("/wallet", e.handleCreateWallet).Methods("POST")
-	muxRouter.HandleFunc("/mywallet", e.handleMyWallet).Methods("POST")
-	muxRouter.HandleFunc("/address", e.handleGetServersAddress).Methods("GET")
-
-	muxRouter.Use(middleware.DefaultHeader)
-	muxRouter.Use(e.MetricsMiddleware)
-
-	return muxRouter
 }
 
 func (e *EndPoint) MetricsMiddleware(next http.Handler) http.Handler {

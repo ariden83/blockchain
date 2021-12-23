@@ -18,7 +18,7 @@ var (
 	ErrTxNotFound = errors.New("transaction not found")
 )
 
-func txsShow(rw http.ResponseWriter, r *http.Request) {
+func txsShowPage(rw http.ResponseWriter, r *http.Request) {
 	id := utils.GetRoute(r, "id")
 	fmt.Println(fmt.Sprintf("%s", id))
 	tx := &transactions.Transactions{}

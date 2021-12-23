@@ -2,7 +2,6 @@ package http
 
 import (
 	"fmt"
-	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/iterator"
 	"go.uber.org/zap"
 	"io"
@@ -34,5 +33,5 @@ func (e *EndPoint) handleGetBlockChain(w http.ResponseWriter, _ *http.Request) {
 			break
 		}
 	}
-	e.event.Push(event.Message{Type: event.BlockChain})
+	// e.event.Push(event.Message{Type: event.BlockChain})
 }

@@ -20,7 +20,8 @@ type Seed struct {
 type SeedNoPrivKey struct {
 	Timestamp int64
 	PubKey    string
-	PrivKey   string
+	Mnemonic  string
+	Address   string
 }
 
 var mutex = &sync.Mutex{}
@@ -33,12 +34,26 @@ func (ws *Wallets) GetAllPublicSeeds() []SeedNoPrivKey {
 	var allSeeds []SeedNoPrivKey
 	for _, j := range ws.Seeds {
 		allSeeds = append(allSeeds, SeedNoPrivKey{
-			PrivKey:   j.PrivKey,
+			Mnemonic:  j.Mnemonic,
 			Timestamp: j.Timestamp,
 			PubKey:    j.PubKey,
+			Address:   j.Address,
 		})
 	}
 	return allSeeds
+}
+
+func GetKeys(mnemonic string) SeedNoPrivKey {
+	// Get private key from mnemonic
+	masterPrv := hdwallet.MasterKey([]byte(mnemonic))
+	// Convert a private key to public key
+	masterPub := masterPrv.Pub()
+
+	return SeedNoPrivKey{
+		PubKey:   masterPrv.String(),
+		Address:  masterPub.Address(),
+		Mnemonic: mnemonic,
+	}
 }
 
 func (ws *Wallets) Create() (*Seed, error) {

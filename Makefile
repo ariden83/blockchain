@@ -107,9 +107,13 @@ local-vendor:
 	dep ensure -update
 
 proto:
-	docker run -v $(MAKEFILE_DIRECTORY):/app -w /app --rm jaegertracing/protobuf -I./api api.proto \
-		--go_out=plugins=grpc:./pkg/api
+	@echo "> protos ..."
+	docker run -v $(MAKEFILE_DIRECTORY):/app -w /app --rm jaegertracing/protobuf -I./protos api.proto --go_out=plugins=grpc:./pkg/api
 	# sudo chmod u+x ./pkg/api/api.pb.go
+	# docker run --rm -u $(id -u) -v${PWD}:${PWD} -w${PWD} jaegertracing/protobuf:latest --proto_path=${PWD}/api \
+    # --golang_out=${PWD}/pkg/api/ --language golang /usr/include/github.com/gogo/protobuf/gogoproto/gogo.proto
+	# docker run --rm -v${PWD}:${PWD} qarlm/protoc:latest --working-dir ${PWD}/protos/*.proto --grpc --language go --grpc_out ${PWD}/pkg/api
+
 
 print-%:
 	@echo '$($*)'

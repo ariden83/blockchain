@@ -19,7 +19,7 @@ type walletsShowData struct {
 	UnspTxOutputs []*UnspTxOutput
 }
 
-func walletsShow(rw http.ResponseWriter, r *http.Request) {
+func walletsShowPage(rw http.ResponseWriter, r *http.Request) {
 	address := utils.GetRoute(r, "address")
 	outputs := []*UnspTxOutput{}
 	balance := uint(0)

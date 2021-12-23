@@ -29,7 +29,10 @@ func main() {
 	defer logs.Sync()
 
 	mtc := metrics.New(cfg.Name)
-	m := model.New(cfg, logs)
+	m, err := model.New(cfg.BlockchainAPI, logs)
+	if err != nil {
+		logs.Fatal("fail to init model", zap.Error(err))
+	}
 	t := token.New(cfg.Token)
 
 	e := explorer.New(cfg, logs, m, t, mtc)

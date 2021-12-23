@@ -14,7 +14,6 @@ import (
 	status "google.golang.org/grpc/status"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	_ "google.golang.org/protobuf/types/known/wrapperspb"
 	reflect "reflect"
 	sync "sync"
 )
@@ -30,7 +29,6 @@ const (
 // of the legacy proto package is being used.
 const _ = proto.ProtoPackageIsVersion4
 
-// Ping
 type Ping struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -86,7 +84,6 @@ func (x *Ping) GetDelaySeconds() float32 {
 	return 0
 }
 
-// Pong
 type Pong struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -134,22 +131,675 @@ func (x *Pong) GetMessage() string {
 	return ""
 }
 
+type Context struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Stream string `protobuf:"bytes,1,opt,name=stream,proto3" json:"stream,omitempty"`
+}
+
+func (x *Context) Reset() {
+	*x = Context{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Context) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Context) ProtoMessage() {}
+
+func (x *Context) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Context.ProtoReflect.Descriptor instead.
+func (*Context) Descriptor() ([]byte, []int) {
+	return file_api_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *Context) GetStream() string {
+	if x != nil {
+		return x.Stream
+	}
+	return ""
+}
+
+type TxInput struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id  []byte `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Out int32  `protobuf:"varint,2,opt,name=out,proto3" json:"out,omitempty"`
+	Sig string `protobuf:"bytes,3,opt,name=sig,proto3" json:"sig,omitempty"`
+}
+
+func (x *TxInput) Reset() {
+	*x = TxInput{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *TxInput) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TxInput) ProtoMessage() {}
+
+func (x *TxInput) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TxInput.ProtoReflect.Descriptor instead.
+func (*TxInput) Descriptor() ([]byte, []int) {
+	return file_api_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *TxInput) GetId() []byte {
+	if x != nil {
+		return x.Id
+	}
+	return nil
+}
+
+func (x *TxInput) GetOut() int32 {
+	if x != nil {
+		return x.Out
+	}
+	return 0
+}
+
+func (x *TxInput) GetSig() string {
+	if x != nil {
+		return x.Sig
+	}
+	return ""
+}
+
+type TxOutput struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Value  uint64 `protobuf:"varint,1,opt,name=value,proto3" json:"value,omitempty"`
+	PubKey string `protobuf:"bytes,2,opt,name=pubKey,proto3" json:"pubKey,omitempty"`
+}
+
+func (x *TxOutput) Reset() {
+	*x = TxOutput{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *TxOutput) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TxOutput) ProtoMessage() {}
+
+func (x *TxOutput) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TxOutput.ProtoReflect.Descriptor instead.
+func (*TxOutput) Descriptor() ([]byte, []int) {
+	return file_api_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *TxOutput) GetValue() uint64 {
+	if x != nil {
+		return x.Value
+	}
+	return 0
+}
+
+func (x *TxOutput) GetPubKey() string {
+	if x != nil {
+		return x.PubKey
+	}
+	return ""
+}
+
+type Transactions struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id        []byte      `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Inputs    []*TxInput  `protobuf:"bytes,2,rep,name=inputs,proto3" json:"inputs,omitempty"`
+	Outputs   []*TxOutput `protobuf:"bytes,3,rep,name=outputs,proto3" json:"outputs,omitempty"`
+	Timestamp int64       `protobuf:"varint,4,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+}
+
+func (x *Transactions) Reset() {
+	*x = Transactions{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Transactions) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Transactions) ProtoMessage() {}
+
+func (x *Transactions) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Transactions.ProtoReflect.Descriptor instead.
+func (*Transactions) Descriptor() ([]byte, []int) {
+	return file_api_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *Transactions) GetId() []byte {
+	if x != nil {
+		return x.Id
+	}
+	return nil
+}
+
+func (x *Transactions) GetInputs() []*TxInput {
+	if x != nil {
+		return x.Inputs
+	}
+	return nil
+}
+
+func (x *Transactions) GetOutputs() []*TxOutput {
+	if x != nil {
+		return x.Outputs
+	}
+	return nil
+}
+
+func (x *Transactions) GetTimestamp() int64 {
+	if x != nil {
+		return x.Timestamp
+	}
+	return 0
+}
+
+type Block struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Index               string          `protobuf:"bytes,1,opt,name=index,proto3" json:"index,omitempty"`
+	Timestamp           int64           `protobuf:"varint,2,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	Transactions        []*Transactions `protobuf:"bytes,3,rep,name=transactions,proto3" json:"transactions,omitempty"`
+	Hash                []byte          `protobuf:"bytes,4,opt,name=hash,proto3" json:"hash,omitempty"`
+	PrevHash            []byte          `protobuf:"bytes,5,opt,name=prevHash,proto3" json:"prevHash,omitempty"`
+	ReceiptHash         []byte          `protobuf:"bytes,6,opt,name=receiptHash,proto3" json:"receiptHash,omitempty"`
+	TransactionHashRoot []byte          `protobuf:"bytes,7,opt,name=transactionHashRoot,proto3" json:"transactionHashRoot,omitempty"`
+	Difficulty          int32           `protobuf:"varint,8,opt,name=difficulty,proto3" json:"difficulty,omitempty"`
+	Nonce               string          `protobuf:"bytes,9,opt,name=nonce,proto3" json:"nonce,omitempty"`
+}
+
+func (x *Block) Reset() {
+	*x = Block{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Block) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Block) ProtoMessage() {}
+
+func (x *Block) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Block.ProtoReflect.Descriptor instead.
+func (*Block) Descriptor() ([]byte, []int) {
+	return file_api_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *Block) GetIndex() string {
+	if x != nil {
+		return x.Index
+	}
+	return ""
+}
+
+func (x *Block) GetTimestamp() int64 {
+	if x != nil {
+		return x.Timestamp
+	}
+	return 0
+}
+
+func (x *Block) GetTransactions() []*Transactions {
+	if x != nil {
+		return x.Transactions
+	}
+	return nil
+}
+
+func (x *Block) GetHash() []byte {
+	if x != nil {
+		return x.Hash
+	}
+	return nil
+}
+
+func (x *Block) GetPrevHash() []byte {
+	if x != nil {
+		return x.PrevHash
+	}
+	return nil
+}
+
+func (x *Block) GetReceiptHash() []byte {
+	if x != nil {
+		return x.ReceiptHash
+	}
+	return nil
+}
+
+func (x *Block) GetTransactionHashRoot() []byte {
+	if x != nil {
+		return x.TransactionHashRoot
+	}
+	return nil
+}
+
+func (x *Block) GetDifficulty() int32 {
+	if x != nil {
+		return x.Difficulty
+	}
+	return 0
+}
+
+func (x *Block) GetNonce() string {
+	if x != nil {
+		return x.Nonce
+	}
+	return ""
+}
+
+type BlockChainReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *BlockChainReq) Reset() {
+	*x = BlockChainReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *BlockChainReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BlockChainReq) ProtoMessage() {}
+
+func (x *BlockChainReq) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BlockChainReq.ProtoReflect.Descriptor instead.
+func (*BlockChainReq) Descriptor() ([]byte, []int) {
+	return file_api_proto_rawDescGZIP(), []int{7}
+}
+
+type BlockChainRes struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	PrevHash    string `protobuf:"bytes,1,opt,name=prevHash,proto3" json:"prevHash,omitempty"`
+	Block       *Block `protobuf:"bytes,2,opt,name=block,proto3" json:"block,omitempty"`
+	CurrentHash string `protobuf:"bytes,3,opt,name=currentHash,proto3" json:"currentHash,omitempty"` //    optional string error = 4;
+}
+
+func (x *BlockChainRes) Reset() {
+	*x = BlockChainRes{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *BlockChainRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BlockChainRes) ProtoMessage() {}
+
+func (x *BlockChainRes) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BlockChainRes.ProtoReflect.Descriptor instead.
+func (*BlockChainRes) Descriptor() ([]byte, []int) {
+	return file_api_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *BlockChainRes) GetPrevHash() string {
+	if x != nil {
+		return x.PrevHash
+	}
+	return ""
+}
+
+func (x *BlockChainRes) GetBlock() *Block {
+	if x != nil {
+		return x.Block
+	}
+	return nil
+}
+
+func (x *BlockChainRes) GetCurrentHash() string {
+	if x != nil {
+		return x.CurrentHash
+	}
+	return ""
+}
+
+type GetWalletInput struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// Mandatory field
+	Context *Context `protobuf:"bytes,1,opt,name=context,proto3" json:"context,omitempty"`
+	Seed    string   `protobuf:"bytes,2,opt,name=seed,proto3" json:"seed,omitempty"`
+}
+
+func (x *GetWalletInput) Reset() {
+	*x = GetWalletInput{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetWalletInput) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetWalletInput) ProtoMessage() {}
+
+func (x *GetWalletInput) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetWalletInput.ProtoReflect.Descriptor instead.
+func (*GetWalletInput) Descriptor() ([]byte, []int) {
+	return file_api_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *GetWalletInput) GetContext() *Context {
+	if x != nil {
+		return x.Context
+	}
+	return nil
+}
+
+func (x *GetWalletInput) GetSeed() string {
+	if x != nil {
+		return x.Seed
+	}
+	return ""
+}
+
+type GetWalletOutput struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Address   string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	Timestamp string `protobuf:"bytes,2,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	PubKey    string `protobuf:"bytes,3,opt,name=pubKey,proto3" json:"pubKey,omitempty"`
+	Mnemonic  string `protobuf:"bytes,5,opt,name=mnemonic,proto3" json:"mnemonic,omitempty"`
+}
+
+func (x *GetWalletOutput) Reset() {
+	*x = GetWalletOutput{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetWalletOutput) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetWalletOutput) ProtoMessage() {}
+
+func (x *GetWalletOutput) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetWalletOutput.ProtoReflect.Descriptor instead.
+func (*GetWalletOutput) Descriptor() ([]byte, []int) {
+	return file_api_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *GetWalletOutput) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
+func (x *GetWalletOutput) GetTimestamp() string {
+	if x != nil {
+		return x.Timestamp
+	}
+	return ""
+}
+
+func (x *GetWalletOutput) GetPubKey() string {
+	if x != nil {
+		return x.PubKey
+	}
+	return ""
+}
+
+func (x *GetWalletOutput) GetMnemonic() string {
+	if x != nil {
+		return x.Mnemonic
+	}
+	return ""
+}
+
 var File_api_proto protoreflect.FileDescriptor
 
 var file_api_proto_rawDesc = []byte{
 	0x0a, 0x09, 0x61, 0x70, 0x69, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x03, 0x61, 0x70, 0x69,
-	0x1a, 0x1e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75,
-	0x66, 0x2f, 0x77, 0x72, 0x61, 0x70, 0x70, 0x65, 0x72, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
 	0x22, 0x44, 0x0a, 0x04, 0x50, 0x69, 0x6e, 0x67, 0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73,
 	0x61, 0x67, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61,
 	0x67, 0x65, 0x12, 0x22, 0x0a, 0x0c, 0x64, 0x65, 0x6c, 0x61, 0x79, 0x53, 0x65, 0x63, 0x6f, 0x6e,
 	0x64, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x02, 0x52, 0x0c, 0x64, 0x65, 0x6c, 0x61, 0x79, 0x53,
 	0x65, 0x63, 0x6f, 0x6e, 0x64, 0x73, 0x22, 0x20, 0x0a, 0x04, 0x50, 0x6f, 0x6e, 0x67, 0x12, 0x18,
 	0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x32, 0x29, 0x0a, 0x03, 0x41, 0x70, 0x69, 0x12,
-	0x22, 0x0a, 0x08, 0x53, 0x65, 0x6e, 0x64, 0x50, 0x69, 0x6e, 0x67, 0x12, 0x09, 0x2e, 0x61, 0x70,
+	0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x22, 0x21, 0x0a, 0x07, 0x43, 0x6f, 0x6e, 0x74,
+	0x65, 0x78, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x06, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x22, 0x3d, 0x0a, 0x07, 0x54,
+	0x78, 0x49, 0x6e, 0x70, 0x75, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x0c, 0x52, 0x02, 0x69, 0x64, 0x12, 0x10, 0x0a, 0x03, 0x6f, 0x75, 0x74, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x05, 0x52, 0x03, 0x6f, 0x75, 0x74, 0x12, 0x10, 0x0a, 0x03, 0x73, 0x69, 0x67, 0x18,
+	0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x73, 0x69, 0x67, 0x22, 0x38, 0x0a, 0x08, 0x54, 0x78,
+	0x4f, 0x75, 0x74, 0x70, 0x75, 0x74, 0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x12, 0x16, 0x0a, 0x06,
+	0x70, 0x75, 0x62, 0x4b, 0x65, 0x79, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x70, 0x75,
+	0x62, 0x4b, 0x65, 0x79, 0x22, 0x8b, 0x01, 0x0a, 0x0c, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x61, 0x63,
+	0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x0c, 0x52, 0x02, 0x69, 0x64, 0x12, 0x24, 0x0a, 0x06, 0x69, 0x6e, 0x70, 0x75, 0x74, 0x73, 0x18,
+	0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x54, 0x78, 0x49, 0x6e,
+	0x70, 0x75, 0x74, 0x52, 0x06, 0x69, 0x6e, 0x70, 0x75, 0x74, 0x73, 0x12, 0x27, 0x0a, 0x07, 0x6f,
+	0x75, 0x74, 0x70, 0x75, 0x74, 0x73, 0x18, 0x03, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x61,
+	0x70, 0x69, 0x2e, 0x54, 0x78, 0x4f, 0x75, 0x74, 0x70, 0x75, 0x74, 0x52, 0x07, 0x6f, 0x75, 0x74,
+	0x70, 0x75, 0x74, 0x73, 0x12, 0x1c, 0x0a, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d,
+	0x70, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61,
+	0x6d, 0x70, 0x22, 0xac, 0x02, 0x0a, 0x05, 0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x12, 0x14, 0x0a, 0x05,
+	0x69, 0x6e, 0x64, 0x65, 0x78, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x69, 0x6e, 0x64,
+	0x65, 0x78, 0x12, 0x1c, 0x0a, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70,
+	0x12, 0x35, 0x0a, 0x0c, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x73,
+	0x18, 0x03, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x54, 0x72, 0x61,
+	0x6e, 0x73, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x0c, 0x74, 0x72, 0x61, 0x6e, 0x73,
+	0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x12, 0x0a, 0x04, 0x68, 0x61, 0x73, 0x68, 0x18,
+	0x04, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x04, 0x68, 0x61, 0x73, 0x68, 0x12, 0x1a, 0x0a, 0x08, 0x70,
+	0x72, 0x65, 0x76, 0x48, 0x61, 0x73, 0x68, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x08, 0x70,
+	0x72, 0x65, 0x76, 0x48, 0x61, 0x73, 0x68, 0x12, 0x20, 0x0a, 0x0b, 0x72, 0x65, 0x63, 0x65, 0x69,
+	0x70, 0x74, 0x48, 0x61, 0x73, 0x68, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x0b, 0x72, 0x65,
+	0x63, 0x65, 0x69, 0x70, 0x74, 0x48, 0x61, 0x73, 0x68, 0x12, 0x30, 0x0a, 0x13, 0x74, 0x72, 0x61,
+	0x6e, 0x73, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x48, 0x61, 0x73, 0x68, 0x52, 0x6f, 0x6f, 0x74,
+	0x18, 0x07, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x13, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x61, 0x63, 0x74,
+	0x69, 0x6f, 0x6e, 0x48, 0x61, 0x73, 0x68, 0x52, 0x6f, 0x6f, 0x74, 0x12, 0x1e, 0x0a, 0x0a, 0x64,
+	0x69, 0x66, 0x66, 0x69, 0x63, 0x75, 0x6c, 0x74, 0x79, 0x18, 0x08, 0x20, 0x01, 0x28, 0x05, 0x52,
+	0x0a, 0x64, 0x69, 0x66, 0x66, 0x69, 0x63, 0x75, 0x6c, 0x74, 0x79, 0x12, 0x14, 0x0a, 0x05, 0x6e,
+	0x6f, 0x6e, 0x63, 0x65, 0x18, 0x09, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x6e, 0x6f, 0x6e, 0x63,
+	0x65, 0x22, 0x0f, 0x0a, 0x0d, 0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x43, 0x68, 0x61, 0x69, 0x6e, 0x52,
+	0x65, 0x71, 0x22, 0x6f, 0x0a, 0x0d, 0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x43, 0x68, 0x61, 0x69, 0x6e,
+	0x52, 0x65, 0x73, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x72, 0x65, 0x76, 0x48, 0x61, 0x73, 0x68, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x72, 0x65, 0x76, 0x48, 0x61, 0x73, 0x68, 0x12,
+	0x20, 0x0a, 0x05, 0x62, 0x6c, 0x6f, 0x63, 0x6b, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0a,
+	0x2e, 0x61, 0x70, 0x69, 0x2e, 0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x52, 0x05, 0x62, 0x6c, 0x6f, 0x63,
+	0x6b, 0x12, 0x20, 0x0a, 0x0b, 0x63, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x48, 0x61, 0x73, 0x68,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x63, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x48,
+	0x61, 0x73, 0x68, 0x22, 0x4c, 0x0a, 0x0e, 0x47, 0x65, 0x74, 0x57, 0x61, 0x6c, 0x6c, 0x65, 0x74,
+	0x49, 0x6e, 0x70, 0x75, 0x74, 0x12, 0x26, 0x0a, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x78, 0x74,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x43, 0x6f, 0x6e,
+	0x74, 0x65, 0x78, 0x74, 0x52, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x78, 0x74, 0x12, 0x12, 0x0a,
+	0x04, 0x73, 0x65, 0x65, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x73, 0x65, 0x65,
+	0x64, 0x22, 0x7d, 0x0a, 0x0f, 0x47, 0x65, 0x74, 0x57, 0x61, 0x6c, 0x6c, 0x65, 0x74, 0x4f, 0x75,
+	0x74, 0x70, 0x75, 0x74, 0x12, 0x18, 0x0a, 0x07, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x12, 0x1c,
+	0x0a, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x12, 0x16, 0x0a, 0x06,
+	0x70, 0x75, 0x62, 0x4b, 0x65, 0x79, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x70, 0x75,
+	0x62, 0x4b, 0x65, 0x79, 0x12, 0x1a, 0x0a, 0x08, 0x6d, 0x6e, 0x65, 0x6d, 0x6f, 0x6e, 0x69, 0x63,
+	0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x6d, 0x6e, 0x65, 0x6d, 0x6f, 0x6e, 0x69, 0x63,
+	0x32, 0xf8, 0x02, 0x0a, 0x03, 0x41, 0x70, 0x69, 0x12, 0x21, 0x0a, 0x07, 0x67, 0x65, 0x74, 0x50,
+	0x6f, 0x6e, 0x67, 0x12, 0x09, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x50, 0x69, 0x6e, 0x67, 0x1a, 0x09,
+	0x2e, 0x61, 0x70, 0x69, 0x2e, 0x50, 0x6f, 0x6e, 0x67, 0x22, 0x00, 0x12, 0x24, 0x0a, 0x0a, 0x47,
+	0x65, 0x74, 0x42, 0x61, 0x6c, 0x61, 0x6e, 0x63, 0x65, 0x12, 0x09, 0x2e, 0x61, 0x70, 0x69, 0x2e,
+	0x50, 0x69, 0x6e, 0x67, 0x1a, 0x09, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x50, 0x6f, 0x6e, 0x67, 0x22,
+	0x00, 0x12, 0x25, 0x0a, 0x0b, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x42, 0x6c, 0x6f, 0x63, 0x6b,
+	0x12, 0x09, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x50, 0x69, 0x6e, 0x67, 0x1a, 0x09, 0x2e, 0x61, 0x70,
+	0x69, 0x2e, 0x50, 0x6f, 0x6e, 0x67, 0x22, 0x00, 0x12, 0x23, 0x0a, 0x09, 0x53, 0x65, 0x6e, 0x64,
+	0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x12, 0x09, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x50, 0x69, 0x6e, 0x67,
+	0x1a, 0x09, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x50, 0x6f, 0x6e, 0x67, 0x22, 0x00, 0x12, 0x24, 0x0a,
+	0x0a, 0x47, 0x65, 0x74, 0x57, 0x61, 0x6c, 0x6c, 0x65, 0x74, 0x73, 0x12, 0x09, 0x2e, 0x61, 0x70,
 	0x69, 0x2e, 0x50, 0x69, 0x6e, 0x67, 0x1a, 0x09, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x50, 0x6f, 0x6e,
-	0x67, 0x22, 0x00, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x67, 0x22, 0x00, 0x12, 0x27, 0x0a, 0x0d, 0x47, 0x65, 0x74, 0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x43,
+	0x68, 0x61, 0x69, 0x6e, 0x12, 0x09, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x50, 0x69, 0x6e, 0x67, 0x1a,
+	0x09, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x50, 0x6f, 0x6e, 0x67, 0x22, 0x00, 0x12, 0x26, 0x0a, 0x0c,
+	0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x57, 0x61, 0x6c, 0x6c, 0x65, 0x74, 0x12, 0x09, 0x2e, 0x61,
+	0x70, 0x69, 0x2e, 0x50, 0x69, 0x6e, 0x67, 0x1a, 0x09, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x50, 0x6f,
+	0x6e, 0x67, 0x22, 0x00, 0x12, 0x38, 0x0a, 0x09, 0x47, 0x65, 0x74, 0x57, 0x61, 0x6c, 0x6c, 0x65,
+	0x74, 0x12, 0x13, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x47, 0x65, 0x74, 0x57, 0x61, 0x6c, 0x6c, 0x65,
+	0x74, 0x49, 0x6e, 0x70, 0x75, 0x74, 0x1a, 0x14, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x47, 0x65, 0x74,
+	0x57, 0x61, 0x6c, 0x6c, 0x65, 0x74, 0x4f, 0x75, 0x74, 0x70, 0x75, 0x74, 0x22, 0x00, 0x12, 0x2b,
+	0x0a, 0x11, 0x47, 0x65, 0x74, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x73, 0x41, 0x64, 0x64, 0x72,
+	0x65, 0x73, 0x73, 0x12, 0x09, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x50, 0x69, 0x6e, 0x67, 0x1a, 0x09,
+	0x2e, 0x61, 0x70, 0x69, 0x2e, 0x50, 0x6f, 0x6e, 0x67, 0x22, 0x00, 0x62, 0x06, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x33,
 }
 
 var (
@@ -164,19 +814,49 @@ func file_api_proto_rawDescGZIP() []byte {
 	return file_api_proto_rawDescData
 }
 
-var file_api_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_api_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_api_proto_goTypes = []interface{}{
-	(*Ping)(nil), // 0: api.Ping
-	(*Pong)(nil), // 1: api.Pong
+	(*Ping)(nil),            // 0: api.Ping
+	(*Pong)(nil),            // 1: api.Pong
+	(*Context)(nil),         // 2: api.Context
+	(*TxInput)(nil),         // 3: api.TxInput
+	(*TxOutput)(nil),        // 4: api.TxOutput
+	(*Transactions)(nil),    // 5: api.Transactions
+	(*Block)(nil),           // 6: api.Block
+	(*BlockChainReq)(nil),   // 7: api.BlockChainReq
+	(*BlockChainRes)(nil),   // 8: api.BlockChainRes
+	(*GetWalletInput)(nil),  // 9: api.GetWalletInput
+	(*GetWalletOutput)(nil), // 10: api.GetWalletOutput
 }
 var file_api_proto_depIdxs = []int32{
-	0, // 0: api.Api.SendPing:input_type -> api.Ping
-	1, // 1: api.Api.SendPing:output_type -> api.Pong
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	3,  // 0: api.Transactions.inputs:type_name -> api.TxInput
+	4,  // 1: api.Transactions.outputs:type_name -> api.TxOutput
+	5,  // 2: api.Block.transactions:type_name -> api.Transactions
+	6,  // 3: api.BlockChainRes.block:type_name -> api.Block
+	2,  // 4: api.GetWalletInput.context:type_name -> api.Context
+	0,  // 5: api.Api.getPong:input_type -> api.Ping
+	0,  // 6: api.Api.GetBalance:input_type -> api.Ping
+	0,  // 7: api.Api.CreateBlock:input_type -> api.Ping
+	0,  // 8: api.Api.SendBlock:input_type -> api.Ping
+	0,  // 9: api.Api.GetWallets:input_type -> api.Ping
+	0,  // 10: api.Api.GetBlockChain:input_type -> api.Ping
+	0,  // 11: api.Api.CreateWallet:input_type -> api.Ping
+	9,  // 12: api.Api.GetWallet:input_type -> api.GetWalletInput
+	0,  // 13: api.Api.GetServersAddress:input_type -> api.Ping
+	1,  // 14: api.Api.getPong:output_type -> api.Pong
+	1,  // 15: api.Api.GetBalance:output_type -> api.Pong
+	1,  // 16: api.Api.CreateBlock:output_type -> api.Pong
+	1,  // 17: api.Api.SendBlock:output_type -> api.Pong
+	1,  // 18: api.Api.GetWallets:output_type -> api.Pong
+	1,  // 19: api.Api.GetBlockChain:output_type -> api.Pong
+	1,  // 20: api.Api.CreateWallet:output_type -> api.Pong
+	10, // 21: api.Api.GetWallet:output_type -> api.GetWalletOutput
+	1,  // 22: api.Api.GetServersAddress:output_type -> api.Pong
+	14, // [14:23] is the sub-list for method output_type
+	5,  // [5:14] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_api_proto_init() }
@@ -209,6 +889,114 @@ func file_api_proto_init() {
 				return nil
 			}
 		}
+		file_api_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Context); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*TxInput); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*TxOutput); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Transactions); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Block); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*BlockChainReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*BlockChainRes); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetWalletInput); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetWalletOutput); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -216,7 +1004,7 @@ func file_api_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_api_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -242,7 +1030,16 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type ApiClient interface {
-	SendPing(ctx context.Context, in *Ping, opts ...grpc.CallOption) (*Pong, error)
+	GetPong(ctx context.Context, in *Ping, opts ...grpc.CallOption) (*Pong, error)
+	// rpc GetBlockChain(BlockChainReq) returns (stream BlockChainRes) {}
+	GetBalance(ctx context.Context, in *Ping, opts ...grpc.CallOption) (*Pong, error)
+	CreateBlock(ctx context.Context, in *Ping, opts ...grpc.CallOption) (*Pong, error)
+	SendBlock(ctx context.Context, in *Ping, opts ...grpc.CallOption) (*Pong, error)
+	GetWallets(ctx context.Context, in *Ping, opts ...grpc.CallOption) (*Pong, error)
+	GetBlockChain(ctx context.Context, in *Ping, opts ...grpc.CallOption) (*Pong, error)
+	CreateWallet(ctx context.Context, in *Ping, opts ...grpc.CallOption) (*Pong, error)
+	GetWallet(ctx context.Context, in *GetWalletInput, opts ...grpc.CallOption) (*GetWalletOutput, error)
+	GetServersAddress(ctx context.Context, in *Ping, opts ...grpc.CallOption) (*Pong, error)
 }
 
 type apiClient struct {
@@ -253,9 +1050,81 @@ func NewApiClient(cc grpc.ClientConnInterface) ApiClient {
 	return &apiClient{cc}
 }
 
-func (c *apiClient) SendPing(ctx context.Context, in *Ping, opts ...grpc.CallOption) (*Pong, error) {
+func (c *apiClient) GetPong(ctx context.Context, in *Ping, opts ...grpc.CallOption) (*Pong, error) {
 	out := new(Pong)
-	err := c.cc.Invoke(ctx, "/api.Api/SendPing", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/api.Api/getPong", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *apiClient) GetBalance(ctx context.Context, in *Ping, opts ...grpc.CallOption) (*Pong, error) {
+	out := new(Pong)
+	err := c.cc.Invoke(ctx, "/api.Api/GetBalance", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *apiClient) CreateBlock(ctx context.Context, in *Ping, opts ...grpc.CallOption) (*Pong, error) {
+	out := new(Pong)
+	err := c.cc.Invoke(ctx, "/api.Api/CreateBlock", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *apiClient) SendBlock(ctx context.Context, in *Ping, opts ...grpc.CallOption) (*Pong, error) {
+	out := new(Pong)
+	err := c.cc.Invoke(ctx, "/api.Api/SendBlock", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *apiClient) GetWallets(ctx context.Context, in *Ping, opts ...grpc.CallOption) (*Pong, error) {
+	out := new(Pong)
+	err := c.cc.Invoke(ctx, "/api.Api/GetWallets", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *apiClient) GetBlockChain(ctx context.Context, in *Ping, opts ...grpc.CallOption) (*Pong, error) {
+	out := new(Pong)
+	err := c.cc.Invoke(ctx, "/api.Api/GetBlockChain", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *apiClient) CreateWallet(ctx context.Context, in *Ping, opts ...grpc.CallOption) (*Pong, error) {
+	out := new(Pong)
+	err := c.cc.Invoke(ctx, "/api.Api/CreateWallet", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *apiClient) GetWallet(ctx context.Context, in *GetWalletInput, opts ...grpc.CallOption) (*GetWalletOutput, error) {
+	out := new(GetWalletOutput)
+	err := c.cc.Invoke(ctx, "/api.Api/GetWallet", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *apiClient) GetServersAddress(ctx context.Context, in *Ping, opts ...grpc.CallOption) (*Pong, error) {
+	out := new(Pong)
+	err := c.cc.Invoke(ctx, "/api.Api/GetServersAddress", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -264,35 +1133,212 @@ func (c *apiClient) SendPing(ctx context.Context, in *Ping, opts ...grpc.CallOpt
 
 // ApiServer is the server API for Api service.
 type ApiServer interface {
-	SendPing(context.Context, *Ping) (*Pong, error)
+	GetPong(context.Context, *Ping) (*Pong, error)
+	// rpc GetBlockChain(BlockChainReq) returns (stream BlockChainRes) {}
+	GetBalance(context.Context, *Ping) (*Pong, error)
+	CreateBlock(context.Context, *Ping) (*Pong, error)
+	SendBlock(context.Context, *Ping) (*Pong, error)
+	GetWallets(context.Context, *Ping) (*Pong, error)
+	GetBlockChain(context.Context, *Ping) (*Pong, error)
+	CreateWallet(context.Context, *Ping) (*Pong, error)
+	GetWallet(context.Context, *GetWalletInput) (*GetWalletOutput, error)
+	GetServersAddress(context.Context, *Ping) (*Pong, error)
 }
 
 // UnimplementedApiServer can be embedded to have forward compatible implementations.
 type UnimplementedApiServer struct {
 }
 
-func (*UnimplementedApiServer) SendPing(context.Context, *Ping) (*Pong, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SendPing not implemented")
+func (*UnimplementedApiServer) GetPong(context.Context, *Ping) (*Pong, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPong not implemented")
+}
+func (*UnimplementedApiServer) GetBalance(context.Context, *Ping) (*Pong, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBalance not implemented")
+}
+func (*UnimplementedApiServer) CreateBlock(context.Context, *Ping) (*Pong, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateBlock not implemented")
+}
+func (*UnimplementedApiServer) SendBlock(context.Context, *Ping) (*Pong, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendBlock not implemented")
+}
+func (*UnimplementedApiServer) GetWallets(context.Context, *Ping) (*Pong, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetWallets not implemented")
+}
+func (*UnimplementedApiServer) GetBlockChain(context.Context, *Ping) (*Pong, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBlockChain not implemented")
+}
+func (*UnimplementedApiServer) CreateWallet(context.Context, *Ping) (*Pong, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateWallet not implemented")
+}
+func (*UnimplementedApiServer) GetWallet(context.Context, *GetWalletInput) (*GetWalletOutput, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetWallet not implemented")
+}
+func (*UnimplementedApiServer) GetServersAddress(context.Context, *Ping) (*Pong, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetServersAddress not implemented")
 }
 
 func RegisterApiServer(s *grpc.Server, srv ApiServer) {
 	s.RegisterService(&_Api_serviceDesc, srv)
 }
 
-func _Api_SendPing_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Api_GetPong_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Ping)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ApiServer).SendPing(ctx, in)
+		return srv.(ApiServer).GetPong(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.Api/SendPing",
+		FullMethod: "/api.Api/GetPong",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiServer).SendPing(ctx, req.(*Ping))
+		return srv.(ApiServer).GetPong(ctx, req.(*Ping))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Api_GetBalance_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Ping)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ApiServer).GetBalance(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Api/GetBalance",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ApiServer).GetBalance(ctx, req.(*Ping))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Api_CreateBlock_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Ping)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ApiServer).CreateBlock(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Api/CreateBlock",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ApiServer).CreateBlock(ctx, req.(*Ping))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Api_SendBlock_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Ping)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ApiServer).SendBlock(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Api/SendBlock",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ApiServer).SendBlock(ctx, req.(*Ping))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Api_GetWallets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Ping)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ApiServer).GetWallets(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Api/GetWallets",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ApiServer).GetWallets(ctx, req.(*Ping))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Api_GetBlockChain_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Ping)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ApiServer).GetBlockChain(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Api/GetBlockChain",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ApiServer).GetBlockChain(ctx, req.(*Ping))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Api_CreateWallet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Ping)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ApiServer).CreateWallet(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Api/CreateWallet",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ApiServer).CreateWallet(ctx, req.(*Ping))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Api_GetWallet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetWalletInput)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ApiServer).GetWallet(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Api/GetWallet",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ApiServer).GetWallet(ctx, req.(*GetWalletInput))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Api_GetServersAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Ping)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ApiServer).GetServersAddress(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Api/GetServersAddress",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ApiServer).GetServersAddress(ctx, req.(*Ping))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -302,8 +1348,40 @@ var _Api_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*ApiServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "SendPing",
-			Handler:    _Api_SendPing_Handler,
+			MethodName: "getPong",
+			Handler:    _Api_GetPong_Handler,
+		},
+		{
+			MethodName: "GetBalance",
+			Handler:    _Api_GetBalance_Handler,
+		},
+		{
+			MethodName: "CreateBlock",
+			Handler:    _Api_CreateBlock_Handler,
+		},
+		{
+			MethodName: "SendBlock",
+			Handler:    _Api_SendBlock_Handler,
+		},
+		{
+			MethodName: "GetWallets",
+			Handler:    _Api_GetWallets_Handler,
+		},
+		{
+			MethodName: "GetBlockChain",
+			Handler:    _Api_GetBlockChain_Handler,
+		},
+		{
+			MethodName: "CreateWallet",
+			Handler:    _Api_CreateWallet_Handler,
+		},
+		{
+			MethodName: "GetWallet",
+			Handler:    _Api_GetWallet_Handler,
+		},
+		{
+			MethodName: "GetServersAddress",
+			Handler:    _Api_GetServersAddress_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

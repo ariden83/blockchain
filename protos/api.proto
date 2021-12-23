@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package api;
+
+service Api {
+    rpc getPong (Ping) returns (Pong) {}
+    // rpc GetBlockChain(BlockChainReq) returns (stream BlockChainRes) {}
+    rpc GetBalance(Ping) returns (Pong) {}
+    rpc CreateBlock(Ping) returns (Pong) {}
+    rpc SendBlock(Ping) returns (Pong) {}
+    rpc GetWallets(Ping) returns (Pong) {}
+    rpc GetBlockChain(Ping) returns (Pong) {}
+    rpc CreateWallet(Ping) returns (Pong) {}
+    rpc GetWallet(GetWalletInput) returns (GetWalletOutput) {}
+    rpc GetServersAddress(Ping) returns (Pong) {}
+}
+
+message Ping {
+    string message = 1;
+    float delaySeconds = 2;
+}
+
+message Pong {
+    string message = 1;
+}
+
+message Context {
+    string stream = 1;
+}
+
+message TxInput {
+    bytes id = 1;
+    int32 out = 2;
+    string sig = 3;
+}
+
+message TxOutput {
+    uint64 value = 1;
+    string pubKey = 2;
+}
+
+message Transactions {
+    bytes id = 1;
+    repeated TxInput inputs = 2;
+    repeated TxOutput outputs = 3;
+    int64 timestamp = 4;
+}
+
+message Block {
+    string index = 1;
+    int64 timestamp = 2;
+    repeated Transactions transactions = 3;
+    bytes hash = 4;
+    bytes prevHash = 5;
+    bytes receiptHash = 6;
+    bytes transactionHashRoot = 7;
+    int32 difficulty = 8;
+    string nonce = 9;
+}
+
+message BlockChainReq {
+//    optional Context context = 1;
+}
+
+message BlockChainRes {
+    string prevHash = 1;
+    Block block = 2;
+    string currentHash = 3;
+//    optional string error = 4;
+}
+
+message GetWalletInput {
+    // Mandatory field
+    Context context = 1;
+    string seed = 2;
+}
+
+message GetWalletOutput {
+    string address = 1;
+    string timestamp = 2;
+    string pubKey = 3;
+    string mnemonic = 5;
+}

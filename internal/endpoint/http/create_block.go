@@ -13,14 +13,14 @@ import (
 )
 
 // Message takes incoming JSON payload for writing heart rate
-type WriteBlockInput struct {
+type CreateBlockInput struct {
 	Address string `json:"address"`
 	PubKey  string `json:"key"`
 }
 
 // takes JSON payload as an input for heart rate (BPM)
-func (e *EndPoint) handleWriteBlock(w http.ResponseWriter, r *http.Request) {
-	var m WriteBlockInput
+func (e *EndPoint) handleCreateBlock(w http.ResponseWriter, r *http.Request) {
+	var m CreateBlockInput
 
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&m); err != nil {
@@ -60,7 +60,7 @@ func (e *EndPoint) getLastBlock() ([]byte, *big.Int) {
 	return lastHash, block.Index
 }
 
-func (e *EndPoint) WriteBlock(p WriteBlockInput) blockchain.Block {
+func (e *EndPoint) WriteBlock(p CreateBlockInput) blockchain.Block {
 	lastHash, index := e.getLastBlock()
 
 	//mutex.Lock()

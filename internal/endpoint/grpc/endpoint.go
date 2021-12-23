@@ -36,7 +36,7 @@ func New(
 	per persistence.IPersistence,
 	trans transactions.ITransaction,
 	wallets wallet.IWallets,
-	mtcs *metrics.Metrics,
+	mtc *metrics.Metrics,
 	logs *zap.Logger,
 	evt *event.Event,
 	userAddress string,
@@ -46,7 +46,7 @@ func New(
 		persistence: per,
 		transaction: trans,
 		wallets:     wallets,
-		metrics:     mtcs,
+		metrics:     mtc,
 		log:         logs.With(zap.String("service", "grpc")),
 		event:       evt,
 		userAddress: userAddress,
@@ -81,13 +81,13 @@ func (s *EndPoint) Listen() error {
 
 	if err := s.server.Serve(lis); err != nil {
 		s.ready = false
-		s.log.Error("failed to serve : %s", zap.Error(err))
+		s.log.Error("failed to serve : %w", zap.Error(err))
 	}
 
 	return nil
 }
 
 func (s *EndPoint) Shutdown() {
-	s.log.Debug("Gracefully pausing down the GRPC server")
+	s.log.Info("Gracefully pausing down the GRPC server")
 	s.server.GracefulStop()
 }

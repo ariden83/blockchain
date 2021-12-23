@@ -11,7 +11,7 @@ type blocksIndexData struct {
 	Blocks    []*blockchain.Block
 }
 
-func blocksIndex(rw http.ResponseWriter, r *http.Request) {
+func blocksIndexPage(rw http.ResponseWriter, r *http.Request) {
 	blocks := []*blockchain.Block{}
 	data := blocksIndexData{"Blocks", blocks}
 

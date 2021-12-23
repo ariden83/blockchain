@@ -11,7 +11,7 @@ type walletsServerData struct {
 	UnspTxOutputs []*UnspTxOutput
 }
 
-func walletsServer(rw http.ResponseWriter, r *http.Request) {
+func walletsServerPage(rw http.ResponseWriter, r *http.Request) {
 	address := ""
 	outputs := []*UnspTxOutput{}
 	balance := uint(0)

@@ -24,6 +24,12 @@ type Api struct {
 	TimeOut float64
 }
 
+type BlockchainAPI struct {
+	MaxSizeCall int     `config:"blockchainapi_maxcallsize"`
+	URL         string  `config:"blockchainapi_url"`
+	TimeOut     float64 `config:"blockchainapi_timeout"`
+}
+
 type Metrics struct {
 	Port int    `config:"metrics_port"`
 	Host string `config:"metrics_host"`
@@ -35,17 +41,18 @@ type Healthz struct {
 }
 
 type Config struct {
-	Name         string `config:"name"`
-	Version      string `config:"version"`
-	TemplatesDir string `config:"template_dir"`
-	StaticDir    string `config:"static_dir"`
-	StaticRoute  string `config:"static_route"`
-	Port         int    `config:"port"`
-	Log          config.Log
-	Api          Api
-	Token        Token
-	Metrics      Metrics
-	Healthz      Healthz
+	Name          string `config:"name"`
+	Version       string `config:"version"`
+	TemplatesDir  string `config:"template_dir"`
+	StaticDir     string `config:"static_dir"`
+	StaticRoute   string `config:"static_route"`
+	Port          int    `config:"port"`
+	Log           config.Log
+	Api           Api
+	Token         Token
+	Metrics       Metrics
+	Healthz       Healthz
+	BlockchainAPI BlockchainAPI
 }
 
 func getDefaultConfig() *Config {
@@ -69,6 +76,9 @@ func getDefaultConfig() *Config {
 		Metrics: Metrics{
 			Port: 8101,
 			Host: "0.0.0.0",
+		},
+		BlockchainAPI: BlockchainAPI{
+			MaxSizeCall: 1024 * 1024 * 12,
 		},
 	}
 }

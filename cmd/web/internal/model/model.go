@@ -1,14 +1,12 @@
 package model
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
+	"context"
 	"github.com/ariden83/blockchain/cmd/web/config"
+	"github.com/ariden83/blockchain/pkg/api"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
 	"io"
-	"net/http"
-	"os"
 	"time"
 )
 
@@ -18,9 +16,8 @@ type IModel interface {
 
 type Model struct {
 	log     *zap.Logger
-	baseURL string
-	client  *http.Client
-	TimeOut float64
+	client  *grpc.ClientConn
+	timeOut float64
 }
 
 type PostInput interface{}
@@ -28,35 +25,47 @@ type PostOutput interface{}
 
 type Option func(e *Model)
 
-func New(cfg *config.Config, log *zap.Logger) *Model {
+func New(cfg config.BlockchainAPI, log *zap.Logger) (*Model, error) {
+
+	opts := []grpc.DialOption{}
+	opts = append(opts, grpc.WithInsecure())
+	opts = append(opts, grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(cfg.MaxSizeCall)))
+	conn, err := grpc.Dial(cfg.URL, opts...)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
 	return &Model{
-		log:     log,
-		baseURL: "http://localhost" + cfg.BuildPort(cfg.Api.Port),
-		client: &http.Client{
-			Timeout: time.Duration(float64(time.Second) * cfg.Api.TimeOut),
-		},
+		log:     log.With(zap.String("service", "grpc")),
+		timeOut: cfg.TimeOut,
+		client:  conn,
+	}, nil
+}
+
+func (m *Model) ShutDown() {
+	if m.client != nil {
+		if err := m.client.Close(); err != nil {
+			m.log.Error("fail to close connexion", zap.Error(err))
+		}
 	}
 }
 
-func (m *Model) Post(path string, p PostInput) (io.ReadCloser, error) {
-	postBody, err := json.Marshal(p)
-	if err != nil {
-		m.log.Error("An Error Occured when marshal post body", zap.Error(err), zap.String("path", path))
-		return nil, err
-	}
-	reqBody := bytes.NewBuffer(postBody)
-	//Leverage Go's HTTP Post function to make request
-	req, err := http.NewRequest("POST", m.baseURL+path, reqBody)
+func (m *Model) GetWallet(seed string) (*api.GetWalletOutput, error) {
+	c := api.NewApiClient(m.client)
 
-	req.Header.Add("Accept", `application/json`)
-	// add header for authentication
-	req.Header.Add("Authorization", fmt.Sprintf("token %s", os.Getenv("TOKEN")))
+	// Contact the server and print out its response.
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(m.timeOut)*time.Second)
+	defer cancel()
 
-	resp, err := m.client.Do(req)
-	if err != nil {
-		m.log.Error("An Error Occured when call api", zap.Error(err), zap.String("path", path))
-		return nil, err
+	search := api.GetWalletInput{
+		Seed: seed,
 	}
-	defer resp.Body.Close()
-	return resp.Body, nil
+	data, err := c.GetWallet(ctx, &search)
+	if err != nil {
+		m.log.Info("Cannot connect get user wallet", zap.Error(err))
+		return data, err
+
+	}
+	return data, nil
 }

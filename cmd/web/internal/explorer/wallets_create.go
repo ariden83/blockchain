@@ -17,7 +17,7 @@ type walletsCreateData struct {
 	Token     string
 }
 
-func (e *Explorer) walletsCreate(rw http.ResponseWriter, r *http.Request) {
+func (e *Explorer) walletsCreatePage(rw http.ResponseWriter, r *http.Request) {
 	/*	var (
 			params    apiParamInput = apiParamInput{}
 			path      string        = "/wallet"

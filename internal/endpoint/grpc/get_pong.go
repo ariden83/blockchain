@@ -5,7 +5,7 @@ import (
 	"golang.org/x/net/context"
 )
 
-// SendPing service
-func (s *EndPoint) SendPing(ctx context.Context, in *protoAPI.Ping) (*protoAPI.Pong, error) {
+// GetPong service
+func (EndPoint) GetPong(_ context.Context, in *protoAPI.Ping) (*protoAPI.Pong, error) {
 	return &protoAPI.Pong{Message: "pong"}, nil
 }

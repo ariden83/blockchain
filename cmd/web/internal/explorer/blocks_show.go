@@ -18,7 +18,7 @@ var (
 	ErrBlockNotFound = errors.New("block not found")
 )
 
-func blocksShow(rw http.ResponseWriter, r *http.Request) {
+func blocksShowPage(rw http.ResponseWriter, r *http.Request) {
 	hash := utils.GetRoute(r, "hash")
 
 	fmt.Println(fmt.Sprintf("%s", hash))
