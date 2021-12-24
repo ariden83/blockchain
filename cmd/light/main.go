@@ -45,7 +45,14 @@ func main() {
 	trans := transactions.Init(cfg.Transactions, per, logs)
 	mtc := metrics.New(cfg.Metrics)
 
-	server := httpEndpoint.New(cfg.API, per, trans, wallets, mtc, logs, evt, cfg.Address)
+	server := httpEndpoint.New(httpEndpoint.WithPersistence(per),
+		httpEndpoint.WithTransactions(trans),
+		httpEndpoint.WithMetrics(mtc),
+		httpEndpoint.WithLogs(logs),
+		httpEndpoint.WithWallets(wallets),
+		httpEndpoint.WithEvents(evt),
+		httpEndpoint.WithUserAddress(cfg.Address),
+		httpEndpoint.WithConfig(cfg.API))
 
 	var p *p2p.EndPoint
 	p = p2p.Init(cfg.P2P, per, wallets, logs, evt, p2p.WithXCache(cfg.XCache))

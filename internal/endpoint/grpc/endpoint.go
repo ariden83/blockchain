@@ -37,29 +37,64 @@ type EndPoint struct {
 	ready       bool
 }
 
-func New(
-	cfg config.GRPC,
-	per persistence.IPersistence,
-	trans transactions.ITransaction,
-	wallets wallet.IWallets,
-	mtc *metrics.Metrics,
-	logs *zap.Logger,
-	evt *event.Event,
-	userAddress string,
-) *EndPoint {
-	e := &EndPoint{
-		cfg:         cfg,
-		persistence: per,
-		transaction: trans,
-		wallets:     wallets,
-		metrics:     mtc,
-		log:         logs.With(zap.String("service", "grpc")),
-		event:       evt,
-		userAddress: userAddress,
+func New(options ...func(*EndPoint)) *EndPoint {
+	ep := &EndPoint{}
+
+	for _, o := range options {
+		o(ep)
 	}
 
-	return e
+	return ep
 }
+
+func WithConfig(cfg config.GRPC) func(*EndPoint) {
+	return func(e *EndPoint) {
+		e.cfg = cfg
+	}
+}
+
+func WithPersistence(p persistence.IPersistence) func(*EndPoint) {
+	return func(e *EndPoint) {
+		e.persistence = p
+	}
+}
+
+func WithTransactions(t transactions.ITransaction) func(*EndPoint) {
+	return func(e *EndPoint) {
+		e.transaction = t
+	}
+}
+
+func WithWallets(w wallet.IWallets) func(*EndPoint) {
+	return func(e *EndPoint) {
+		e.wallets = w
+	}
+}
+
+func WithMetrics(m *metrics.Metrics) func(*EndPoint) {
+	return func(e *EndPoint) {
+		e.metrics = m
+	}
+}
+
+func WithLogs(logs *zap.Logger) func(*EndPoint) {
+	return func(e *EndPoint) {
+		e.log = logs.With(zap.String("service", "http"))
+	}
+}
+
+func WithEvents(evt *event.Event) func(*EndPoint) {
+	return func(e *EndPoint) {
+		e.event = evt
+	}
+}
+
+func WithUserAddress(a string) func(*EndPoint) {
+	return func(e *EndPoint) {
+		e.userAddress = a
+	}
+}
+
 
 // Listen start the server.
 func (e *EndPoint) Listen() error {

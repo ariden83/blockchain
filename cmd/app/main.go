@@ -72,7 +72,15 @@ func main() {
 		httpEndpoint.WithUserAddress(cfg.Address),
 		httpEndpoint.WithConfig(cfg.API))
 
-	s.grpcServer = grpcEndpoint.New(cfg.GRPC, per, trans, wallets, mtc, logs, evt, cfg.Address)
+	s.grpcServer = grpcEndpoint.New(grpcEndpoint.WithPersistence(per),
+		grpcEndpoint.WithTransactions(trans),
+		grpcEndpoint.WithMetrics(mtc),
+		grpcEndpoint.WithLogs(logs),
+		grpcEndpoint.WithWallets(wallets),
+		grpcEndpoint.WithEvents(evt),
+		grpcEndpoint.WithUserAddress(cfg.Address),
+		grpcEndpoint.WithConfig(cfg.GRPC))
+
 	s.metricsServer = metricsEndpoint.New(cfg.Metrics, logs)
 
 	stop := make(chan error, 1)
