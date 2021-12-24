@@ -2,16 +2,12 @@ package http
 
 import (
 	"context"
-	"errors"
 	"github.com/ariden83/blockchain/config"
-	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/metrics"
 	"github.com/ariden83/blockchain/internal/persistence"
 	"github.com/ariden83/blockchain/internal/transactions"
-	"github.com/ariden83/blockchain/internal/utils"
 	"github.com/ariden83/blockchain/internal/wallet"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
@@ -37,78 +33,62 @@ type EndPoint struct {
 	userAddress   string
 }
 
-func New(
-	cfg config.API,
-	per persistence.IPersistence,
-	trans transactions.ITransaction,
-	wallets wallet.IWallets,
-	mtcs *metrics.Metrics,
-	logs *zap.Logger,
-	evt *event.Event,
-	userAddress string,
-) *EndPoint {
-	e := &EndPoint{
-		cfg:         cfg,
-		persistence: per,
-		transaction: trans,
-		wallets:     wallets,
-		metrics:     mtcs,
-		log:         logs.With(zap.String("service", "http")),
-		event:       evt,
-		userAddress: userAddress,
+func New(options ...func(*EndPoint)) *EndPoint {
+	ep := &EndPoint{}
+
+	for _, o := range options {
+		o(ep)
 	}
 
-	return e
+	return ep
 }
 
-func (e *EndPoint) Genesis() {
-	go func() {
-		var lastHash []byte
-
-		// si les fichiers locaux n'existent pas
-		if !e.persistence.DBExists() {
-			e.Handle(errors.New("fail to open DB files"))
-		}
-
-		lastHash, err := e.persistence.GetLastHash()
-		e.Handle(err)
-
-		if lastHash == nil {
-			lastHash = e.createGenesis()
-
-		} else {
-
-			val, err := e.persistence.GetCurrentHashSerialize(lastHash)
-			e.Handle(err)
-			block, err := utils.Deserialize(val)
-			e.Handle(err)
-
-			e.persistence.SetLastHash(lastHash)
-
-			mutex.Lock()
-			blockchain.BlockChain = append(blockchain.BlockChain, *block)
-			mutex.Unlock()
-
-			spew.Dump(blockchain.BlockChain)
-		}
-
-	}()
+func WithConfig(cfg config.API) func(*EndPoint) {
+	return func(e *EndPoint) {
+		e.cfg = cfg
+	}
 }
 
-func (e *EndPoint) createGenesis() []byte {
-	var genesisData string = "First Transaction from Genesis" // This is arbitrary public key for our genesis data
-	cbtx := e.transaction.CoinBaseTx(e.userAddress, genesisData)
-	genesis := blockchain.Genesis(cbtx)
-	e.log.Info("Genesis proved")
+func WithPersistence(p persistence.IPersistence) func(*EndPoint) {
+	return func(e *EndPoint) {
+		e.persistence = p
+	}
+}
 
-	firstHash := genesis.Hash
+func WithTransactions(t transactions.ITransaction) func(*EndPoint) {
+	return func(e *EndPoint) {
+		e.transaction = t
+	}
+}
 
-	serializeBLock, err := utils.Serialize(genesis)
-	e.Handle(err)
+func WithWallets(w wallet.IWallets) func(*EndPoint) {
+	return func(e *EndPoint) {
+		e.wallets = w
+	}
+}
 
-	err = e.persistence.Update(firstHash, serializeBLock)
-	e.Handle(err)
-	return firstHash
+func WithMetrics(m *metrics.Metrics) func(*EndPoint) {
+	return func(e *EndPoint) {
+		e.metrics = m
+	}
+}
+
+func WithLogs(logs *zap.Logger) func(*EndPoint) {
+	return func(e *EndPoint) {
+		e.log = logs.With(zap.String("service", "http"))
+	}
+}
+
+func WithEvents(evt *event.Event) func(*EndPoint) {
+	return func(e *EndPoint) {
+		e.event = evt
+	}
+}
+
+func WithUserAddress(a string) func(*EndPoint) {
+	return func(e *EndPoint) {
+		e.userAddress = a
+	}
 }
 
 func (e *EndPoint) Listen() error {

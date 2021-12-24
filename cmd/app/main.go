@@ -62,7 +62,16 @@ func main() {
 	evt := event.New()
 
 	s := Server{cfg: cfg}
-	s.httpServer = httpEndpoint.New(cfg.API, per, trans, wallets, mtc, logs, evt, cfg.Address)
+
+	s.httpServer = httpEndpoint.New(httpEndpoint.WithPersistence(per),
+		httpEndpoint.WithTransactions(trans),
+		httpEndpoint.WithMetrics(mtc),
+		httpEndpoint.WithLogs(logs),
+		httpEndpoint.WithWallets(wallets),
+		httpEndpoint.WithEvents(evt),
+		httpEndpoint.WithUserAddress(cfg.Address),
+		httpEndpoint.WithConfig(cfg.API))
+
 	s.grpcServer = grpcEndpoint.New(cfg.GRPC, per, trans, wallets, mtc, logs, evt, cfg.Address)
 	s.metricsServer = metricsEndpoint.New(cfg.Metrics, logs)
 

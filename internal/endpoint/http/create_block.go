@@ -38,7 +38,7 @@ func (e *EndPoint) handleCreateBlock(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	newBlock := e.WriteBlock(*req)
-	e.respondWithJSON(rw, http.StatusCreated, newBlock)
+	e.JSONRes(rw, http.StatusCreated, newBlock)
 
 }
 

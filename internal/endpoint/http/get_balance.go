@@ -31,7 +31,7 @@ func (e *EndPoint) handleGetBalance(rw http.ResponseWriter, r *http.Request) {
 	tokensSend := e.transaction.FindUserTokensSend(req.PubKey)
 	tokensReceived := e.transaction.FindUserTokensReceived(req.PubKey)
 
-	e.respondWithJSON(rw, http.StatusOK, getBalanceOutput{
+	e.JSONRes(rw, http.StatusOK, getBalanceOutput{
 		Address:       req.PubKey,
 		Balance:       balance,
 		TotalReceived: tokensReceived,
