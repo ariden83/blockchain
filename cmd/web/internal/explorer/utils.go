@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"go.uber.org/zap"
+	"io"
 	"net/http"
 	"time"
 )
@@ -24,6 +25,8 @@ type ErrorResponse struct {
 	// The error message
 	Message string `json:"message"`
 }
+
+type BodyReceived interface{}
 
 // fail Respond error to json format
 func (e *Explorer) fail(statusCode int, err error, w http.ResponseWriter) {
@@ -54,6 +57,27 @@ func (e *Explorer) resp(rw http.ResponseWriter, resp interface{}) {
 		e.fail(http.StatusInternalServerError, err, rw)
 		return
 	}
+}
+
+func (e *Explorer) decodeBody(rw http.ResponseWriter, logCTX *zap.Logger, body io.ReadCloser, req BodyReceived) error {
+	var err error
+	body = http.MaxBytesReader(rw, body, 1048)
+
+	dec := json.NewDecoder(body)
+	dec.DisallowUnknownFields()
+
+	if err = dec.Decode(&req); err != nil {
+		logCTX.Error("fail to decode input", zap.Error(err))
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return err
+	}
+	if err = dec.Decode(&struct{}{}); err != io.EOF {
+		msg := "Request body must only contain a single JSON object"
+		logCTX.Error(msg, zap.Error(err))
+		http.Error(rw, msg, http.StatusBadRequest)
+		return err
+	}
+	return nil
 }
 
 func debug(i interface{}) string {

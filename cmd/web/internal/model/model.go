@@ -15,9 +15,10 @@ type IModel interface {
 }
 
 type Model struct {
-	log     *zap.Logger
-	client  *grpc.ClientConn
-	timeOut float64
+	log       *zap.Logger
+	connexion *grpc.ClientConn
+	client    *api.ApiClient
+	timeOut   float64
 }
 
 type PostInput interface{}
@@ -34,34 +35,49 @@ func New(cfg config.BlockchainAPI, log *zap.Logger) (*Model, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer conn.Close()
+	logCTX := log.With(zap.String("service", "grpc"))
+	logCTX.Info("init grpc connexion", zap.String("url", cfg.URL))
+
+	client := api.NewApiClient(conn)
 
 	return &Model{
-		log:     log.With(zap.String("service", "grpc")),
-		timeOut: cfg.TimeOut,
-		client:  conn,
+		log:       logCTX,
+		timeOut:   cfg.TimeOut,
+		connexion: conn,
+		client:    &client,
 	}, nil
 }
 
 func (m *Model) ShutDown() {
 	if m.client != nil {
-		if err := m.client.Close(); err != nil {
+		if err := m.connexion.Close(); err != nil {
 			m.log.Error("fail to close connexion", zap.Error(err))
 		}
 	}
 }
 
 func (m *Model) GetWallet(ctx context.Context, mnemonic string) (*api.GetWalletOutput, error) {
-	c := api.NewApiClient(m.client)
 
-	// Contact the server and print out its response.
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(m.timeOut)*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(m.timeOut)*time.Second)
 	defer cancel()
 
-	search := api.GetWalletInput{
+	data, err := (*m.client).GetWallet(ctx, &api.GetWalletInput{
 		Mnemonic: mnemonic,
+	})
+	if err != nil {
+		m.log.Info("Cannot connect get user wallet", zap.Error(err), zap.String("mnemonic", mnemonic))
+		return data, err
+
 	}
-	data, err := c.GetWallet(ctx, &search)
+	return data, nil
+}
+
+func (m *Model) CreateWallet(ctx context.Context) (*api.CreateWalletOutput, error) {
+
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(m.timeOut)*time.Second)
+	defer cancel()
+
+	data, err := (*m.client).CreateWallet(ctx, &api.CreateWalletInput{})
 	if err != nil {
 		m.log.Info("Cannot connect get user wallet", zap.Error(err))
 		return data, err

@@ -1,9 +1,7 @@
 package explorer
 
 import (
-	"encoding/json"
 	"go.uber.org/zap"
-	"io"
 	"net/http"
 )
 
@@ -22,7 +20,7 @@ type postLoginAPIBodyReq struct {
 
 type postLoginAPIBodyRes struct {
 	Address string `json:"address"`
-	PubKey  string `json:"publickey"`
+	PubKey  string `json:"pubkey"`
 }
 
 // postLoginResp
@@ -88,21 +86,10 @@ type postLoginAPIReq struct {
 //        412: genericError
 //        500: genericError
 func (e *Explorer) loginAPI(rw http.ResponseWriter, r *http.Request) {
-	var req postLoginAPIBodyReq
+	req := &postLoginAPIBodyReq{}
 
-	r.Body = http.MaxBytesReader(rw, r.Body, 1048)
-	dec := json.NewDecoder(r.Body)
-	dec.DisallowUnknownFields()
-
-	if err := dec.Decode(&req); err != nil {
-		e.log.Error("fail to decode input", zap.Error(err))
-		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
-	}
-	if err := dec.Decode(&struct{}{}); err != io.EOF {
-		msg := "Request body must only contain a single JSON object"
-		e.log.Error(msg, zap.Error(err))
-		http.Error(rw, msg, http.StatusBadRequest)
+	log := e.log.With(zap.String("input", "loginAPI"))
+	if err := e.decodeBody(rw, log, r.Body, req); err != nil {
 		return
 	}
 

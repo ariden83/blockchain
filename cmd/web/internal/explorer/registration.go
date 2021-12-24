@@ -44,3 +44,87 @@ func (e *Explorer) walletsCreatePage(rw http.ResponseWriter, r *http.Request) {
 
 	templates.ExecuteTemplate(rw, "wallets_create", frontData)
 }
+
+type postRegistrationAPIBodyReq struct{}
+
+type postRegistrationAPIBodyRes struct {
+	Address  string `json:"address"`
+	PubKey   string `json:"pubkey"`
+	Mnemonic string `json:"mnemonic"`
+}
+
+// postRegistrationAPIResp
+//
+// swagger:response postRegistrationAPIResp
+// nolint
+type postRegistrationAPIResp struct {
+	// Content-Length
+	// in: header
+	// required: true
+	ContentLength string `json:"Content-Length"`
+	// Content-Type
+	// in: header
+	// required: true
+	ContentType string `json:"Content-Type"`
+	// X-Request-Id
+	// in: header
+	// required: true
+	XRequestID string `json:"X-Request-Id"`
+	// corps of Response
+	// in: body
+	Body struct {
+		postRegistrationAPIBodyRes
+	} `json:"body"`
+}
+
+// postRegistrationAPIReq Params for method POST
+//
+// swagger:parameters postRegistrationAPIReq
+// nolint
+type postRegistrationAPIReq struct {
+	// the items for this order
+	//
+	// in: body
+	postRegistrationAPIBodyReq postRegistrationAPIBodyReq
+	// X-Request-Id
+	// in: header
+	// required: true
+	XRequestID string `json:"X-Request-Id"`
+	// X-Token
+	// in: header
+	// required: true
+	XToken string `json:"X-Token"`
+}
+
+// registrationAPI swagger:route POST /api/registration registrationAPI postRegistrationAPIReq
+//
+// POST registrationAPI
+//
+//     Consumes:
+//     - application/json
+//
+//     Produces:
+//     - application/json
+//
+//     Schemes: http, https
+//
+// Responses:
+//    default: genericError
+//        200: postRegistrationAPIResp
+//        401: genericError
+//        404: genericError
+//        412: genericError
+//        500: genericError
+func (e *Explorer) registrationAPI(rw http.ResponseWriter, r *http.Request) {
+	wallet, err := e.model.CreateWallet(r.Context())
+	if err != nil {
+		e.fail(http.StatusNotFound, err, rw)
+		return
+	}
+
+	e.resp(rw, postRegistrationAPIBodyRes{
+		Address:  wallet.Address,
+		PubKey:   wallet.PubKey,
+		Mnemonic: wallet.Mnemonic,
+	})
+}
