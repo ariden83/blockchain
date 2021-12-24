@@ -95,6 +95,9 @@ func WithUserAddress(a string) func(*EndPoint) {
 	}
 }
 
+func (e *EndPoint) Enabled() bool {
+	return e.cfg.Enabled
+}
 
 // Listen start the server.
 func (e *EndPoint) Listen() error {

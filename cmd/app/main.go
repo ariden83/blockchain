@@ -61,7 +61,7 @@ func main() {
 
 	evt := event.New()
 
-	s := Server{cfg: cfg}
+	s := Server{}
 
 	s.httpServer = httpEndpoint.New(httpEndpoint.WithPersistence(per),
 		httpEndpoint.WithTransactions(trans),

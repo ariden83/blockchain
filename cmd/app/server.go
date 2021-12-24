@@ -3,24 +3,22 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/ariden83/blockchain/config"
 	grpcEndpoint "github.com/ariden83/blockchain/internal/endpoint/grpc"
 	httpEndpoint "github.com/ariden83/blockchain/internal/endpoint/http"
 	metricsEndpoint "github.com/ariden83/blockchain/internal/endpoint/metrics"
 )
 
 type Server struct {
-	cfg           *config.Config
 	httpServer    *httpEndpoint.EndPoint
 	grpcServer    *grpcEndpoint.EndPoint
 	metricsServer *metricsEndpoint.EndPoint
 }
 
 func (s *Server) Start(stop chan error) {
-	if s.cfg.GRPC.Enabled {
+	if s.grpcServer.Enabled() {
 		s.startGRPCServer(stop)
 	}
-	if s.cfg.API.Enabled {
+	if s.httpServer.Enabled() {
 		s.startHTTPServer(stop)
 	}
 	s.startMetricsServer(stop)

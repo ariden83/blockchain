@@ -91,6 +91,10 @@ func WithUserAddress(a string) func(*EndPoint) {
 	}
 }
 
+func (e *EndPoint) Enabled() bool {
+	return e.cfg.Enabled
+}
+
 func (e *EndPoint) Listen() error {
 	e.log.Info("Start listening HTTP Server", zap.Int("port", e.cfg.Port))
 
