@@ -2,7 +2,6 @@ package http
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/blockchain"
@@ -156,22 +155,6 @@ func (e *EndPoint) MetricsMiddleware(next http.Handler) http.Handler {
 
 		jsonHandler.ServeHTTP(w, r)
 	})
-}
-
-func (e *EndPoint) respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
-	response, err := json.MarshalIndent(payload, "", "  ")
-	if err != nil {
-		e.log.Error("HTTP 500: Internal Server Error", zap.Error(err))
-		w.WriteHeader(http.StatusInternalServerError)
-		if _, err = w.Write([]byte("HTTP 500: Internal Server Error")); err != nil {
-			e.log.Error("fail to write response", zap.Error(err))
-		}
-		return
-	}
-	w.WriteHeader(code)
-	if _, err = w.Write(response); err != nil {
-		e.log.Error("fail to write response", zap.Error(err))
-	}
 }
 
 func (e *EndPoint) Shutdown(ctx context.Context) {

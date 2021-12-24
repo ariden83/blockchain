@@ -1,12 +1,12 @@
 package http
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/p2p/address"
 	"github.com/ariden83/blockchain/internal/p2p/validation"
 	"github.com/ariden83/blockchain/internal/utils"
+	"go.uber.org/zap"
 	"io"
 	"math/big"
 	"net/http"
@@ -18,29 +18,27 @@ type CreateBlockInput struct {
 	PubKey  string `json:"key"`
 }
 
-// takes JSON payload as an input for heart rate (BPM)
-func (e *EndPoint) handleCreateBlock(w http.ResponseWriter, r *http.Request) {
-	var m CreateBlockInput
+// handleCreateBlock takes JSON payload as an input for heart rate (BPM)
+func (e *EndPoint) handleCreateBlock(rw http.ResponseWriter, r *http.Request) {
+	req := &CreateBlockInput{}
 
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&m); err != nil {
-		e.respondWithJSON(w, http.StatusBadRequest, r.Body)
-		return
-	}
-	defer r.Body.Close()
-
-	if m.Address == "" {
-		io.WriteString(w, "No address set")
+	log := e.log.With(zap.String("input", "createBlock"))
+	if err := e.decodeBody(rw, log, r.Body, req); err != nil {
 		return
 	}
 
-	if m.PubKey == "" {
-		io.WriteString(w, "No pub key set")
+	if req.Address == "" {
+		io.WriteString(rw, "No address set")
 		return
 	}
 
-	newBlock := e.WriteBlock(m)
-	e.respondWithJSON(w, http.StatusCreated, newBlock)
+	if req.PubKey == "" {
+		io.WriteString(rw, "No pub key set")
+		return
+	}
+
+	newBlock := e.WriteBlock(*req)
+	e.respondWithJSON(rw, http.StatusCreated, newBlock)
 
 }
 

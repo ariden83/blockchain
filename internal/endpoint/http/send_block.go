@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/p2p/address"
@@ -20,18 +19,15 @@ type SendBlockInput struct {
 	Amount *big.Int `json:"amount"`
 }
 
-func (e *EndPoint) handleSendBlock(w http.ResponseWriter, r *http.Request) {
-	var m SendBlockInput
+func (e *EndPoint) handleSendBlock(rw http.ResponseWriter, r *http.Request) {
+	req := &SendBlockInput{}
 
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&m); err != nil {
-		e.log.Error("fail to decode input", zap.Error(err), zap.String("input", "sendBlock"))
-		e.respondWithJSON(w, http.StatusBadRequest, r.Body)
+	log := e.log.With(zap.String("input", "sendBlock"))
+	if err := e.decodeBody(rw, log, r.Body, req); err != nil {
 		return
 	}
-	defer r.Body.Close()
 
-	e.sendBlock(w, m)
+	e.sendBlock(rw, *req)
 }
 
 func (e *EndPoint) sendBlock(w http.ResponseWriter, input SendBlockInput) {

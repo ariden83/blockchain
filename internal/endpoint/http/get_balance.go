@@ -1,9 +1,7 @@
 package http
 
 import (
-	"encoding/json"
 	"go.uber.org/zap"
-	"io"
 	"math/big"
 	"net/http"
 )
@@ -21,32 +19,20 @@ type getBalanceOutput struct {
 	UnconfirmedBalance *big.Int
 }
 
-func (e *EndPoint) handleGetBalance(w http.ResponseWriter, r *http.Request) {
-	var input getBalanceInput
+func (e *EndPoint) handleGetBalance(rw http.ResponseWriter, r *http.Request) {
+	req := &getBalanceInput{}
 
-	r.Body = http.MaxBytesReader(w, r.Body, 1048)
-	dec := json.NewDecoder(r.Body)
-	dec.DisallowUnknownFields()
-
-	if err := dec.Decode(&input); err != nil {
-		e.log.Error("Request body must only contain a single JSON object", zap.Error(err))
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	log := e.log.With(zap.String("input", "getBalance"))
+	if err := e.decodeBody(rw, log, r.Body, req); err != nil {
 		return
 	}
 
-	if err := dec.Decode(&struct{}{}); err != io.EOF {
-		msg := "Request body must only contain a single JSON object"
-		e.log.Error("Request body must only contain a single JSON object")
-		http.Error(w, msg, http.StatusBadRequest)
-		return
-	}
+	balance := e.transaction.FindUserBalance(req.PubKey)
+	tokensSend := e.transaction.FindUserTokensSend(req.PubKey)
+	tokensReceived := e.transaction.FindUserTokensReceived(req.PubKey)
 
-	balance := e.transaction.FindUserBalance(input.PubKey)
-	tokensSend := e.transaction.FindUserTokensSend(input.PubKey)
-	tokensReceived := e.transaction.FindUserTokensReceived(input.PubKey)
-
-	e.respondWithJSON(w, http.StatusOK, getBalanceOutput{
-		Address:       input.PubKey,
+	e.respondWithJSON(rw, http.StatusOK, getBalanceOutput{
+		Address:       req.PubKey,
 		Balance:       balance,
 		TotalReceived: tokensReceived,
 		TotalSent:     tokensSend,
