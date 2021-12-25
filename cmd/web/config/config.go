@@ -15,8 +15,9 @@ import (
 	"time"
 )
 
-type Token struct {
-	SecretKey string `config:"token_secret_key,obfuscate"`
+type Auth struct {
+	SecretKey  string `config:"token_secret_key,obfuscate"`
+	RefreshKey string `config:"token_refresh_key,obfuscate"`
 }
 
 type Api struct {
@@ -49,7 +50,7 @@ type Config struct {
 	Port          int    `config:"port"`
 	Log           config.Log
 	Api           Api
-	Token         Token
+	Auth          Auth
 	Metrics       Metrics
 	Healthz       Healthz
 	BlockchainAPI BlockchainAPI
@@ -70,8 +71,9 @@ func getDefaultConfig() *Config {
 		Api: Api{
 			Port: 8098,
 		},
-		Token: Token{
-			SecretKey: "chihuahua",
+		Auth: Auth{
+			SecretKey:  "chihuahua",
+			RefreshKey: "channel",
 		},
 		Metrics: Metrics{
 			Port: 8101,

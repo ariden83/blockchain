@@ -1,14 +1,40 @@
 version: "3.4"
 services:
+  redis:
+    image: "redis:alpine"
+    hostname: redis
+    ports:
+      - "6379:6379"
+
   blockchain:
     image: localhost:5000/ariden83/blockchain:782a3ff
     container_name: "blockChain"
     ports:
-      - "8580:8098"
-      - "8581:8099"
-      - "8582:8097"
+      - "8100:8100"
     restart: "always"
     volumes:
       - "./tmp:/go/tmp"
+
+  blockchain-2:
+    image: localhost:5000/ariden83/blockchain:782a3ff
+    container_name: "blockChain"
+    ports:
+      - "8101:8100"
+    restart: "always"
+
+  web-app:
+    image: localhost:5000/ariden83/blockchain:782a3ff
+    entrypoint: ./web
+    container_name: "blockChain"
+    ports:
+      - "4000:4000"
+    depends_on:
+      - redis
+      - blockchain
+    restart: "always"
+
+
+
+
 
 

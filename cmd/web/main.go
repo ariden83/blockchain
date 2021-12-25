@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/ariden83/blockchain/cmd/web/config"
+	"github.com/ariden83/blockchain/cmd/web/internal/auth"
 	"github.com/ariden83/blockchain/cmd/web/internal/explorer"
 	"github.com/ariden83/blockchain/cmd/web/internal/metrics"
 	"github.com/ariden83/blockchain/cmd/web/internal/model"
-	"github.com/ariden83/blockchain/cmd/web/internal/token"
 	"github.com/ariden83/blockchain/internal/logger"
 	"go.uber.org/zap"
 	"log"
@@ -33,7 +33,7 @@ func main() {
 	if err != nil {
 		logs.Fatal("fail to init model", zap.Error(err))
 	}
-	t := token.New(cfg.Token)
+	t := auth.New(cfg.Auth)
 
 	e := explorer.New(cfg, logs, m, t, mtc)
 	stop := make(chan error, 1)

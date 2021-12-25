@@ -3,9 +3,9 @@ package explorer
 import (
 	"context"
 	"github.com/ariden83/blockchain/cmd/web/config"
+	"github.com/ariden83/blockchain/cmd/web/internal/auth"
 	"github.com/ariden83/blockchain/cmd/web/internal/metrics"
 	"github.com/ariden83/blockchain/cmd/web/internal/model"
-	"github.com/ariden83/blockchain/cmd/web/internal/token"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 	"net/http"
@@ -22,7 +22,7 @@ type Explorer struct {
 	server        *http.Server
 	router        *mux.Router
 	model         *model.Model
-	token         *token.Token
+	token         *auth.Auth
 	metricsServer *http.Server
 	metrics       *metrics.Metrics
 }
@@ -33,7 +33,7 @@ type Healthz struct {
 	Version  string   `json:"version"`
 }
 
-func New(cfg *config.Config, log *zap.Logger, m *model.Model, t *token.Token, mtc *metrics.Metrics) *Explorer {
+func New(cfg *config.Config, log *zap.Logger, m *model.Model, t *auth.Auth, mtc *metrics.Metrics) *Explorer {
 	return &Explorer{
 		log:     log,
 		cfg:     cfg,

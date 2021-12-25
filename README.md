@@ -3,6 +3,8 @@ My first own blockchain. See website of project [blockchain-altcoin.com](https:/
 
 ## Resources
 
+### Blockchain 
+
 * See tutorial [Code your own blockchain in less than 200 lines of Go!](https://mycoralhealth.medium.com/code-your-own-blockchain-in-less-than-200-lines-of-go-e296282bcffc)
 * See original code [nosequeldeebee/blockchain-tutorial](https://github.com/nosequeldeebee/blockchain-tutorial)
 * Block hashing algorithm [Block_hashing_algorithm](https://en.bitcoin.it/wiki/Block_hashing_algorithm)
@@ -18,6 +20,10 @@ My first own blockchain. See website of project [blockchain-altcoin.com](https:/
 * p2p discovery mdns [p2p/discovery/mdns.go](https://gitlab.dms3.io/p2p/go-p2p/-/blob/master/p2p/discovery/mdns.go)
 * p2P examples [examples](https://github.com/libp2p/go-libp2p/tree/master/examples/)
 * blockchain go project by Nomad [nc_nomadcoin](https://github.com/librity/nc_nomadcoin)
+
+### Others
+
+* Using JWT for Authentication [using-jwt-for-authentication-in-a-golang-application-dr](https://learn.vonage.com/blog/2020/03/13/using-jwt-for-authentication-in-a-golang-application-dr/)
 
 ## Installation
 
