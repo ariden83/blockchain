@@ -24,7 +24,7 @@ func (e *EndPoint) handleGetWallet(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	keys := wallet.GetKeys(req.Mnemonic)
-	e.JSONRes(rw, http.StatusCreated, GetWalletOutput{
+	e.JSON(rw, http.StatusCreated, GetWalletOutput{
 		Address: keys.Address,
 		PubKey:  keys.PubKey,
 	})

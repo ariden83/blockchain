@@ -24,6 +24,7 @@ My first own blockchain. See website of project [blockchain-altcoin.com](https:/
 ### Others
 
 * Using JWT for Authentication [using-jwt-for-authentication-in-a-golang-application-dr](https://learn.vonage.com/blog/2020/03/13/using-jwt-for-authentication-in-a-golang-application-dr/)
+* Encrypt And Decrypt Data [encrypt-decrypt-data](https://www.thepolyglotdeveloper.com/2018/02/encrypt-decrypt-data-golang-application-crypto-packages/)
 
 ## Installation
 

@@ -99,7 +99,21 @@ func (e *Explorer) loginAPI(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	e.resp(rw, postLoginAPIBodyRes{
+	ts, err := e.auth.CreateToken(wallet.PubKey)
+	if err != nil {
+		e.fail(http.StatusUnprocessableEntity, err, rw)
+		return
+	}
+	saveErr := e.auth.CreateAuth(r.Context(), wallet.PubKey, ts)
+	if saveErr != nil {
+		e.fail(http.StatusUnprocessableEntity, err, rw)
+		return
+	}
+
+	e.setTokenHeaders(rw, ts)
+	e.setUserKeyHeaders(rw, wallet.PubKey)
+
+	e.JSON(rw, postLoginAPIBodyRes{
 		Address: wallet.Address,
 		PubKey:  wallet.PubKey,
 	})

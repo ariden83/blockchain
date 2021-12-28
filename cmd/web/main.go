@@ -28,14 +28,19 @@ func main() {
 	logs = logs.With(zap.String("v", cfg.Version))
 	defer logs.Sync()
 
-	mtc := metrics.New(cfg.Name)
 	m, err := model.New(cfg.BlockchainAPI, logs)
 	if err != nil {
 		logs.Fatal("fail to init model", zap.Error(err))
 	}
-	t := auth.New(cfg.Auth)
 
-	e := explorer.New(cfg, logs, m, t, mtc)
+	e := explorer.New(
+		explorer.WithConfig(cfg),
+		explorer.WithLogs(logs),
+		explorer.WithModel(m),
+		explorer.WithAuth(auth.New(cfg.Auth)),
+		explorer.WithMetrics(metrics.New(cfg.Name)),
+	)
+
 	stop := make(chan error, 1)
 
 	e.StartMetricsServer(stop)

@@ -2,12 +2,18 @@ package auth
 
 import (
 	"context"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/md5"
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"github.com/ariden83/blockchain/cmd/web/config"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-redis/redis/v8"
 	uuid "github.com/satori/go.uuid"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -55,16 +61,19 @@ func (a *Auth) CreateToken(userID string) (*TokenDetails, error) {
 	atClaims["user_id"] = userID
 	atClaims["exp"] = td.AtExpires
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
+
 	td.AccessToken, err = at.SignedString([]byte(a.cfg.SecretKey))
 	if err != nil {
 		return nil, err
 	}
+
 	//Creating Refresh Token
 	rtClaims := jwt.MapClaims{}
 	rtClaims["refresh_uuid"] = td.RefreshUuid
 	rtClaims["user_id"] = userID
 	rtClaims["exp"] = td.RtExpires
 	rt := jwt.NewWithClaims(jwt.SigningMethodHS256, rtClaims)
+
 	td.RefreshToken, err = rt.SignedString([]byte(a.cfg.RefreshKey))
 	if err != nil {
 		return nil, err
@@ -184,4 +193,43 @@ func (a *Auth) DeleteTokens(ctx context.Context, authD *AccessDetails) error {
 		return errors.New("something went wrong")
 	}
 	return nil
+}
+
+func (a *Auth) createHash(key string) string {
+	hasher := md5.New()
+	hasher.Write([]byte(key))
+	return hex.EncodeToString(hasher.Sum(nil))
+}
+
+func (a *Auth) Encrypt(data []byte) (string, error) {
+	block, _ := aes.NewCipher([]byte(a.createHash(a.cfg.EncryptKey)))
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return "", err
+	}
+	nonce := make([]byte, gcm.NonceSize())
+	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
+		return "", err
+	}
+	ciphertext := gcm.Seal(nonce, nonce, data, nil)
+	return string(ciphertext), nil
+}
+
+func (a *Auth) Decrypt(data []byte) (string, error) {
+	key := []byte(a.createHash(a.cfg.EncryptKey))
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return "", err
+	}
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return "", err
+	}
+	nonceSize := gcm.NonceSize()
+	nonce, ciphertext := data[:nonceSize], data[nonceSize:]
+	plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
+	if err != nil {
+		return "", err
+	}
+	return string(plaintext), nil
 }

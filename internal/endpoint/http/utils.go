@@ -30,7 +30,7 @@ func (e *EndPoint) decodeBody(rw http.ResponseWriter, logCTX *zap.Logger, body i
 	return nil
 }
 
-func (e *EndPoint) JSONRes(w http.ResponseWriter, code int, payload interface{}) {
+func (e *EndPoint) JSON(w http.ResponseWriter, code int, payload interface{}) {
 	response, err := json.MarshalIndent(payload, "", "  ")
 	if err != nil {
 		e.log.Error("HTTP 500: Internal Server Error", zap.Error(err))

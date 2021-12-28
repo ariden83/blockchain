@@ -5,13 +5,18 @@ import (
 	"github.com/ariden83/blockchain/cmd/web/config"
 	"github.com/ariden83/blockchain/cmd/web/internal/auth"
 	"github.com/ariden83/blockchain/cmd/web/internal/metrics"
+	"github.com/ariden83/blockchain/cmd/web/internal/middleware"
 	"github.com/ariden83/blockchain/cmd/web/internal/model"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/urfave/negroni"
 	"go.uber.org/zap"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -22,7 +27,7 @@ type Explorer struct {
 	server        *http.Server
 	router        *mux.Router
 	model         *model.Model
-	token         *auth.Auth
+	auth          *auth.Auth
 	metricsServer *http.Server
 	metrics       *metrics.Metrics
 }
@@ -33,15 +38,44 @@ type Healthz struct {
 	Version  string   `json:"version"`
 }
 
-func New(cfg *config.Config, log *zap.Logger, m *model.Model, t *auth.Auth, mtc *metrics.Metrics) *Explorer {
-	return &Explorer{
-		log:     log,
-		cfg:     cfg,
-		baseURL: "http://localhost" + cfg.BuildPort(cfg.Port),
-		router:  mux.NewRouter(),
-		model:   m,
-		token:   t,
-		metrics: mtc,
+func New(options ...func(*Explorer)) *Explorer {
+	e := &Explorer{
+		router: mux.NewRouter(),
+	}
+	for _, o := range options {
+		o(e)
+	}
+	return e
+}
+
+func WithConfig(cfg *config.Config) func(*Explorer) {
+	return func(e *Explorer) {
+		e.cfg = cfg
+		e.baseURL = "http://localhost" + cfg.BuildPort(cfg.Port)
+	}
+}
+
+func WithLogs(logs *zap.Logger) func(*Explorer) {
+	return func(e *Explorer) {
+		e.log = logs.With(zap.String("service", "http"))
+	}
+}
+
+func WithMetrics(m *metrics.Metrics) func(*Explorer) {
+	return func(e *Explorer) {
+		e.metrics = m
+	}
+}
+
+func WithModel(evt *model.Model) func(*Explorer) {
+	return func(e *Explorer) {
+		e.model = evt
+	}
+}
+
+func WithAuth(a *auth.Auth) func(*Explorer) {
+	return func(e *Explorer) {
+		e.auth = a
 	}
 }
 
@@ -71,9 +105,36 @@ func (e *Explorer) listenOrDie(stop chan error) {
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 	mux.Handle("/", e.router)
 
+	n := negroni.New(negroni.HandlerFunc(middleware.DefaultHeader))
+	n.UseFunc(e.tokenHeader)
+	n.UseFunc(e.requestIDHeader)
+
+	n.Use(negroni.HandlerFunc(func(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+		route := strings.ToLower(r.Method)
+		route = strings.Replace(route, "/", "_", 0)
+
+		jsonHandler := promhttp.InstrumentHandlerInFlight(
+			e.metrics.InFlight,
+
+			promhttp.InstrumentHandlerResponseSize(
+				e.metrics.ResponseSize.MustCurryWith(prometheus.Labels{"service": route}),
+
+				promhttp.InstrumentHandlerRequestSize(
+					e.metrics.RequestSize.MustCurryWith(prometheus.Labels{"service": route}),
+
+					promhttp.InstrumentHandlerCounter(
+						e.metrics.RouteCountReqs.MustCurryWith(prometheus.Labels{"service": route}),
+
+						promhttp.InstrumentHandlerDuration(
+							e.metrics.ResponseDuration.MustCurryWith(prometheus.Labels{"service": route}),
+							next)))))
+
+		jsonHandler.ServeHTTP(rw, r)
+	}))
+
 	e.server = &http.Server{
 		Addr:           ":" + strconv.Itoa(e.cfg.Port),
-		Handler:        mux,
+		Handler:        n,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,

@@ -30,6 +30,7 @@ require (
 	github.com/multiformats/go-multiaddr v0.4.1
 	github.com/prometheus/client_golang v1.11.0
 	github.com/satori/go.uuid v1.2.0
+	github.com/urfave/negroni v1.0.0
 	github.com/wemeetagain/go-hdwallet v0.1.0
 	go.uber.org/zap v1.19.0
 	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d

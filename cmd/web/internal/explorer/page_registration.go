@@ -122,7 +122,7 @@ func (e *Explorer) registrationAPI(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	e.resp(rw, postRegistrationAPIBodyRes{
+	e.JSON(rw, postRegistrationAPIBodyRes{
 		Address:  wallet.Address,
 		PubKey:   wallet.PubKey,
 		Mnemonic: wallet.Mnemonic,

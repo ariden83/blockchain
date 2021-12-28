@@ -18,6 +18,7 @@ import (
 type Auth struct {
 	SecretKey  string `config:"token_secret_key,obfuscate"`
 	RefreshKey string `config:"token_refresh_key,obfuscate"`
+	EncryptKey string `config:"token_encrypt_key,obfuscate"`
 }
 
 type Api struct {
@@ -74,6 +75,7 @@ func getDefaultConfig() *Config {
 		Auth: Auth{
 			SecretKey:  "chihuahua",
 			RefreshKey: "channel",
+			EncryptKey: "lelou",
 		},
 		Metrics: Metrics{
 			Port: 8101,

@@ -3,10 +3,16 @@ package explorer
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/ariden83/blockchain/cmd/web/internal/auth"
 	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"time"
+)
+
+const (
+	RequestIDHeaderKey = "X-Request-ID"
+	RequestIDKey       = "RequestID"
 )
 
 // GenericError Default response when we have an error
@@ -46,7 +52,7 @@ func (e *Explorer) fail(statusCode int, err error, w http.ResponseWriter) {
 	}
 }
 
-func (e *Explorer) resp(rw http.ResponseWriter, resp interface{}) {
+func (e *Explorer) JSON(rw http.ResponseWriter, resp interface{}) {
 	if js, err := json.Marshal(resp); err != nil {
 		e.log.Error("Fail to json.Marshal", zap.Error(err))
 		e.fail(http.StatusInternalServerError, err, rw)
@@ -57,6 +63,23 @@ func (e *Explorer) resp(rw http.ResponseWriter, resp interface{}) {
 		e.fail(http.StatusInternalServerError, err, rw)
 		return
 	}
+}
+
+func (e *Explorer) setTokenHeaders(rw http.ResponseWriter, ts *auth.TokenDetails) {
+	rw.Header().Set("Access_Token", ts.AccessToken)
+	rw.Header().Set("Token_Type", "Bearer")
+	rw.Header().Set("Expires_In", fmt.Sprintf("%d", ts.RtExpires))
+	rw.Header().Set("Refresh_Token", ts.RefreshToken)
+	rw.Header().Set("Scope", "create")
+}
+
+func (e *Explorer) setUserKeyHeaders(rw http.ResponseWriter, userKey string) {
+	key, err := e.auth.Encrypt([]byte(userKey))
+	if err != nil {
+		e.log.Error("fail to set user key header", zap.Error(err))
+		return
+	}
+	rw.Header().Set("User_Key", key)
 }
 
 func (e *Explorer) decodeBody(rw http.ResponseWriter, logCTX *zap.Logger, body io.ReadCloser, req BodyReceived) error {
