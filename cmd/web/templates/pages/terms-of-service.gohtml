@@ -1,0 +1,19 @@
+{{ define "home" }}<!DOCTYPE html>
+<html lang="en">
+  {{ template "head" .PageTitle }}
+  <body>
+  <div id="app-content" class="dark">
+    <div class="main-container-wrapper">
+      <div class="first-time-flow">
+        <div class="first-time-flow__wrapper">
+          <div class="import-account">
+            <h1 class="unlock-page__title">Bienvenue !</h1>
+            <p>Le web décentralisé vous attend</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    {{ template "footer" }}
+  </div>
+  </body>
+</html>{{ end }}

@@ -37,7 +37,11 @@ func main() {
 		explorer.WithConfig(cfg),
 		explorer.WithLogs(logs),
 		explorer.WithModel(m),
-		explorer.WithAuth(auth.New(cfg.Auth)),
+		explorer.WithMetadata(cfg.Metadata),
+		explorer.WithAuth(auth.New(
+			auth.WithGoogleAPI(cfg.Auth.GoogleAPI),
+			auth.WithClassic(cfg.Auth.Classic),
+		)),
 		explorer.WithMetrics(metrics.New(cfg.Name)),
 	)
 

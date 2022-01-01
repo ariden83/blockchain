@@ -15,10 +15,18 @@ import (
 	"time"
 )
 
+type OAuthConfig struct {
+	ClientStore  string
+	ClientID     string
+	ClientSecret string
+	Scopes       []string
+	URLAPI       string
+	Enable       bool
+}
+
 type Auth struct {
-	SecretKey  string `config:"token_secret_key,obfuscate"`
-	RefreshKey string `config:"token_refresh_key,obfuscate"`
-	EncryptKey string `config:"token_encrypt_key,obfuscate"`
+	GoogleAPI OAuthConfig
+	Classic   OAuthConfig
 }
 
 type Api struct {
@@ -42,9 +50,14 @@ type Healthz struct {
 	WriteTimeout time.Duration `config:"healthz_write_timeout"`
 }
 
+type Metadata struct {
+	Title string `config:"metadata_title"`
+}
+
 type Config struct {
 	Name          string `config:"name"`
 	Version       string `config:"version"`
+	Domain        string `config:"domain"`
 	TemplatesDir  string `config:"template_dir"`
 	StaticDir     string `config:"static_dir"`
 	StaticRoute   string `config:"static_route"`
@@ -55,6 +68,7 @@ type Config struct {
 	Metrics       Metrics
 	Healthz       Healthz
 	BlockchainAPI BlockchainAPI
+	Metadata      Metadata
 }
 
 func getDefaultConfig() *Config {
@@ -62,6 +76,7 @@ func getDefaultConfig() *Config {
 		Name:         "blockChain",
 		Version:      "0.0.0",
 		Port:         4000,
+		Domain:       "http://localhost:4000",
 		TemplatesDir: "cmd/web/templates/",
 		StaticDir:    "./cmd/web/static/",
 		StaticRoute:  "/static/",
@@ -73,9 +88,16 @@ func getDefaultConfig() *Config {
 			Port: 8098,
 		},
 		Auth: Auth{
-			SecretKey:  "chihuahua",
-			RefreshKey: "channel",
-			EncryptKey: "lelou",
+			Classic: OAuthConfig{
+				ClientID:     "clientID",
+				ClientSecret: "1234567898900",
+				Scopes:       []string{"all"},
+			},
+			GoogleAPI: OAuthConfig{
+				ClientID:     "",
+				ClientSecret: "",
+				URLAPI:       "https://www.googleapis.com/oauth2/v2/userinfo?access_token=",
+			},
 		},
 		Metrics: Metrics{
 			Port: 8101,
@@ -85,6 +107,9 @@ func getDefaultConfig() *Config {
 			MaxSizeCall: 1024 * 1024 * 12,
 			URL:         "0.0.0.0:8100",
 			TimeOut:     10,
+		},
+		Metadata: Metadata{
+			Title: "blockchain-altcoin",
 		},
 	}
 }

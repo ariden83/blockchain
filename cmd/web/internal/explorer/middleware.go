@@ -9,25 +9,15 @@ import (
 )
 
 func (e *Explorer) tokenHeader(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	userKey := r.Header.Get("User_Key")
-	if userKey == "" {
+	/*if err := e.auth.TokenValid(r); err != nil {
 		next(rw, r)
 		return
 	}
 
-	ts, err := e.auth.CreateToken(userKey)
-	if err != nil {
-		e.fail(http.StatusUnprocessableEntity, err, rw)
-		return
-	}
-	saveErr := e.auth.CreateAuth(r.Context(), userKey, ts)
-	if saveErr != nil {
-		e.fail(http.StatusUnprocessableEntity, err, rw)
-		return
-	}
 
-	e.setTokenHeaders(rw, ts)
-	e.setUserKeyHeaders(rw, userKey)
+	token := e.auth.ExtractToken(r)
+
+	e.setTokenHeaders(rw, ts)*/
 
 	next(rw, r)
 }

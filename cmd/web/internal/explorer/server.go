@@ -12,6 +12,11 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/urfave/negroni"
 	"go.uber.org/zap"
+	"gopkg.in/oauth2.v3/errors"
+	"gopkg.in/oauth2.v3/manage"
+	"gopkg.in/oauth2.v3/models"
+	"gopkg.in/oauth2.v3/server"
+	"gopkg.in/oauth2.v3/store"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -23,6 +28,7 @@ import (
 type Explorer struct {
 	log           *zap.Logger
 	cfg           *config.Config
+	metadata      config.Metadata
 	baseURL       string
 	server        *http.Server
 	router        *mux.Router
@@ -30,6 +36,7 @@ type Explorer struct {
 	auth          *auth.Auth
 	metricsServer *http.Server
 	metrics       *metrics.Metrics
+	authServer    *server.Server
 }
 
 type Healthz struct {
@@ -52,6 +59,12 @@ func WithConfig(cfg *config.Config) func(*Explorer) {
 	return func(e *Explorer) {
 		e.cfg = cfg
 		e.baseURL = "http://localhost" + cfg.BuildPort(cfg.Port)
+	}
+}
+
+func WithMetadata(metadata config.Metadata) func(*Explorer) {
+	return func(e *Explorer) {
+		e.metadata = metadata
 	}
 }
 
@@ -101,6 +114,7 @@ func (e *Explorer) listenOrDie(stop chan error) {
 	mux := http.NewServeMux()
 
 	fileServer := http.FileServer(http.Dir(e.cfg.StaticDir))
+	e.manageAuth()
 
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 	mux.Handle("/", e.router)
@@ -142,6 +156,30 @@ func (e *Explorer) listenOrDie(stop chan error) {
 	if err = e.server.ListenAndServe(); err != nil {
 		stop <- err
 	}
+}
+
+func (e *Explorer) manageAuth() {
+	manager := manage.NewDefaultManager()
+	// token store
+	manager.MustTokenStorage(store.NewMemoryTokenStore())
+	clientStore := store.NewClientStore()
+	clientStore.Set(e.cfg.Auth.Classic.ClientStore, &models.Client{
+		ID:     e.cfg.Auth.Classic.ClientID,
+		Secret: e.cfg.Auth.Classic.ClientSecret,
+		Domain: e.cfg.Domain,
+	})
+	manager.MapClientStorage(clientStore)
+	e.authServer = server.NewServer(server.NewConfig(), manager)
+	e.authServer.SetUserAuthorizationHandler(e.userAuthorizeHandler)
+
+	e.authServer.SetInternalErrorHandler(func(err error) (re *errors.Response) {
+		e.log.Info("Internal Error:", zap.Error(err))
+		return
+	})
+
+	e.authServer.SetResponseErrorHandler(func(re *errors.Response) {
+		e.log.Info("Response Error:", zap.Error(re.Error))
+	})
 }
 
 func (e *Explorer) Shutdown(ctx context.Context) {

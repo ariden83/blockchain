@@ -1,0 +1,48 @@
+package explorer
+
+import (
+	"fmt"
+	"golang.org/x/oauth2"
+	"net/http"
+
+	"go.uber.org/zap"
+
+	"github.com/ariden83/blockchain/cmd/web/internal/auth/google"
+)
+
+// /auth/google/login
+func (e *Explorer) oauthGoogleCallback(rw http.ResponseWriter, r *http.Request) {
+	// Create oauthState cookie
+	oauthState := e.auth.API[google.Name].GenerateStateOauthCookie(rw)
+	/*
+		AuthCodeURL receive state that is a token to protect the user from CSRF attacks. You must always provide a non-empty string and
+		validate that it matches the the state query parameter on your redirect callback.
+	*/
+	param := oauth2.SetAuthURLParam("foo", "bar")
+	u := e.auth.API[google.Name].Config().AuthCodeURL(oauthState, param)
+	http.Redirect(rw, r, u, http.StatusTemporaryRedirect)
+}
+
+// /auth/google/callback
+func (e *Explorer) oauthGoogleLogin(rw http.ResponseWriter, r *http.Request) {
+	// Read oauthState from Cookie
+	oauthState, _ := r.Cookie("oauthstate")
+
+	if r.FormValue("state") != oauthState.Value {
+		e.log.Info("invalid oauth google state")
+		http.Redirect(rw, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+
+	data, err := e.auth.API[google.Name].GetUserData(r.FormValue("code"))
+	if err != nil {
+		e.log.Error("fail tp get user data from google", zap.Error(err))
+		http.Redirect(rw, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+
+	// GetOrCreate User in your db.
+	// Redirect or response with a token.
+	// More code .....
+	e.log.Info(fmt.Sprintf("UserInfo: %s\n", data))
+}

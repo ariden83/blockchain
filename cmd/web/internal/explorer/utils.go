@@ -3,7 +3,6 @@ package explorer
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ariden83/blockchain/cmd/web/internal/auth"
 	"go.uber.org/zap"
 	"io"
 	"net/http"
@@ -65,22 +64,17 @@ func (e *Explorer) JSON(rw http.ResponseWriter, resp interface{}) {
 	}
 }
 
+/*
 func (e *Explorer) setTokenHeaders(rw http.ResponseWriter, ts *auth.TokenDetails) {
 	rw.Header().Set("Access_Token", ts.AccessToken)
 	rw.Header().Set("Token_Type", "Bearer")
 	rw.Header().Set("Expires_In", fmt.Sprintf("%d", ts.RtExpires))
 	rw.Header().Set("Refresh_Token", ts.RefreshToken)
-	rw.Header().Set("Scope", "create")
-}
-
-func (e *Explorer) setUserKeyHeaders(rw http.ResponseWriter, userKey string) {
-	key, err := e.auth.Encrypt([]byte(userKey))
-	if err != nil {
-		e.log.Error("fail to set user key header", zap.Error(err))
-		return
+	if ts.Scope != "" {
+		rw.Header().Set("Scope", ts.Scope)
 	}
-	rw.Header().Set("User_Key", key)
 }
+*/
 
 func (e *Explorer) decodeBody(rw http.ResponseWriter, logCTX *zap.Logger, body io.ReadCloser, req BodyReceived) error {
 	var err error

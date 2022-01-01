@@ -1,3 +1,6 @@
+# cloud.google.com/go v0.65.0
+## explicit; go 1.11
+cloud.google.com/go/compute/metadata
 # github.com/AndreasBriese/bbloom v0.0.0-20190825152654-46b345b51c96
 ## explicit
 github.com/AndreasBriese/bbloom
@@ -51,9 +54,6 @@ github.com/dgraph-io/ristretto/z/simd
 # github.com/dgrijalva/jwt-go v3.2.0+incompatible
 ## explicit
 github.com/dgrijalva/jwt-go
-# github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f
-## explicit
-github.com/dgryski/go-rendezvous
 # github.com/dustin/go-humanize v1.0.0
 ## explicit
 github.com/dustin/go-humanize
@@ -66,16 +66,9 @@ github.com/francoispqt/gojay
 # github.com/fsnotify/fsnotify v1.4.9
 ## explicit; go 1.13
 github.com/fsnotify/fsnotify
-# github.com/go-redis/redis/v8 v8.11.4
-## explicit; go 1.13
-github.com/go-redis/redis/v8
-github.com/go-redis/redis/v8/internal
-github.com/go-redis/redis/v8/internal/hashtag
-github.com/go-redis/redis/v8/internal/hscan
-github.com/go-redis/redis/v8/internal/pool
-github.com/go-redis/redis/v8/internal/proto
-github.com/go-redis/redis/v8/internal/rand
-github.com/go-redis/redis/v8/internal/util
+# github.com/go-session/session v3.1.2+incompatible
+## explicit
+github.com/go-session/session
 # github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0
 ## explicit; go 1.13
 github.com/go-task/slim-sprig
@@ -99,6 +92,8 @@ github.com/golang/protobuf/ptypes/timestamp
 # github.com/golang/snappy v0.0.3
 ## explicit
 github.com/golang/snappy
+# github.com/google/go-cmp v0.5.6
+## explicit; go 1.8
 # github.com/google/gopacket v1.1.19
 ## explicit; go 1.12
 github.com/google/gopacket/routing
@@ -505,6 +500,8 @@ github.com/onsi/ginkgo/reporters/stenographer
 github.com/onsi/ginkgo/reporters/stenographer/support/go-colorable
 github.com/onsi/ginkgo/reporters/stenographer/support/go-isatty
 github.com/onsi/ginkgo/types
+# github.com/onsi/gomega v1.16.0
+## explicit; go 1.16
 # github.com/opentracing/opentracing-go v1.2.0
 ## explicit; go 1.14
 github.com/opentracing/opentracing-go
@@ -545,6 +542,31 @@ github.com/satori/go.uuid
 # github.com/spacemonkeygo/spacelog v0.0.0-20180420211403-2296661a0572
 ## explicit
 github.com/spacemonkeygo/spacelog
+# github.com/tidwall/btree v0.0.0-20170113224114-9876f1454cf0
+## explicit
+github.com/tidwall/btree
+# github.com/tidwall/buntdb v1.1.0
+## explicit
+github.com/tidwall/buntdb
+# github.com/tidwall/gjson v1.3.2
+## explicit; go 1.12
+github.com/tidwall/gjson
+# github.com/tidwall/grect v0.0.0-20161006141115-ba9a043346eb
+## explicit
+github.com/tidwall/grect
+# github.com/tidwall/match v1.0.1
+## explicit
+github.com/tidwall/match
+# github.com/tidwall/pretty v1.0.0
+## explicit
+github.com/tidwall/pretty
+# github.com/tidwall/rtree v0.0.0-20180113144539-6cd427091e0e
+## explicit
+github.com/tidwall/rtree
+github.com/tidwall/rtree/base
+# github.com/tidwall/tinyqueue v0.0.0-20180302190814-1e39f5511563
+## explicit
+github.com/tidwall/tinyqueue
 # github.com/urfave/negroni v1.0.0
 ## explicit
 github.com/urfave/negroni
@@ -603,6 +625,7 @@ golang.org/x/crypto/sha3
 ## explicit; go 1.17
 golang.org/x/net/bpf
 golang.org/x/net/context
+golang.org/x/net/context/ctxhttp
 golang.org/x/net/http/httpguts
 golang.org/x/net/http2
 golang.org/x/net/http2/hpack
@@ -614,6 +637,15 @@ golang.org/x/net/ipv4
 golang.org/x/net/ipv6
 golang.org/x/net/route
 golang.org/x/net/trace
+# golang.org/x/oauth2 v0.0.0-20210514164344-f6687ab2804c
+## explicit; go 1.11
+golang.org/x/oauth2
+golang.org/x/oauth2/authhandler
+golang.org/x/oauth2/google
+golang.org/x/oauth2/google/internal/externalaccount
+golang.org/x/oauth2/internal
+golang.org/x/oauth2/jws
+golang.org/x/oauth2/jwt
 # golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 ## explicit
 golang.org/x/sync/errgroup
@@ -632,6 +664,18 @@ golang.org/x/text/unicode/norm
 # golang.org/x/tools v0.1.1
 ## explicit; go 1.17
 golang.org/x/tools/go/ast/inspector
+# google.golang.org/appengine v1.6.6
+## explicit; go 1.11
+google.golang.org/appengine
+google.golang.org/appengine/internal
+google.golang.org/appengine/internal/app_identity
+google.golang.org/appengine/internal/base
+google.golang.org/appengine/internal/datastore
+google.golang.org/appengine/internal/log
+google.golang.org/appengine/internal/modules
+google.golang.org/appengine/internal/remote_api
+google.golang.org/appengine/internal/urlfetch
+google.golang.org/appengine/urlfetch
 # google.golang.org/genproto v0.0.0-20200825200019-8632dd797987
 ## explicit; go 1.11
 google.golang.org/genproto/googleapis/rpc/status
@@ -717,6 +761,16 @@ google.golang.org/protobuf/types/descriptorpb
 google.golang.org/protobuf/types/known/anypb
 google.golang.org/protobuf/types/known/durationpb
 google.golang.org/protobuf/types/known/timestamppb
+# gopkg.in/oauth2.v3 v3.12.0
+## explicit; go 1.13
+gopkg.in/oauth2.v3
+gopkg.in/oauth2.v3/errors
+gopkg.in/oauth2.v3/generates
+gopkg.in/oauth2.v3/manage
+gopkg.in/oauth2.v3/models
+gopkg.in/oauth2.v3/server
+gopkg.in/oauth2.v3/store
+gopkg.in/oauth2.v3/utils/uuid
 # gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7
 ## explicit
 gopkg.in/tomb.v1
