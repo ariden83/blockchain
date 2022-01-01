@@ -1,7 +1,7 @@
 package explorer
 
 import (
-	"github.com/ariden83/blockchain/internal/middleware"
+	"github.com/ariden83/blockchain/cmd/web/internal/middleware"
 	"net/http"
 )
 
@@ -29,9 +29,16 @@ func (e *Explorer) loadRoutes() {
 
 }
 
+type test struct {
+	Title string
+}
+
 func (e *Explorer) loadAPIRoutes() {
-	s := e.router.PathPrefix("/api").Subrouter()
-	s.Use(middleware.DefaultHeader)
+	s := e.router.PathPrefix("/api").Subrouter().StrictSlash(true)
+
+	s.HandleFunc("/test", func(rw http.ResponseWriter, r *http.Request) {
+		e.JSON(rw, test{Title: "totot"})
+	})
 
 	// s.HandleFunc("/auth/google/login", e.oauthGoogleLogin)
 	// s.HandleFunc("/auth/google/callback", e.oauthGoogleCallback)
@@ -47,6 +54,7 @@ func (e *Explorer) loadAPIRoutes() {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
+
 	s.HandleFunc("/authorize", func(w http.ResponseWriter, r *http.Request) {
 		err := e.authServer.HandleAuthorizeRequest(w, r)
 		if err != nil {
@@ -54,4 +62,5 @@ func (e *Explorer) loadAPIRoutes() {
 		}
 	})
 
+	s.Use(middleware.JSONHeader)
 }

@@ -116,7 +116,7 @@ func (e *Explorer) listenOrDie(stop chan error) {
 	mux.Handle("/", e.router)
 
 	n := negroni.New()
-	n.UseFunc(e.tokenHeader)
+	// n.UseFunc(e.tokenHeader)
 	n.UseFunc(e.requestIDHeader)
 
 	n.Use(negroni.HandlerFunc(func(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
