@@ -52,7 +52,11 @@ func (e *Explorer) fail(statusCode int, err error, w http.ResponseWriter) {
 }
 
 func (e *Explorer) JSON(rw http.ResponseWriter, resp interface{}) {
-	if js, err := json.Marshal(resp); err != nil {
+	data := json.NewEncoder(rw)
+	data.SetIndent("", "  ")
+	data.Encode(resp)
+
+	/* if js, err := json.Marshal(resp); err != nil {
 		e.log.Error("Fail to json.Marshal", zap.Error(err))
 		e.fail(http.StatusInternalServerError, err, rw)
 		return
@@ -62,6 +66,7 @@ func (e *Explorer) JSON(rw http.ResponseWriter, resp interface{}) {
 		e.fail(http.StatusInternalServerError, err, rw)
 		return
 	}
+	*/
 }
 
 /*

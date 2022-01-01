@@ -1,6 +1,9 @@
 package explorer
 
 import (
+	"context"
+	"errors"
+	"github.com/ariden83/blockchain/cmd/web/internal/auth/classic"
 	"go.uber.org/zap"
 	"net/http"
 	"net/url"
@@ -88,7 +91,7 @@ type postLoginAPIReq struct {
 //        404: genericError
 //        412: genericError
 //        500: genericError
-func (e *Explorer) oauthLogin(rw http.ResponseWriter, r *http.Request) {
+func (e *Explorer) loginHandler(rw http.ResponseWriter, r *http.Request) {
 	store, err := session.Start(nil, rw, r)
 	if err != nil {
 		e.fail(http.StatusInternalServerError, err, rw)
@@ -185,4 +188,28 @@ func (e *Explorer) userAuthorizeHandler(w http.ResponseWriter, r *http.Request) 
 	store.Delete("UserID")
 	store.Save()
 	return
+}
+
+// authorize
+func (e *Explorer) authorize(rw http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	state := r.Form.Get("state")
+	if state != "xyz" {
+		e.fail(http.StatusBadRequest, errors.New("State invalid"), rw)
+		return
+	}
+
+	code := r.Form.Get("code")
+	if code == "" {
+		e.fail(http.StatusBadRequest, errors.New("Code not found"), rw)
+		return
+	}
+
+	token, err := e.auth.API[classic.Name].Config().Exchange(context.Background(), code)
+	if err != nil {
+		e.fail(http.StatusInternalServerError, err, rw)
+		return
+	}
+
+	e.JSON(rw, *token)
 }

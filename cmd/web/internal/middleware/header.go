@@ -14,6 +14,5 @@ func DefaultHeader(w http.ResponseWriter, r *http.Request, next http.HandlerFunc
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	now := time.Now()
 	w.Header().Set("Date", now.String())
-
 	next(w, r)
 }

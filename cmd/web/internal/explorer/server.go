@@ -5,7 +5,6 @@ import (
 	"github.com/ariden83/blockchain/cmd/web/config"
 	"github.com/ariden83/blockchain/cmd/web/internal/auth"
 	"github.com/ariden83/blockchain/cmd/web/internal/metrics"
-	"github.com/ariden83/blockchain/cmd/web/internal/middleware"
 	"github.com/ariden83/blockchain/cmd/web/internal/model"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
@@ -97,11 +96,8 @@ func (e *Explorer) Start(stop chan error) {
 	e.loadTemplates()
 	e.loadRoutes()
 	e.loadAPIRoutes()
-	e.loadMiddleware()
 	e.listenOrDie(stop)
 }
-
-func (Explorer) loadMiddleware() {}
 
 func (e *Explorer) listenOrDie(stop chan error) {
 	e.log.Info("Start listening HTTP Server", zap.Int("port", e.cfg.Port))
@@ -119,7 +115,7 @@ func (e *Explorer) listenOrDie(stop chan error) {
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 	mux.Handle("/", e.router)
 
-	n := negroni.New(negroni.HandlerFunc(middleware.DefaultHeader))
+	n := negroni.New()
 	n.UseFunc(e.tokenHeader)
 	n.UseFunc(e.requestIDHeader)
 
@@ -145,6 +141,8 @@ func (e *Explorer) listenOrDie(stop chan error) {
 
 		jsonHandler.ServeHTTP(rw, r)
 	}))
+
+	n.UseHandler(mux)
 
 	e.server = &http.Server{
 		Addr:           ":" + strconv.Itoa(e.cfg.Port),
