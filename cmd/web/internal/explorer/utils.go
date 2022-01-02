@@ -6,6 +6,7 @@ import (
 	"go.uber.org/zap"
 	"io"
 	"net/http"
+	"net/http/httputil"
 	"time"
 )
 
@@ -135,4 +136,14 @@ func (e *Explorer) txURL(hash string) string {
 
 func (e *Explorer) walletURL(hash string) string {
 	return e.baseURL + "/wallets/" + hash
+}
+
+func dumpRequest(writer io.Writer, header string, r *http.Request) error {
+	data, err := httputil.DumpRequest(r, true)
+	if err != nil {
+		return err
+	}
+	writer.Write([]byte("\n" + header + ": \n"))
+	writer.Write(data)
+	return nil
 }

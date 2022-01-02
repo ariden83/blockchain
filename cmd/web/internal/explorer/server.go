@@ -169,6 +169,12 @@ func (e *Explorer) manageAuth() {
 	manager.MapClientStorage(clientStore)
 	e.authServer = server.NewServer(server.NewConfig(), manager)
 	e.authServer.SetUserAuthorizationHandler(e.userAuthorizeHandler)
+	e.authServer.SetPasswordAuthorizationHandler(func(username, password string) (userID string, err error) {
+		if username == "test" && password == "test" {
+			userID = "test"
+		}
+		return
+	})
 
 	e.authServer.SetInternalErrorHandler(func(err error) (re *errors.Response) {
 		e.log.Info("Internal Error:", zap.Error(err))

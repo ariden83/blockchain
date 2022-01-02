@@ -1,6 +1,6 @@
 // Full spec-compliant TodoMVC with localStorage persistence
 // and hash-based routing in ~120 effective lines of JavaScript.
-console.log("******************************* v0.0.11")
+console.log("******************************* v0.0.9")
 // localStorage persistence
 const STORAGE_KEY = "todos-vuejs-2.0";
 const todoStorage = {
@@ -78,6 +78,9 @@ document.addEventListener("DOMContentLoaded", () => {
         // methods that implement data logic.
         // note there's no DOM manipulation here at all.
         methods: {
+            pluralize(n) {
+                return n === 1 ? "item" : "items";
+            },
             addTodo() {
                 var value = this.newTodo && this.newTodo.trim();
                 if (!value) {
@@ -105,6 +108,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 })
                     .then(function (response) {
                         console.log(response);
+                        t.errorTodo = '';
+
+                        t.todos.push({
+                            id: todoStorage.uid++,
+                            title: response.data.pubkey,
+                            completed: false
+                        });
                         t.newTodo = "";
                         t.errorTodo = '';
                     })
@@ -112,10 +122,39 @@ document.addEventListener("DOMContentLoaded", () => {
                         t.errorTodo = 'Error! Could not reach the API. ' + error;
                     }).finally(() => {
 
-
+                        
                         //Perform action in always
                     });
             },
+
+            removeTodo(todo) {
+                this.todos.splice(this.todos.indexOf(todo), 1);
+            },
+
+            editTodo(todo) {
+                this.beforeEditCache = todo.title;
+                this.editedTodo = todo;
+            },
+
+            doneEdit(todo) {
+                if (!this.editedTodo) {
+                    return;
+                }
+                this.editedTodo = null;
+                todo.title = todo.title.trim();
+                if (!todo.title) {
+                    this.removeTodo(todo);
+                }
+            },
+
+            cancelEdit(todo) {
+                this.editedTodo = null;
+                todo.title = this.beforeEditCache;
+            },
+
+            removeCompleted() {
+                this.todos = filters.active(this.todos);
+            }
         },
 
         // a custom directive to wait for the DOM to be updated

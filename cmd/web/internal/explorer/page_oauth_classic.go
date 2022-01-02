@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap"
 	"net/http"
 	"net/url"
+	"os"
 
 	"github.com/go-session/session"
 )
@@ -92,6 +93,9 @@ type postLoginAPIReq struct {
 //        412: genericError
 //        500: genericError
 func (e *Explorer) loginHandler(rw http.ResponseWriter, r *http.Request) {
+	if e.cfg.DumpVar {
+		_ = dumpRequest(os.Stdout, "login", r) // Ignore the error
+	}
 	store, err := session.Start(nil, rw, r)
 	if err != nil {
 		e.fail(http.StatusInternalServerError, err, rw)
@@ -106,6 +110,13 @@ func (e *Explorer) loginHandler(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.Form == nil {
+		if err := r.ParseForm(); err != nil {
+			e.fail(http.StatusInternalServerError, err, rw)
+			return
+		}
+	}
+
 	wallet, err := e.model.GetWallet(r.Context(), req.Mnemonic)
 	if err != nil {
 		e.fail(http.StatusNotFound, err, rw)
@@ -115,7 +126,7 @@ func (e *Explorer) loginHandler(rw http.ResponseWriter, r *http.Request) {
 	store.Set("LoggedInUserID", wallet.PubKey)
 	store.Save()
 
-	rw.WriteHeader(http.StatusFound)
+	rw.WriteHeader(http.StatusOK)
 
 	e.JSON(rw, postLoginAPIBodyRes{
 		Address: wallet.Address,
@@ -130,6 +141,9 @@ type authBodyRes struct {
 }
 
 func (e *Explorer) oauthHandler(rw http.ResponseWriter, r *http.Request) {
+	if e.cfg.DumpVar {
+		_ = dumpRequest(os.Stdout, "login", r) // Ignore the error
+	}
 	store, err := session.Start(nil, rw, r)
 	if err != nil {
 		e.fail(http.StatusInternalServerError, err, rw)
@@ -137,7 +151,7 @@ func (e *Explorer) oauthHandler(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, ok := store.Get("LoggedInUserID"); !ok {
-		rw.WriteHeader(http.StatusFound)
+		rw.WriteHeader(http.StatusOK)
 		e.JSON(rw, authBodyRes{
 			Location: "/login",
 		})
@@ -153,7 +167,7 @@ func (e *Explorer) oauthHandler(rw http.ResponseWriter, r *http.Request) {
 	u.Path = "/authorize"
 	u.RawQuery = form.Encode()
 	rw.Header().Set("Location", u.String())
-	rw.WriteHeader(http.StatusFound)
+	rw.WriteHeader(http.StatusOK)
 	store.Delete("Form")
 
 	if v, ok := store.Get("LoggedInUserID"); ok {
@@ -167,6 +181,9 @@ func (e *Explorer) oauthHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (e *Explorer) userAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string, err error) {
+	if e.cfg.DumpVar {
+		_ = dumpRequest(os.Stdout, "login", r) // Ignore the error
+	}
 	store, err := session.Start(nil, w, r)
 	if err != nil {
 		return
@@ -181,7 +198,7 @@ func (e *Explorer) userAuthorizeHandler(w http.ResponseWriter, r *http.Request) 
 		store.Save()
 
 		w.Header().Set("Location", "/login")
-		w.WriteHeader(http.StatusFound)
+		w.WriteHeader(http.StatusOK)
 		return
 	}
 	userID = uid.(string)
@@ -192,6 +209,9 @@ func (e *Explorer) userAuthorizeHandler(w http.ResponseWriter, r *http.Request) 
 
 // authorize
 func (e *Explorer) authorize(rw http.ResponseWriter, r *http.Request) {
+	if e.cfg.DumpVar {
+		_ = dumpRequest(os.Stdout, "login", r) // Ignore the error
+	}
 	r.ParseForm()
 	state := r.Form.Get("state")
 	if state != "xyz" {

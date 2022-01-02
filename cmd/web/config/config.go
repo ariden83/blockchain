@@ -57,6 +57,7 @@ type Metadata struct {
 type Config struct {
 	Name          string `config:"name"`
 	Version       string `config:"version"`
+	DumpVar       bool   `config:"dump_var"`
 	Domain        string `config:"domain"`
 	TemplatesDir  string `config:"template_dir"`
 	StaticDir     string `config:"static_dir"`
@@ -76,6 +77,7 @@ func getDefaultConfig() *Config {
 		Name:         "blockChain",
 		Version:      "0.0.0",
 		Port:         4000,
+		DumpVar:      true,
 		Domain:       "http://localhost:4000",
 		TemplatesDir: "cmd/web/templates/",
 		StaticDir:    "./cmd/web/static/",
