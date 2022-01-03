@@ -34,6 +34,7 @@ My first own blockchain. See website of project [blockchain-altcoin.com](https:/
 ## Command
 
 - `make local` - launch the app
+- `make web` - launch the web app
 
 ### Metrics
 
