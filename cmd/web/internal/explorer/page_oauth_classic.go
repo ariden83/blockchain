@@ -18,7 +18,7 @@ type loginForm struct {
 
 func (e *Explorer) loginPage(rw http.ResponseWriter, r *http.Request) {
 	frontData := loginForm{"Wallets connexion"}
-	templates.ExecuteTemplate(rw, "wallets_login_form", frontData)
+	templates.ExecuteTemplate(rw, "login", frontData)
 }
 
 type postLoginAPIBodyReq struct {

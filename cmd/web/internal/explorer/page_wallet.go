@@ -1,9 +1,8 @@
 package explorer
 
 import (
-	"net/http"
-
 	"github.com/ariden83/blockchain/cmd/web/internal/utils"
+	"net/http"
 )
 
 type UnspTxOutput struct {
@@ -19,16 +18,18 @@ type walletsShowData struct {
 	UnspTxOutputs []*UnspTxOutput
 }
 
-func walletsShowPage(rw http.ResponseWriter, r *http.Request) {
+func walletPage(rw http.ResponseWriter, r *http.Request) {
+
 	address := utils.GetRoute(r, "address")
 	outputs := []*UnspTxOutput{}
 	balance := uint(0)
 
 	data := walletsShowData{
-		PageTitle:     "Show Wallet",
+		PageTitle:     "your wallet",
 		Address:       address,
 		Balance:       balance,
 		UnspTxOutputs: outputs,
 	}
-	templates.ExecuteTemplate(rw, "wallets_show", data)
+
+	templates.ExecuteTemplate(rw, "wallet", data)
 }

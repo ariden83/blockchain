@@ -12,6 +12,8 @@ func (e *Explorer) loadRoutes() {
 	e.router.HandleFunc("/404", notFoundPage).Methods(http.MethodGet)
 	e.router.HandleFunc("/privacy-policy", e.privacyPolicyPage).Methods(http.MethodGet)
 	e.router.HandleFunc("/terms-of-service", e.termsOfServicePage).Methods(http.MethodGet)
+	e.router.HandleFunc("/wallet", walletPage).Methods(http.MethodGet)
+
 	/*
 
 		e.router.HandleFunc("/blocks", blocksIndexPage).Methods(http.MethodGet)

@@ -42,7 +42,7 @@ func (e *Explorer) walletsCreatePage(rw http.ResponseWriter, r *http.Request) {
 	*/
 	frontData := walletsCreateData{"Seed creation", "eihf iefhiehfi eifh iehf eifhiehfih ehifhiehf eifhiehf", "ozijefojzeiofhioef"}
 
-	templates.ExecuteTemplate(rw, "wallets_create", frontData)
+	templates.ExecuteTemplate(rw, "inscription", frontData)
 }
 
 type postRegistrationAPIBodyReq struct{}
