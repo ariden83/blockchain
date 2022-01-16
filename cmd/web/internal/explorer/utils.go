@@ -82,6 +82,14 @@ func (e *Explorer) setTokenHeaders(rw http.ResponseWriter, ts *auth.TokenDetails
 }
 */
 
+func (e *Explorer) authorized(_ http.ResponseWriter, r *http.Request) (string, bool) {
+	data, err := e.authServer.ValidationBearerToken(r)
+	if err != nil {
+		return "", false
+	}
+	return data.GetUserID(), true
+}
+
 func (e *Explorer) decodeBody(rw http.ResponseWriter, logCTX *zap.Logger, body io.ReadCloser, req BodyReceived) error {
 	var err error
 	body = http.MaxBytesReader(rw, body, 1048)

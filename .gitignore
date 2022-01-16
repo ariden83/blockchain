@@ -3,4 +3,5 @@
 .idea
 bin
 tmp
+cmd/web/static/styles/
 

@@ -2,21 +2,18 @@
 <html lang="en">
   {{ template "head" .PageTitle }}
   <body>
-  <div id="app-content" class="dark">
-    <div class="main-container-wrapper">
-      <div class="first-time-flow">
-        <div class="first-time-flow__wrapper">
-          <div class="import-account">
-            <h1 class="unlock-page__title">Bienvenue</h1>
-            <div>Le web décentralisé vous attend </div>
-            <div class="unlock-page__links">
-              <div><a href="/login" class="unlock-page__link">Connectez-vous</a></div>
-              <div><a href="/inscription" class="unlock-page__link">Nouveau compte</a></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div class="container-fluid">
+  <main>
+    <section>
+      <header>
+        <h1>Le web décentralisé vous attend</h1>
+      </header>
+    </section>
+    <section>
+      <p><a href="/login" title="Connectez-vous à votre compte blockchain altcoin">Connectez-vous</a></p>
+      <p><a href="/inscription" title="Créez votre nouveau compte blockchain altcoin">Nouveau compte</a></p>
+    </section>
+  </main>
     {{ template "footer" }}
   </div>
   </body>

@@ -6,7 +6,8 @@ import (
 )
 
 func (e *Explorer) privacyPolicyPage(rw http.ResponseWriter, r *http.Request) {
-	data := homeData{e.metadata.Title + " - privacy policy"}
+	_, authorized := e.authorized(rw, r)
+	data := frontData{e.metadata.Title + " - privacy policy", authorized}
 
 	templates.ExecuteTemplate(rw, "privacy-policy", data)
 }

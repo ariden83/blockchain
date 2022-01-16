@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/ariden83/blockchain/config"
+	"github.com/google/uuid"
 	"github.com/heetch/confita"
 	"github.com/heetch/confita/backend"
 	"github.com/heetch/confita/backend/env"
@@ -91,14 +92,16 @@ func getDefaultConfig() *Config {
 		},
 		Auth: Auth{
 			Classic: OAuthConfig{
-				ClientID:     "clientID",
-				ClientSecret: "1234567898900",
+				ClientID:     uuid.New().String()[:8],
+				ClientSecret: uuid.New().String()[:8],
 				Scopes:       []string{"all"},
+				Enable:       true,
 			},
 			GoogleAPI: OAuthConfig{
 				ClientID:     "",
 				ClientSecret: "",
 				URLAPI:       "https://www.googleapis.com/oauth2/v2/userinfo?access_token=",
+				Enable:       false,
 			},
 		},
 		Metrics: Metrics{

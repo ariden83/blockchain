@@ -85,3 +85,22 @@ func (m *Model) CreateWallet(ctx context.Context) (*api.CreateWalletOutput, erro
 	}
 	return data, nil
 }
+
+func (m *Model) GetBalance(ctx context.Context, userKey, userAddress string) (*api.GetBalanceOutput, error) {
+
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(m.timeOut)*time.Second)
+	defer cancel()
+
+	data, err := (*m.client).GetBalance(ctx, &api.GetBalanceInput{
+		Address: userAddress,
+		PubKey:  userKey,
+	})
+	if err != nil {
+		m.log.Info("Cannot connect get user wallet", zap.Error(err),
+			zap.String("userKey", userKey),
+			zap.String("userAddress", userAddress))
+		return data, err
+
+	}
+	return data, nil
+}

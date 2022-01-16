@@ -19,7 +19,9 @@ type Auth struct {
 }
 
 func New(options ...func(*Auth)) *Auth {
-	e := &Auth{}
+	e := &Auth{
+		API: map[string]IOAuth{},
+	}
 	for _, o := range options {
 		o(e)
 	}

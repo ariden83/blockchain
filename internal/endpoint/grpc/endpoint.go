@@ -150,7 +150,7 @@ func (e *EndPoint) Listen() error {
 	return nil
 }
 
-func (s *EndPoint) Shutdown() {
-	s.log.Info("Gracefully pausing down the GRPC server")
-	s.server.GracefulStop()
+func (e *EndPoint) Shutdown() {
+	e.log.Info("Gracefully pausing down the GRPC server")
+	e.server.GracefulStop()
 }

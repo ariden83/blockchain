@@ -1,68 +1,41 @@
 package explorer
 
 import (
-	"github.com/ariden83/blockchain/cmd/web/internal/middleware"
 	"net/http"
 )
 
 func (e *Explorer) loadRoutes() {
-	e.router.HandleFunc("/", homePage).Methods(http.MethodGet)
+	e.router.HandleFunc("/", e.homePage).Methods(http.MethodGet)
 	e.router.HandleFunc("/login", e.loginPage).Methods(http.MethodGet)
-	e.router.HandleFunc("/inscription", e.walletsCreatePage).Methods(http.MethodGet)
+	e.router.HandleFunc("/inscription", e.inscriptionPage).Methods(http.MethodGet)
 	e.router.HandleFunc("/404", notFoundPage).Methods(http.MethodGet)
 	e.router.HandleFunc("/privacy-policy", e.privacyPolicyPage).Methods(http.MethodGet)
 	e.router.HandleFunc("/terms-of-service", e.termsOfServicePage).Methods(http.MethodGet)
-	e.router.HandleFunc("/wallet", walletPage).Methods(http.MethodGet)
-
-	/*
-
-		e.router.HandleFunc("/blocks", blocksIndexPage).Methods(http.MethodGet)
-		e.router.HandleFunc("/blocks/{hash:[0-9a-f]+}", blocksShowPage).Methods(http.MethodGet)
-		e.router.HandleFunc("/blocks", blocksCreatePage).Methods("POST")
-		e.router.HandleFunc("/blocks/mine", blocksMinePage).Methods(http.MethodGet)
-
-		e.router.HandleFunc("/transactions/{id:[0-9a-f]+}", txsShowPage).Methods(http.MethodGet)
-
-		e.router.HandleFunc("/wallets", walletsIndexPage).Methods(http.MethodGet)
-		e.router.HandleFunc("/wallets/server", walletsServerPage).Methods(http.MethodGet)
-		e.router.HandleFunc("/wallets/{address:[0-9a-f]+}", walletsShowPage).Methods(http.MethodGet)
-
-	*/
-
 }
 
-type test struct {
-	Title string
+func (e *Explorer) loadConnectedRoutes() {
+	s := e.router.PathPrefix("/").Subrouter().StrictSlash(true)
+	s.HandleFunc("/wallet", e.walletPage).Methods(http.MethodGet)
+
+	s.Use(e.validateToken)
 }
 
 func (e *Explorer) loadAPIRoutes() {
 	s := e.router.PathPrefix("/api").Subrouter().StrictSlash(true)
 
-	s.HandleFunc("/test", func(rw http.ResponseWriter, r *http.Request) {
-		e.JSON(rw, test{Title: "totot"})
-	})
-
 	// s.HandleFunc("/auth/google/login", e.oauthGoogleLogin)
 	// s.HandleFunc("/auth/google/callback", e.oauthGoogleCallback)
 
-	s.HandleFunc("/oauth2", e.authorize)
+	s.HandleFunc("/login", e.loginAPI).Methods(http.MethodPost)
+	s.HandleFunc("/authorize", e.authorizeAPI).Methods(http.MethodGet)
 
-	s.HandleFunc("/auth", e.oauthHandler).Methods(http.MethodPost)
-	s.HandleFunc("/login", e.loginHandler).Methods(http.MethodPost)
+	s.Use(jsonHeader)
+}
 
-	s.HandleFunc("/token", func(w http.ResponseWriter, r *http.Request) {
-		err := e.authServer.HandleTokenRequest(w, r)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-	})
+func (e *Explorer) loadAPIConnectedRoutes() {
+	s := e.router.PathPrefix("/api").Subrouter().StrictSlash(true)
 
-	s.HandleFunc("/authorize", func(w http.ResponseWriter, r *http.Request) {
-		err := e.authServer.HandleAuthorizeRequest(w, r)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-		}
-	})
-
-	s.Use(middleware.JSONHeader)
+	s.HandleFunc("/token", e.tokenAPI).Methods(http.MethodGet)
+	s.Use(e.validateToken)
+	s.Use(jsonHeader)
 }

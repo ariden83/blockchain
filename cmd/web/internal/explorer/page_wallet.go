@@ -1,7 +1,7 @@
 package explorer
 
 import (
-	"github.com/ariden83/blockchain/cmd/web/internal/utils"
+	"github.com/go-session/session"
 	"net/http"
 )
 
@@ -18,15 +18,31 @@ type walletsShowData struct {
 	UnspTxOutputs []*UnspTxOutput
 }
 
-func walletPage(rw http.ResponseWriter, r *http.Request) {
+func (e *Explorer) walletPage(rw http.ResponseWriter, r *http.Request) {
+	store, err := session.Start(r.Context(), rw, r)
+	if err != nil {
+		e.fail(http.StatusInternalServerError, err, rw)
+		return
+	}
+	accessToken, _ := store.Get(sessionLabelAccessToken)
+	token, err := e.authServer.Manager.LoadAccessToken(r.Context(), accessToken.(string))
+	if err != nil {
+		e.fail(http.StatusInternalServerError, err, rw)
+		return
+	}
 
-	address := utils.GetRoute(r, "address")
 	outputs := []*UnspTxOutput{}
 	balance := uint(0)
 
+	wallet, err := e.model.GetWallet(r.Context(), token.GetUserID())
+	if err != nil {
+		e.fail(http.StatusNotFound, err, rw)
+		return
+	}
+
 	data := walletsShowData{
 		PageTitle:     "your wallet",
-		Address:       address,
+		Address:       wallet.Address,
 		Balance:       balance,
 		UnspTxOutputs: outputs,
 	}

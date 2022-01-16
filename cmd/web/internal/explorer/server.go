@@ -4,18 +4,22 @@ import (
 	"context"
 	"github.com/ariden83/blockchain/cmd/web/config"
 	"github.com/ariden83/blockchain/cmd/web/internal/auth"
+	"github.com/ariden83/blockchain/cmd/web/internal/auth/classic"
 	"github.com/ariden83/blockchain/cmd/web/internal/metrics"
 	"github.com/ariden83/blockchain/cmd/web/internal/model"
+	"github.com/go-oauth2/oauth2/v4"
+	"github.com/go-oauth2/oauth2/v4/errors"
+	"github.com/go-oauth2/oauth2/v4/generates"
+	"github.com/go-oauth2/oauth2/v4/manage"
+	"github.com/go-oauth2/oauth2/v4/models"
+	"github.com/go-oauth2/oauth2/v4/server"
+	"github.com/go-oauth2/oauth2/v4/store"
+	"github.com/go-session/session"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/urfave/negroni"
 	"go.uber.org/zap"
-	"gopkg.in/oauth2.v3/errors"
-	"gopkg.in/oauth2.v3/manage"
-	"gopkg.in/oauth2.v3/models"
-	"gopkg.in/oauth2.v3/server"
-	"gopkg.in/oauth2.v3/store"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -95,7 +99,9 @@ func (e *Explorer) Start(stop chan error) {
 	e.log.Info("start web server")
 	e.loadTemplates()
 	e.loadRoutes()
+	e.loadConnectedRoutes()
 	e.loadAPIRoutes()
+	e.loadAPIConnectedRoutes()
 	e.listenOrDie(stop)
 }
 
@@ -106,19 +112,15 @@ func (e *Explorer) listenOrDie(stop chan error) {
 	if err != nil {
 		e.log.Fatal("fail to read index.css")
 	}
-
 	mux := http.NewServeMux()
-
 	fileServer := http.FileServer(http.Dir(e.cfg.StaticDir))
 	e.manageAuth()
-
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 	mux.Handle("/", e.router)
-
 	n := negroni.New()
 	// n.UseFunc(e.tokenHeader)
 	n.UseFunc(e.requestIDHeader)
-
+	n.UseFunc(e.dumpRequest)
 	n.Use(negroni.HandlerFunc(func(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 		route := strings.ToLower(r.Method)
 		route = strings.Replace(route, "/", "_", 0)
@@ -143,7 +145,6 @@ func (e *Explorer) listenOrDie(stop chan error) {
 	}))
 
 	n.UseHandler(mux)
-
 	e.server = &http.Server{
 		Addr:           ":" + strconv.Itoa(e.cfg.Port),
 		Handler:        n,
@@ -157,32 +158,62 @@ func (e *Explorer) listenOrDie(stop chan error) {
 }
 
 func (e *Explorer) manageAuth() {
+	classicAuth, ok := e.auth.API[classic.Name]
+	if !ok {
+		return
+	}
+
 	manager := manage.NewDefaultManager()
-	// token store
+
+	manager.SetAuthorizeCodeExp(time.Minute * 10)
+	manager.SetPasswordTokenCfg(manage.DefaultPasswordTokenCfg)
+	manager.SetAuthorizeCodeTokenCfg(manage.DefaultAuthorizeCodeTokenCfg)
+	manager.SetRefreshTokenCfg(manage.DefaultRefreshTokenCfg)
+	manager.SetClientTokenCfg(manage.DefaultClientTokenCfg)
+	manager.SetImplicitTokenCfg(&manage.Config{AccessTokenExp: time.Hour * 2, RefreshTokenExp: time.Hour * 24 * 7, IsGenerateRefresh: true})
+
 	manager.MustTokenStorage(store.NewMemoryTokenStore())
+	// generate jwt access token
+	// manager.MapAccessGenerate(generates.NewJWTAccessGenerate("", []byte("00000000"), jwt.SigningMethodHS512))
+	manager.MapAccessGenerate(generates.NewAccessGenerate())
+
 	clientStore := store.NewClientStore()
-	clientStore.Set(e.cfg.Auth.Classic.ClientStore, &models.Client{
-		ID:     e.cfg.Auth.Classic.ClientID,
-		Secret: e.cfg.Auth.Classic.ClientSecret,
-		Domain: e.cfg.Domain,
+	clientStore.Set(classicAuth.Config().ClientID, &models.Client{
+		ID:     classicAuth.Config().ClientID,
+		Secret: classicAuth.Config().ClientSecret,
 	})
+
 	manager.MapClientStorage(clientStore)
 	e.authServer = server.NewServer(server.NewConfig(), manager)
-	e.authServer.SetUserAuthorizationHandler(e.userAuthorizeHandler)
-	e.authServer.SetPasswordAuthorizationHandler(func(username, password string) (userID string, err error) {
-		if username == "test" && password == "test" {
-			userID = "test"
+	e.authServer.SetAllowGetAccessRequest(true)
+	e.authServer.SetClientInfoHandler(server.ClientFormHandler)
+	e.authServer.SetRefreshingValidationHandler(func(ti oauth2.TokenInfo) (allowed bool, err error) {
+		return true, nil
+	})
+	e.authServer.SetUserAuthorizationHandler(func(w http.ResponseWriter, r *http.Request) (userID string, err error) {
+		store, err := session.Start(r.Context(), w, r)
+		if err != nil {
+			return
 		}
+
+		uid, ok := store.Get(sessionLabelUserID)
+		if !ok {
+			w.Header().Set("Location", "/login")
+			w.WriteHeader(http.StatusFound)
+			return
+		}
+
+		userID = uid.(string)
+		store.Delete(sessionLabelUserID)
+		store.Save()
 		return
 	})
-
 	e.authServer.SetInternalErrorHandler(func(err error) (re *errors.Response) {
-		e.log.Info("Internal Error:", zap.Error(err))
+		e.log.Error("Internal Error", zap.Error(err))
 		return
 	})
-
 	e.authServer.SetResponseErrorHandler(func(re *errors.Response) {
-		e.log.Info("Response Error:", zap.Error(re.Error))
+		e.log.Error("Response Error", zap.Error(re.Error))
 	})
 }
 

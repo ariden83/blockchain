@@ -1,7 +1,6 @@
 package http
 
 import (
-	"github.com/ariden83/blockchain/internal/middleware"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -17,7 +16,7 @@ func (e *EndPoint) makeMuxRouter() http.Handler {
 	muxRouter.HandleFunc("/wallet", e.handleGetWallet).Methods("GET")
 	muxRouter.HandleFunc("/address", e.handleGetServersAddress).Methods("GET")
 
-	muxRouter.Use(middleware.DefaultHeader)
+	muxRouter.Use(defaultHeader)
 	muxRouter.Use(e.MetricsMiddleware)
 
 	return muxRouter

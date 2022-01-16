@@ -4,11 +4,13 @@ import (
 	"net/http"
 )
 
-type homeData struct {
-	PageTitle string
+type frontData struct {
+	PageTitle    string
+	Authentified bool
 }
 
-func homePage(rw http.ResponseWriter, r *http.Request) {
-	data := homeData{"Home"}
+func (e *Explorer) homePage(rw http.ResponseWriter, r *http.Request) {
+	_, authorized := e.authorized(rw, r)
+	data := frontData{PageTitle: "Home", Authentified: authorized}
 	templates.ExecuteTemplate(rw, "home", data)
 }

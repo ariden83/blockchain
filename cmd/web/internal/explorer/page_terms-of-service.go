@@ -6,7 +6,8 @@ import (
 )
 
 func (e *Explorer) termsOfServicePage(rw http.ResponseWriter, r *http.Request) {
-	data := homeData{e.metadata.Title + " - terms of service"}
+	_, authorized := e.authorized(rw, r)
+	data := frontData{e.metadata.Title + " - terms of service", authorized}
 
 	templates.ExecuteTemplate(rw, "terms-of-service", data)
 }

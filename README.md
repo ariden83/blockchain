@@ -17,15 +17,18 @@ My first own blockchain. See website of project [blockchain-altcoin.com](https:/
 * Ethereum accounts transactions gas [tutorial](https://hudsonjameson.com/2017-06-27-accounts-transactions-gas-ethereum/)
 * Le minage en 7 étapes [tutorial](http://www.ab-consulting.fr/blog/blockchain/minage-7-etapes=)
 * libp2p in go tutorial [tutorial](https://dev.to/feliperosa/getting-started-with-libp2p-in-go-4hoa)
-* p2p discovery mdns [p2p/discovery/mdns.go](https://gitlab.dms3.io/p2p/go-p2p/-/blob/master/p2p/discovery/mdns.go)
+* p2p discovery mdns [code source](https://gitlab.dms3.io/p2p/go-p2p/-/blob/master/p2p/discovery/mdns.go)
 * p2P examples [examples](https://github.com/libp2p/go-libp2p/tree/master/examples/)
 * blockchain go project by Nomad [code source](https://github.com/librity/nc_nomadcoin)
 
 ### Others
 
 * Authentification with global id [tutorial](https://developer.global.id)
+* oauth2 tutorial by medium [tutorial](https://medium.com/@cyantarek/build-your-own-oauth2-server-in-go-7d0f660732c3)
 * oauth2 tutorial [tutorial](https://tutorialedge.net/golang/go-oauth2-tutorial/)
-| [code source](https://github.com/go-oauth2/oauth2/tree/master/example)
+| [code source](https://github.com/go-oauth2/oauth2/tree/master/example) 
+| [code source](https://github.com/TutorialEdge/go-oauth-tutorial)
+* How to mock OAuth 2.0 in Go [tutorial](https://blog.seriesci.com/how-to-mock-oauth-in-go/)
 
 ## Installation
 
@@ -34,7 +37,13 @@ My first own blockchain. See website of project [blockchain-altcoin.com](https:/
 ## Command
 
 - `make local` - launch the app
+- `local-light` - launch the app without files generators (logs, blockchain, ...)
 - `make web` - launch the web app
+
+### Build
+
+- `make proto` - generate proto files
+- `make local-vendor` - generate vendor files
 
 ### Metrics
 
@@ -69,8 +78,8 @@ http://127.0.0.1:8082/readiness
 - [x] Evolution de la difficulté
 
 ### Future
-- [] Fully Tested
-- [] GRPC endpoint
+- [ ] Fully Tested
+- [ ] GRPC endpoint
 - ...
 
 ### Godocs

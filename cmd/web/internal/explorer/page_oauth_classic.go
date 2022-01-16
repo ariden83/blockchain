@@ -1,24 +1,23 @@
 package explorer
 
 import (
-	"context"
 	"errors"
 	"github.com/ariden83/blockchain/cmd/web/internal/auth/classic"
+	"github.com/go-oauth2/oauth2/v4"
+	"github.com/go-session/session"
 	"go.uber.org/zap"
 	"net/http"
 	"net/url"
-	"os"
-
-	"github.com/go-session/session"
 )
 
-type loginForm struct {
-	PageTitle string
-}
-
 func (e *Explorer) loginPage(rw http.ResponseWriter, r *http.Request) {
-	frontData := loginForm{"Wallets connexion"}
-	templates.ExecuteTemplate(rw, "login", frontData)
+	_, authorized := e.authorized(rw, r)
+	if authorized {
+		http.Redirect(rw, r, "/wallet", http.StatusFound)
+		return
+	}
+	data := frontData{"Wallets connexion", authorized}
+	templates.ExecuteTemplate(rw, "login", data)
 }
 
 type postLoginAPIBodyReq struct {
@@ -29,6 +28,12 @@ type postLoginAPIBodyRes struct {
 	Address string `json:"address"`
 	PubKey  string `json:"pubkey"`
 }
+
+const (
+	sessionLabelUserID       string = "LoggedInUserID"
+	sessionLabelAccessToken  string = "LoggedAccessToken"
+	sessionLabelRefreshToken string = "LoggedRefreshToken"
+)
 
 // postLoginResp
 //
@@ -92,24 +97,18 @@ type postLoginAPIReq struct {
 //        404: genericError
 //        412: genericError
 //        500: genericError
-func (e *Explorer) loginHandler(rw http.ResponseWriter, r *http.Request) {
-	if e.cfg.DumpVar {
-		_ = dumpRequest(os.Stdout, "login", r) // Ignore the error
-	}
-	store, err := session.Start(nil, rw, r)
-	if err != nil {
-		e.fail(http.StatusInternalServerError, err, rw)
+func (e *Explorer) loginAPI(rw http.ResponseWriter, r *http.Request) {
+	_, authorized := e.authorized(rw, r)
+	if authorized {
+		http.Redirect(rw, r, "/wallet", http.StatusFound)
 		return
 	}
-
 	req := &postLoginAPIBodyReq{}
-
 	log := e.log.With(zap.String("input", "oauthClassicLogin"))
 	if err := e.decodeBody(rw, log, r.Body, req); err != nil {
 		e.fail(http.StatusPreconditionFailed, err, rw)
 		return
 	}
-
 	if r.Form == nil {
 		if err := r.ParseForm(); err != nil {
 			e.fail(http.StatusInternalServerError, err, rw)
@@ -123,113 +122,141 @@ func (e *Explorer) loginHandler(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	store.Set("LoggedInUserID", wallet.PubKey)
+	store, err := session.Start(r.Context(), rw, r)
+	if err != nil {
+		e.fail(http.StatusNotFound, err, rw)
+		return
+	}
+	store.Set(sessionLabelUserID, wallet.Address)
 	store.Save()
 
-	rw.WriteHeader(http.StatusOK)
+	rw.Header().Set("Location", "/api/authorize?grant_type=client_credentials"+
+		"&client_id="+e.auth.API[classic.Name].Config().ClientID+
+		"&client_secret="+e.auth.API[classic.Name].Config().ClientSecret+
+		"&scope=all"+
+		"&response_type=token")
 
-	e.JSON(rw, postLoginAPIBodyRes{
-		Address: wallet.Address,
-		PubKey:  wallet.PubKey,
-	})
+	rw.WriteHeader(http.StatusFound)
 }
 
-func (e *Explorer) oauthCallback(rw http.ResponseWriter, r *http.Request) {}
+func (e *Explorer) authorizeAPI(rw http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 
-type authBodyRes struct {
-	Location string
-}
-
-func (e *Explorer) oauthHandler(rw http.ResponseWriter, r *http.Request) {
-	if e.cfg.DumpVar {
-		_ = dumpRequest(os.Stdout, "login", r) // Ignore the error
-	}
-	store, err := session.Start(nil, rw, r)
+	req, err := e.authServer.ValidationAuthorizeRequest(r)
 	if err != nil {
-		e.fail(http.StatusInternalServerError, err, rw)
+		e.fail(http.StatusUnauthorized, err, rw)
 		return
 	}
 
-	if _, ok := store.Get("LoggedInUserID"); !ok {
-		rw.WriteHeader(http.StatusOK)
-		e.JSON(rw, authBodyRes{
-			Location: "/login",
-		})
-		return
-	}
-
-	var form url.Values
-	if v, ok := store.Get("ReturnUri"); ok {
-		form = v.(url.Values)
-	}
-
-	u := new(url.URL)
-	u.Path = "/authorize"
-	u.RawQuery = form.Encode()
-	rw.Header().Set("Location", u.String())
-	rw.WriteHeader(http.StatusOK)
-	store.Delete("Form")
-
-	if v, ok := store.Get("LoggedInUserID"); ok {
-		store.Set("UserID", v)
-	}
-	store.Save()
-
-	e.JSON(rw, authBodyRes{
-		Location: u.String(),
-	})
-}
-
-func (e *Explorer) userAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string, err error) {
-	if e.cfg.DumpVar {
-		_ = dumpRequest(os.Stdout, "login", r) // Ignore the error
-	}
-	store, err := session.Start(nil, w, r)
+	// user authorization
+	userID, err := e.authServer.UserAuthorizationHandler(rw, r)
 	if err != nil {
+		e.fail(http.StatusUnauthorized, err, rw)
+		return
+	} else if userID == "" {
+		e.fail(http.StatusUnauthorized, err, rw)
 		return
 	}
+	req.UserID = userID
 
-	uid, ok := store.Get("UserID")
-	if !ok {
-		if r.Form == nil {
-			r.ParseForm()
+	// specify the scope of authorization
+	if fn := e.authServer.AuthorizeScopeHandler; fn != nil {
+		scope, err := fn(rw, r)
+		if err != nil {
+			e.fail(http.StatusUnauthorized, err, rw)
+			return
+		} else if scope != "" {
+			req.Scope = scope
 		}
-		store.Set("ReturnUri", r.Form)
-		store.Save()
+	}
 
-		w.Header().Set("Location", "/login")
-		w.WriteHeader(http.StatusOK)
+	// specify the expiration time of access token
+	if fn := e.authServer.AccessTokenExpHandler; fn != nil {
+		exp, err := fn(rw, r)
+		if err != nil {
+			e.fail(http.StatusUnauthorized, err, rw)
+			return
+		}
+		req.AccessTokenExp = exp
+	}
+
+	ti, err := e.authServer.GetAuthorizeToken(ctx, req)
+	if err != nil {
+		e.fail(http.StatusUnauthorized, err, rw)
 		return
 	}
-	userID = uid.(string)
-	store.Delete("UserID")
+
+	// If the redirect URI is empty, the default domain provided by the client is used.
+	if req.RedirectURI == "" {
+		client, err := e.authServer.Manager.GetClient(ctx, req.ClientID)
+		if err != nil {
+			e.fail(http.StatusUnauthorized, err, rw)
+			return
+		}
+		req.RedirectURI = client.GetDomain()
+	}
+
+	data := e.authServer.GetAuthorizeData(req.ResponseType, ti)
+
+	/*  outputJSON(data) */
+	store, err := session.Start(r.Context(), rw, r)
+	if err != nil {
+		e.fail(http.StatusUnauthorized, err, rw)
+		return
+	}
+	store.Set(sessionLabelAccessToken, data["access_token"].(string))
+	store.Set(sessionLabelRefreshToken, data["refresh_token"].(string))
 	store.Save()
-	return
+
+	rw.Header().Set("Location", "/protected")
+	rw.WriteHeader(http.StatusFound)
 }
 
-// authorize
-func (e *Explorer) authorize(rw http.ResponseWriter, r *http.Request) {
-	if e.cfg.DumpVar {
-		_ = dumpRequest(os.Stdout, "login", r) // Ignore the error
-	}
-	r.ParseForm()
-	state := r.Form.Get("state")
-	if state != "xyz" {
-		e.fail(http.StatusBadRequest, errors.New("State invalid"), rw)
-		return
-	}
-
-	code := r.Form.Get("code")
-	if code == "" {
-		e.fail(http.StatusBadRequest, errors.New("Code not found"), rw)
-		return
-	}
-
-	token, err := e.auth.API[classic.Name].Config().Exchange(context.Background(), code)
+func (e *Explorer) tokenAPI(rw http.ResponseWriter, r *http.Request) {
+	store, err := session.Start(r.Context(), rw, r)
 	if err != nil {
-		e.fail(http.StatusInternalServerError, err, rw)
+		e.fail(http.StatusUnauthorized, err, rw)
+		return
+	}
+	refreshToken, ok := store.Get(sessionLabelRefreshToken)
+	if !ok {
+		e.fail(http.StatusUnauthorized, err, rw)
+		return
+	}
+	parm := r.Form
+	if parm == nil {
+		parm = url.Values{}
+	}
+
+	parm.Add("refresh_token", refreshToken.(string))
+	parm.Add("grant_type", oauth2.Refreshing.String())
+	parm.Add("client_id", e.auth.API[classic.Name].Config().ClientID)
+	parm.Add("client_secret", e.auth.API[classic.Name].Config().ClientSecret)
+	parm.Add("scope", "all")
+
+	r.Form = parm
+
+	ctx := r.Context()
+
+	gt, tgr, err := e.authServer.ValidationTokenRequest(r)
+	if err != nil {
+		_, statusCode, _ := e.authServer.GetErrorData(err)
+		e.fail(statusCode, errors.New("fail to valid token request"), rw)
 		return
 	}
 
-	e.JSON(rw, *token)
+	ti, err := e.authServer.GetAccessToken(ctx, gt, tgr)
+	if err != nil {
+		_, statusCode, _ := e.authServer.GetErrorData(err)
+		e.fail(statusCode, errors.New("fail to valid token request"), rw)
+		return
+	}
+
+	data := e.authServer.GetTokenData(ti)
+	store.Set(sessionLabelAccessToken, data["access_token"].(string))
+	store.Set(sessionLabelRefreshToken, data["refresh_token"].(string))
+	store.Save()
+
+	rw.Header().Set("Location", "/protected")
+	rw.WriteHeader(http.StatusFound)
 }
