@@ -98,10 +98,15 @@ func WithAuth(a *auth.Auth) func(*Explorer) {
 func (e *Explorer) Start(stop chan error) {
 	e.log.Info("start web server")
 	e.loadTemplates()
+
 	e.loadRoutes()
 	e.loadConnectedRoutes()
+	e.loadNonConnectedRoutes()
+
 	e.loadAPIRoutes()
 	e.loadAPIConnectedRoutes()
+	e.loadAPINonConnectedRoutes()
+
 	e.listenOrDie(stop)
 }
 
@@ -196,14 +201,14 @@ func (e *Explorer) manageAuth() {
 			return
 		}
 
-		uid, ok := store.Get(sessionLabelUserID)
+		data, ok := store.Get(sessionLabelUserID)
 		if !ok {
-			w.Header().Set("Location", "/login")
+			w.Header().Set("Location", defaultPageLogin)
 			w.WriteHeader(http.StatusFound)
 			return
 		}
 
-		userID = uid.(string)
+		userID = data.(string)
 		store.Delete(sessionLabelUserID)
 		store.Save()
 		return

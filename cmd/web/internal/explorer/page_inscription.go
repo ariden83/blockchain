@@ -15,19 +15,19 @@ func (e *Explorer) inscriptionPage(rw http.ResponseWriter, r *http.Request) {
 	templates.ExecuteTemplate(rw, "inscription", frontData)
 }
 
-type postinscriptionAPIBodyReq struct{}
+type postInscriptionAPIBodyReq struct{}
 
-type postinscriptionAPIBodyRes struct {
+type postInscriptionAPIBodyRes struct {
 	Address  string `json:"address"`
 	PubKey   string `json:"pubkey"`
 	Mnemonic string `json:"mnemonic"`
 }
 
-// postinscriptionAPIResp
+// postInscriptionAPIResp
 //
-// swagger:response postinscriptionAPIResp
+// swagger:response postInscriptionAPIResp
 // nolint
-type postinscriptionAPIResp struct {
+type postInscriptionAPIResp struct {
 	// Content-Length
 	// in: header
 	// required: true
@@ -43,19 +43,19 @@ type postinscriptionAPIResp struct {
 	// corps of Response
 	// in: body
 	Body struct {
-		postinscriptionAPIBodyRes
+		postInscriptionAPIBodyRes
 	} `json:"body"`
 }
 
-// postinscriptionAPIReq Params for method POST
+// postInscriptionAPIReq Params for method POST
 //
-// swagger:parameters postinscriptionAPIReq
+// swagger:parameters postInscriptionAPIReq
 // nolint
-type postinscriptionAPIReq struct {
+type postInscriptionAPIReq struct {
 	// the items for this order
 	//
 	// in: body
-	postinscriptionAPIBodyReq postinscriptionAPIBodyReq
+	postInscriptionAPIBodyReq postInscriptionAPIBodyReq
 	// X-Request-Id
 	// in: header
 	// required: true
@@ -66,7 +66,7 @@ type postinscriptionAPIReq struct {
 	XToken string `json:"X-Token"`
 }
 
-// inscriptionAPI swagger:route POST /api/registration inscriptionAPI postinscriptionAPIReq
+// inscriptionAPI swagger:route POST /api/registration inscriptionAPI postInscriptionAPIReq
 //
 // POST inscriptionAPI
 //
@@ -80,7 +80,7 @@ type postinscriptionAPIReq struct {
 //
 // Responses:
 //    default: genericError
-//        200: postinscriptionAPIResp
+//        200: postInscriptionAPIResp
 //        401: genericError
 //        404: genericError
 //        412: genericError
@@ -93,7 +93,7 @@ func (e *Explorer) inscriptionAPI(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	e.JSON(rw, postinscriptionAPIBodyRes{
+	e.JSON(rw, postInscriptionAPIBodyRes{
 		Address:  wallet.Address,
 		PubKey:   wallet.PubKey,
 		Mnemonic: wallet.Mnemonic,

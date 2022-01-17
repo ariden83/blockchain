@@ -1,6 +1,6 @@
 // Full spec-compliant TodoMVC with localStorage persistence
 // and hash-based routing in ~120 effective lines of JavaScript.
-console.log("******************************* v0.0.12")
+console.log("******************************* v0.0.14")
 // localStorage persistence
 const STORAGE_KEY = "todos-vuejs-2.0";
 const todoStorage = {
@@ -105,12 +105,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 })
                     .then(function (response) {
                         console.log(response);
+                        if (response.data == 'ok') {
+                            window.location.replace("/authorize");
+                        } else {
+                            t.errorTodo = 'Error! Could not reach the API. ' + error;
+                        }
                     })
                     .catch(function (error) {
                         t.errorTodo = 'Error! Could not reach the API. ' + error;
-                    }).finally(() => {
-                        window.location.replace("/wallet");
-                        //Perform action in always
                     });
             },
         },

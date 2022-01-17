@@ -54,18 +54,46 @@ func (e *Explorer) validateToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		store, err := session.Start(r.Context(), rw, r)
 		if err != nil {
-			http.Error(rw, err.Error(), http.StatusUnauthorized)
+			rw.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		accessToken, ok := store.Get(sessionLabelAccessToken)
 		if !ok {
-			http.Error(rw, "Unauthorized", http.StatusUnauthorized)
+			rw.Header().Set("Location", defaultPageLogin)
+			rw.WriteHeader(http.StatusFound)
 			return
 		}
 		if _, err := e.authServer.Manager.LoadAccessToken(r.Context(), accessToken.(string)); err != nil {
-			http.Error(rw, err.Error(), http.StatusUnauthorized)
+			// try to refresh token
+			if err = e.refreshToken(rw, r); err != nil {
+				rw.Header().Set("Location", defaultPageLogin)
+				rw.WriteHeader(http.StatusFound)
+				return
+			}
+		}
+		next.ServeHTTP(rw, r)
+	})
+}
+
+func (e *Explorer) hasValidToken(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		store, err := session.Start(r.Context(), rw, r)
+		if err != nil {
 			return
 		}
+		accessToken, ok := store.Get(sessionLabelAccessToken)
+		// si pas de token, on reste sur la page
+		if !ok {
+			next.ServeHTTP(rw, r)
+			return
+		}
+		// si token valide, on change de page
+		if _, err := e.authServer.Manager.LoadAccessToken(r.Context(), accessToken.(string)); err == nil {
+			rw.Header().Set("Location", defaultPageLogged)
+			rw.WriteHeader(http.StatusFound)
+			return
+		}
+		// on reste sur la page
 		next.ServeHTTP(rw, r)
 	})
 }

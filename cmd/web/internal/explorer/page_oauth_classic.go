@@ -1,7 +1,6 @@
 package explorer
 
 import (
-	"errors"
 	"github.com/ariden83/blockchain/cmd/web/internal/auth/classic"
 	"github.com/go-oauth2/oauth2/v4"
 	"github.com/go-session/session"
@@ -13,11 +12,112 @@ import (
 func (e *Explorer) loginPage(rw http.ResponseWriter, r *http.Request) {
 	_, authorized := e.authorized(rw, r)
 	if authorized {
-		http.Redirect(rw, r, "/wallet", http.StatusFound)
+		http.Redirect(rw, r, defaultPageLogged, http.StatusFound)
 		return
 	}
 	data := frontData{"Wallets connexion", authorized}
 	templates.ExecuteTemplate(rw, "login", data)
+}
+
+func (e *Explorer) logoutPage(rw http.ResponseWriter, r *http.Request) {
+	store, err := session.Start(r.Context(), rw, r)
+	if err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	store.Delete(sessionLabelAccessToken)
+	store.Delete(sessionLabelRefreshToken)
+	store.Save()
+	rw.Header().Set("Location", defaultPageLogin)
+	rw.WriteHeader(http.StatusFound)
+}
+
+func (e *Explorer) authorizePage(rw http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	parm := r.Form
+	if parm == nil {
+		parm = url.Values{}
+	}
+
+	parm.Add("grant_type", "client_credentials")
+	parm.Add("client_id", e.auth.API[classic.Name].Config().ClientID)
+	parm.Add("client_secret", e.auth.API[classic.Name].Config().ClientSecret)
+	parm.Add("scope", "all")
+	parm.Add("response_type", "token")
+
+	r.Form = parm
+
+	req, err := e.authServer.ValidationAuthorizeRequest(r)
+	if err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		// err := srv.redirectError(w, req, err)}
+		return
+	}
+
+	// user authorization
+	address, err := e.authServer.UserAuthorizationHandler(rw, r)
+	if err != nil {
+		//return s.redirectError(w, req, err)
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		// err := srv.redirectError(w, req, err)}
+		return
+	} else if address == "" {
+		rw.Header().Set("Location", defaultPageLogin)
+		return
+	}
+	req.UserID = address
+
+	// specify the scope of authorization
+	if fn := e.authServer.AuthorizeScopeHandler; fn != nil {
+		scope, err := fn(rw, r)
+		if err != nil {
+			http.Error(rw, err.Error(), http.StatusInternalServerError)
+			return
+		} else if scope != "" {
+			req.Scope = scope
+		}
+	}
+
+	// specify the expiration time of access token
+	if fn := e.authServer.AccessTokenExpHandler; fn != nil {
+		exp, err := fn(rw, r)
+		if err != nil {
+			http.Error(rw, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		req.AccessTokenExp = exp
+	}
+
+	ti, err := e.authServer.GetAuthorizeToken(ctx, req)
+	if err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// If the redirect URI is empty, the default domain provided by the client is used.
+	if req.RedirectURI == "" {
+		client, err := e.authServer.Manager.GetClient(ctx, req.ClientID)
+		if err != nil {
+			http.Error(rw, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		req.RedirectURI = client.GetDomain()
+	}
+
+	data := e.authServer.GetAuthorizeData(req.ResponseType, ti)
+
+	/*  outputJSON(data) */
+	store, err := session.Start(r.Context(), rw, r)
+	if err != nil {
+		return
+	}
+	store.Set(sessionLabelAccessToken, data["access_token"].(string))
+	store.Set(sessionLabelRefreshToken, data["refresh_token"].(string))
+	store.Save()
+
+	rw.Header().Set("Location", defaultPageLogged)
+	rw.WriteHeader(http.StatusFound)
 }
 
 type postLoginAPIBodyReq struct {
@@ -33,6 +133,11 @@ const (
 	sessionLabelUserID       string = "LoggedInUserID"
 	sessionLabelAccessToken  string = "LoggedAccessToken"
 	sessionLabelRefreshToken string = "LoggedRefreshToken"
+)
+
+const (
+	defaultPageLogged string = "/wallet"
+	defaultPageLogin  string = "/login"
 )
 
 // postLoginResp
@@ -100,7 +205,7 @@ type postLoginAPIReq struct {
 func (e *Explorer) loginAPI(rw http.ResponseWriter, r *http.Request) {
 	_, authorized := e.authorized(rw, r)
 	if authorized {
-		http.Redirect(rw, r, "/wallet", http.StatusFound)
+		http.Redirect(rw, r, defaultPageLogged, http.StatusFound)
 		return
 	}
 	req := &postLoginAPIBodyReq{}
@@ -130,104 +235,33 @@ func (e *Explorer) loginAPI(rw http.ResponseWriter, r *http.Request) {
 	store.Set(sessionLabelUserID, wallet.Address)
 	store.Save()
 
-	rw.Header().Set("Location", "/api/authorize?grant_type=client_credentials"+
-		"&client_id="+e.auth.API[classic.Name].Config().ClientID+
-		"&client_secret="+e.auth.API[classic.Name].Config().ClientSecret+
-		"&scope=all"+
-		"&response_type=token")
-
-	rw.WriteHeader(http.StatusFound)
-}
-
-func (e *Explorer) authorizeAPI(rw http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	req, err := e.authServer.ValidationAuthorizeRequest(r)
-	if err != nil {
-		e.fail(http.StatusUnauthorized, err, rw)
-		return
-	}
-
-	// user authorization
-	userID, err := e.authServer.UserAuthorizationHandler(rw, r)
-	if err != nil {
-		e.fail(http.StatusUnauthorized, err, rw)
-		return
-	} else if userID == "" {
-		e.fail(http.StatusUnauthorized, err, rw)
-		return
-	}
-	req.UserID = userID
-
-	// specify the scope of authorization
-	if fn := e.authServer.AuthorizeScopeHandler; fn != nil {
-		scope, err := fn(rw, r)
-		if err != nil {
-			e.fail(http.StatusUnauthorized, err, rw)
-			return
-		} else if scope != "" {
-			req.Scope = scope
-		}
-	}
-
-	// specify the expiration time of access token
-	if fn := e.authServer.AccessTokenExpHandler; fn != nil {
-		exp, err := fn(rw, r)
-		if err != nil {
-			e.fail(http.StatusUnauthorized, err, rw)
-			return
-		}
-		req.AccessTokenExp = exp
-	}
-
-	ti, err := e.authServer.GetAuthorizeToken(ctx, req)
-	if err != nil {
-		e.fail(http.StatusUnauthorized, err, rw)
-		return
-	}
-
-	// If the redirect URI is empty, the default domain provided by the client is used.
-	if req.RedirectURI == "" {
-		client, err := e.authServer.Manager.GetClient(ctx, req.ClientID)
-		if err != nil {
-			e.fail(http.StatusUnauthorized, err, rw)
-			return
-		}
-		req.RedirectURI = client.GetDomain()
-	}
-
-	data := e.authServer.GetAuthorizeData(req.ResponseType, ti)
-
-	/*  outputJSON(data) */
-	store, err := session.Start(r.Context(), rw, r)
-	if err != nil {
-		e.fail(http.StatusUnauthorized, err, rw)
-		return
-	}
-	store.Set(sessionLabelAccessToken, data["access_token"].(string))
-	store.Set(sessionLabelRefreshToken, data["refresh_token"].(string))
-	store.Save()
-
-	rw.Header().Set("Location", "/protected")
-	rw.WriteHeader(http.StatusFound)
+	e.JSON(rw, "ok")
 }
 
 func (e *Explorer) tokenAPI(rw http.ResponseWriter, r *http.Request) {
+	if err := e.refreshToken(rw, r); err != nil {
+		_, statusCode, _ := e.authServer.GetErrorData(err)
+		http.Error(rw, err.Error(), statusCode)
+		return
+	}
+	rw.Header().Set("Location", defaultPageLogged)
+	rw.WriteHeader(http.StatusFound)
+}
+
+func (e *Explorer) refreshToken(rw http.ResponseWriter, r *http.Request) error {
 	store, err := session.Start(r.Context(), rw, r)
 	if err != nil {
-		e.fail(http.StatusUnauthorized, err, rw)
-		return
+		return err
 	}
 	refreshToken, ok := store.Get(sessionLabelRefreshToken)
 	if !ok {
-		e.fail(http.StatusUnauthorized, err, rw)
-		return
+		return err
 	}
+
 	parm := r.Form
 	if parm == nil {
 		parm = url.Values{}
 	}
-
 	parm.Add("refresh_token", refreshToken.(string))
 	parm.Add("grant_type", oauth2.Refreshing.String())
 	parm.Add("client_id", e.auth.API[classic.Name].Config().ClientID)
@@ -240,23 +274,17 @@ func (e *Explorer) tokenAPI(rw http.ResponseWriter, r *http.Request) {
 
 	gt, tgr, err := e.authServer.ValidationTokenRequest(r)
 	if err != nil {
-		_, statusCode, _ := e.authServer.GetErrorData(err)
-		e.fail(statusCode, errors.New("fail to valid token request"), rw)
-		return
+		return err
 	}
 
 	ti, err := e.authServer.GetAccessToken(ctx, gt, tgr)
 	if err != nil {
-		_, statusCode, _ := e.authServer.GetErrorData(err)
-		e.fail(statusCode, errors.New("fail to valid token request"), rw)
-		return
+		return err
 	}
 
 	data := e.authServer.GetTokenData(ti)
 	store.Set(sessionLabelAccessToken, data["access_token"].(string))
 	store.Set(sessionLabelRefreshToken, data["refresh_token"].(string))
 	store.Save()
-
-	rw.Header().Set("Location", "/protected")
-	rw.WriteHeader(http.StatusFound)
+	return nil
 }
