@@ -20,8 +20,8 @@ func (e *Explorer) loginPage(rw http.ResponseWriter, r *http.Request) {
 		Authentified: authorized,
 		Menus:        getMenus(),
 		Javascripts: []string{
-			"https://www.google.com/recaptcha/api.js",
-			"/static/login.js",
+			"https://www.google.com/recaptcha/api.js?render=" + e.cfg.ReCaptcha.SiteKey,
+			"/static/login.js?v0.0.0",
 		},
 	}
 	templates.ExecuteTemplate(rw, "login", data)
@@ -129,7 +129,8 @@ func (e *Explorer) authorizePage(rw http.ResponseWriter, r *http.Request) {
 }
 
 type postLoginAPIBodyReq struct {
-	Mnemonic string `json:"mnemonic"`
+	Mnemonic  string `json:"mnemonic"`
+	Recaptcha string `json:"recaptcha"`
 }
 
 type postLoginAPIBodyRes struct {

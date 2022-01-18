@@ -55,6 +55,11 @@ type Metadata struct {
 	Title string `config:"metadata_title"`
 }
 
+type ReCaptcha struct {
+	SiteKey   string
+	SecretKey string
+}
+
 type Config struct {
 	Name          string `config:"name"`
 	Version       string `config:"version"`
@@ -71,6 +76,7 @@ type Config struct {
 	Healthz       Healthz
 	BlockchainAPI BlockchainAPI
 	Metadata      Metadata
+	ReCaptcha     ReCaptcha
 }
 
 func getDefaultConfig() *Config {
@@ -115,6 +121,10 @@ func getDefaultConfig() *Config {
 		},
 		Metadata: Metadata{
 			Title: "blockchain-altcoin",
+		},
+		ReCaptcha: ReCaptcha{
+			SiteKey:   "6LfmdSAeAAAAAPf5oNQ1UV0wf6QhnH9dQFDSop7V",
+			SecretKey: "6LfmdSAeAAAAANZ1946vLQqqaVWS2fNCQmc4YJoc",
 		},
 	}
 }
