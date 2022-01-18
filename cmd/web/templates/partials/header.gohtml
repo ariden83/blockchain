@@ -3,12 +3,44 @@
     <header>
       <h2>Blockchain altcoins</h2>
     </header>
-    <ul data-current="{{ . }}">
-      <li title="Settings"><a href="/" title="home" >Home</a></li>
-      <li title="Brave Rewards"><a href="/blocks" title="Blocks">Blocks</a></li>
-      <li title="History"><a href="/blocks/mine" title="Mine Block">Mine Block</a></li>
-      <li title="Bookmarks"><a href="/wallets" title="Wallets">Wallets</a></li>
-    </ul>
+
+    <!-- sidebar start -->
+    <aside>
+      <ul>
+        {{ $currentPage := . }}
+        {{ range .Menus }}
+          {{ if .HasChildren }}
+            <li class="{{ if $currentPage.HasMenuCurrent "main" . }}active{{ end }}">
+              <a href="#" title="{{ .Title }}">
+                {{ .Pre }}
+                <span>{{ .Name }}</span>
+              </a>
+            </li>
+            <ul class="sub-menu">
+              {{ range .Children }}
+                <li class="{{ if $currentPage.IsMenuCurrent "main" . }}active{{ end }}">
+                  <a href="{{ .URL }}" title="{{ .Title }}">{{ .Name }}</a>
+                </li>
+              {{ end }}
+            </ul>
+          {{ else }}
+            <li>
+              <a href="{{ .URL }}" title="{{ .Title }}">
+                {{ .Pre }}
+                <span>{{ .Name }}</span>
+              </a>
+            </li>
+          {{ end }}
+        {{ end }}
+        <li>
+          <a href="#" target="_blank">Hardcoded Link 1</a>
+        </li>
+        <li>
+          <a href="#" target="_blank">Hardcoded Link 2</a>
+        </li>
+      </ul>
+    </aside>
+
     <a href="/logout" title="Logout">Logout</a>
   </section>
 {{ end }}

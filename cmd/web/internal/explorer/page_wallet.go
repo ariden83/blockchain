@@ -12,7 +12,7 @@ type UnspTxOutput struct {
 }
 
 type walletsShowData struct {
-	PageTitle     string
+	*FrontData
 	Address       string
 	Balance       uint
 	UnspTxOutputs []*UnspTxOutput
@@ -41,10 +41,15 @@ func (e *Explorer) walletPage(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	data := walletsShowData{
-		PageTitle:     "your wallet",
 		Address:       wallet.Address,
 		Balance:       balance,
 		UnspTxOutputs: outputs,
+	}
+	data.FrontData = &FrontData{
+		PageTitle:    "Wallets page",
+		Authentified: true,
+		Menus:        getMenus(),
+		Javascripts:  []string{},
 	}
 
 	templates.ExecuteTemplate(rw, "wallet", data)

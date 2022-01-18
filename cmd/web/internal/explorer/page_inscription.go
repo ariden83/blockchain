@@ -10,7 +10,14 @@ func (e *Explorer) inscriptionPage(rw http.ResponseWriter, r *http.Request) {
 		http.Redirect(rw, r, "/wallet", http.StatusFound)
 		return
 	}
-	frontData := frontData{"Seed creation", authorized}
+	frontData := FrontData{
+		PageTitle:    "Seed creation",
+		Authentified: authorized,
+		Menus:        getMenus(),
+		Javascripts: []string{
+			"https://www.google.com/recaptcha/api.js",
+		},
+	}
 
 	templates.ExecuteTemplate(rw, "inscription", frontData)
 }

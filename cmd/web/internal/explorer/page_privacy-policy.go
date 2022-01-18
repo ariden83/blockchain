@@ -7,7 +7,11 @@ import (
 
 func (e *Explorer) privacyPolicyPage(rw http.ResponseWriter, r *http.Request) {
 	_, authorized := e.authorized(rw, r)
-	data := frontData{e.metadata.Title + " - privacy policy", authorized}
+	data := FrontData{
+		PageTitle:    e.metadata.Title + " - privacy policy",
+		Authentified: authorized,
+		Menus:        getMenus(),
+	}
 
 	templates.ExecuteTemplate(rw, "privacy-policy", data)
 }

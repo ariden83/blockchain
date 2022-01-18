@@ -15,7 +15,15 @@ func (e *Explorer) loginPage(rw http.ResponseWriter, r *http.Request) {
 		http.Redirect(rw, r, defaultPageLogged, http.StatusFound)
 		return
 	}
-	data := frontData{"Wallets connexion", authorized}
+	data := FrontData{
+		PageTitle:    "Wallets connexion",
+		Authentified: authorized,
+		Menus:        getMenus(),
+		Javascripts: []string{
+			"https://www.google.com/recaptcha/api.js",
+			"/static/login.js",
+		},
+	}
 	templates.ExecuteTemplate(rw, "login", data)
 }
 

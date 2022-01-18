@@ -1,9 +1,11 @@
 {{ define "home" }}<!DOCTYPE html>
 <html lang="en">
-  {{ template "head" .PageTitle }}
+  {{ template "head" . }}
   <body>
   <div class="container-fluid">
-  <main>
+    {{ template "header" . }}
+
+    <main>
     <section>
       <header>
         <h1>Le web décentralisé vous attend</h1>
