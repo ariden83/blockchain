@@ -4,6 +4,9 @@ cloud.google.com/go/compute/metadata
 # github.com/AndreasBriese/bbloom v0.0.0-20190825152654-46b345b51c96
 ## explicit
 github.com/AndreasBriese/bbloom
+# github.com/BurntSushi/toml v0.3.1
+## explicit
+github.com/BurntSushi/toml
 # github.com/LuisAcerv/btchdwallet v0.0.0-20200802014842-cc7fde1007e3
 ## explicit; go 1.13
 github.com/LuisAcerv/btchdwallet/crypt
@@ -144,6 +147,7 @@ github.com/hashicorp/golang-lru/simplelru
 github.com/heetch/confita
 github.com/heetch/confita/backend
 github.com/heetch/confita/backend/env
+github.com/heetch/confita/backend/file
 github.com/heetch/confita/backend/flags
 # github.com/huin/goupnp v1.0.2
 ## explicit; go 1.14
@@ -773,3 +777,6 @@ google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7
 ## explicit
 gopkg.in/tomb.v1
+# gopkg.in/yaml.v2 v2.4.0
+## explicit; go 1.15
+gopkg.in/yaml.v2

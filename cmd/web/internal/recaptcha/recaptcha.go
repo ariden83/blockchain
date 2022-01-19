@@ -1,23 +1,27 @@
 package recaptcha
 
 import (
-	"bytes"
+	"encoding/json"
 	"fmt"
-	"github.com/ariden83/blockchain/cmd/web/config"
 	"go.uber.org/zap"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/ariden83/blockchain/cmd/web/config"
 )
 
 type Captcha struct {
 	log    *zap.Logger
-	cfg    *config.ReCaptcha
+	cfg    config.ReCaptcha
 	client *http.Client
 }
 
-func New(cfg *config.ReCaptcha, log *zap.Logger) *Captcha {
+func New(cfg config.ReCaptcha, log *zap.Logger) *Captcha {
+	if cfg.SiteKey == "" || cfg.SecretKey == "" {
+		return nil
+	}
+
 	return &Captcha{
 		cfg: cfg,
 		log: log.With(zap.String("service", "recaptcha")),
@@ -27,49 +31,70 @@ func New(cfg *config.ReCaptcha, log *zap.Logger) *Captcha {
 	}
 }
 
-func (c *Captcha) verifyCaptcha(token string) (err error) {
+type Input struct {
+	// Required. The shared key between your site and reCAPTCHA.
+	Secret string `json:"secret"`
+	// Required. The user response token provided by the reCAPTCHA client-side integration on your site.
+	Response string `json:"response"`
+	// Optional. The user's IP address.
+	RemoteIP string `json:"remoteip"`
+}
 
+type Output struct {
+	Success     bool      `json:"success"`
+	ChallengeTs time.Time `json:"challenge_ts"`
+	Hostname    string    `json:"hostname"`
+	Error       []string  `json:"error-codes"`
+	Score       float64   `json:"score"`
+	Action      string    `json:"action"`
+}
+
+// https://developers.google.com/recaptcha/docs/v3?authuser=1
+// https://www.google.com/recaptcha/admin/site/505443814/setup
+// https://www.google.com/recaptcha/admin/site/505443814 (analytics)
+// https://www.google.com/recaptcha/admin/site/505443814/settings (settings)
+func (c *Captcha) Verify(token, remoteIP string) (valid bool) {
 	c.log.Debug("verifyCaptcha")
-
-	var URL *url.URL
-	URL, err = url.Parse(c.cfg.URL)
+	URL, err := url.Parse(c.cfg.URL)
 	if err != nil {
 		c.log.Error("fail to parse URL", zap.Error(err))
 		return
 	}
-	parameters := url.Values{}
-	URL.RawQuery = parameters.Encode()
 
-	data := url.Values{}
-	data.Set("client_id", `Lazy Test`)
-
-	req, err := http.NewRequest(http.MethodPost, URL.String(), bytes.NewBufferString(data.Encode()))
+	req, err := http.NewRequest(http.MethodPost, URL.String(), nil)
 	if err != nil {
 		c.log.Error("fail to set New Request to google API", zap.Error(err))
 		return
 	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 
-	if err != nil {
-		c.log.Error("fail to call google api", zap.Error(err))
-		return
-	}
+	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+	q := req.URL.Query()
+	q.Add("secret", c.cfg.SecretKey)
+	q.Add("response", token)
+	q.Add("remoteip", remoteIP)
+	req.URL.RawQuery = q.Encode()
+
 	resp, err := c.client.Do(req)
 	if err != nil {
 		c.log.Error("fail to call google api", zap.Error(err))
 		return
 	}
 
-	f, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
+	defer resp.Body.Close()
+
+	var captchaResp Output
+	dec := json.NewDecoder(resp.Body)
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(&captchaResp); err != nil {
 		c.log.Error("fail to call google api", zap.Error(err))
 		return
 	}
-	resp.Body.Close()
-	if err != nil {
-		c.log.Error("fail to call google api", zap.Error(err))
-		return
+	if captchaResp.Success {
+		valid = true
+		c.log.Info("recaptcha is valid")
+	} else {
+		c.log.Error(fmt.Sprintf("google captcha api return error: %+v", captchaResp.Error), zap.Error(err))
 	}
-	fmt.Println(string(f))
-	return nil
+	return
 }

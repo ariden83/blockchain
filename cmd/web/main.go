@@ -38,6 +38,7 @@ func main() {
 		explorer.WithLogs(logs),
 		explorer.WithModel(m),
 		explorer.WithMetadata(cfg.Metadata),
+		explorer.WithRecaptcha(cfg.ReCaptcha, logs),
 		explorer.WithAuth(auth.New(
 			// auth.WithGoogleAPI(cfg.Auth.GoogleAPI),
 			auth.WithClassic(cfg.Auth.Classic),

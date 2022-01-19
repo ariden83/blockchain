@@ -2,6 +2,7 @@ package explorer
 
 import (
 	"github.com/ariden83/blockchain/cmd/web/internal/auth/classic"
+	"github.com/ariden83/blockchain/cmd/web/internal/ip"
 	"github.com/go-oauth2/oauth2/v4"
 	"github.com/go-session/session"
 	"go.uber.org/zap"
@@ -21,7 +22,7 @@ func (e *Explorer) loginPage(rw http.ResponseWriter, r *http.Request) {
 		Menus:        getMenus(),
 		Javascripts: []string{
 			"https://www.google.com/recaptcha/api.js?render=" + e.cfg.ReCaptcha.SiteKey,
-			"/static/login.js?v0.0.0",
+			"/static/login.js?v0.0.3",
 		},
 	}
 	templates.ExecuteTemplate(rw, "login", data)
@@ -134,8 +135,7 @@ type postLoginAPIBodyReq struct {
 }
 
 type postLoginAPIBodyRes struct {
-	Address string `json:"address"`
-	PubKey  string `json:"pubkey"`
+	Status string `json:"status"`
 }
 
 const (
@@ -230,6 +230,14 @@ func (e *Explorer) loginAPI(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	ip, err := ip.User(r)
+	if e.reCaptcha != nil {
+		if valid := e.reCaptcha.Verify(req.Recaptcha, ip); !valid {
+			http.Error(rw, "fail to verify capcha", http.StatusPreconditionFailed)
+			return
+		}
+	}
+
 	wallet, err := e.model.GetWallet(r.Context(), req.Mnemonic)
 	if err != nil {
 		e.fail(http.StatusNotFound, err, rw)
@@ -244,7 +252,7 @@ func (e *Explorer) loginAPI(rw http.ResponseWriter, r *http.Request) {
 	store.Set(sessionLabelUserID, wallet.Address)
 	store.Save()
 
-	e.JSON(rw, "ok")
+	e.JSON(rw, postLoginAPIBodyRes{"ok"})
 }
 
 func (e *Explorer) tokenAPI(rw http.ResponseWriter, r *http.Request) {

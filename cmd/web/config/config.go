@@ -8,6 +8,7 @@ import (
 	"github.com/heetch/confita"
 	"github.com/heetch/confita/backend"
 	"github.com/heetch/confita/backend/env"
+	"github.com/heetch/confita/backend/file"
 	"github.com/heetch/confita/backend/flags"
 	"os"
 	"path/filepath"
@@ -56,14 +57,14 @@ type Metadata struct {
 }
 
 type ReCaptcha struct {
-	SiteKey   string
-	SecretKey string
-	Timeout   time.Duration `config:"recpatcha_timeout"`
+	SiteKey   string        `config:"recaptcha_sitekey"`
+	SecretKey string        `config:"recaptcha_secretkey"`
+	Timeout   time.Duration `config:"recaptcha_timeout"`
 	URL       string
 }
 
 type Config struct {
-	Name          string `config:"name"`
+	Name          string `config:"name" yaml:"name"`
 	Version       string `config:"version"`
 	DumpVar       bool   `config:"dump_var"`
 	Domain        string `config:"domain"`
@@ -139,6 +140,11 @@ func New() (*Config, error) {
 		flags.NewBackend(),
 	}
 
+	configFile := findConfigFilePathRecursively("prod", 0)
+	if configFile != "" {
+		loaders = append(loaders, file.NewBackend(configFile))
+	}
+
 	loader := confita.NewLoader(loaders...)
 
 	cfg := getDefaultConfig()
@@ -169,6 +175,24 @@ func (c *Config) String() string {
 		c.applyWithType(&s, "", v, t)
 	}
 	return s
+}
+
+func findConfigFilePathRecursively(environment string, depth int) string {
+	char := "../"
+	if depth == 0 {
+		char = "./"
+	}
+	if depth > 3 {
+		return ""
+	}
+
+	filePath := strings.Repeat(char, depth) + "cmd/web/config/config." + environment + ".yaml"
+	if _, err := os.Stat(filePath); err == nil {
+		return filePath
+	}
+	depth++
+
+	return findConfigFilePathRecursively(environment, depth)
 }
 
 func (c *Config) applyWithType(s *string, parentKey string, v reflect.Value, k reflect.StructField) {

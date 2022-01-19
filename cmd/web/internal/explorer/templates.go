@@ -33,11 +33,11 @@ func (e *Explorer) loadPages() {
 			New("templates").
 			Funcs(templateFunctions).
 			// Delims("[[", "]]").
-			ParseGlob(e.cfg.TemplatesDir + "pages/*.gohtml"))
+			ParseGlob(e.cfg.TemplatesDir + "pages/*.html"))
 }
 
 func (e *Explorer) loadPartials() {
 	templates = template.Must(
 		templates.
-			ParseGlob(e.cfg.TemplatesDir + "partials/*.gohtml"))
+			ParseGlob(e.cfg.TemplatesDir + "partials/*.html"))
 }

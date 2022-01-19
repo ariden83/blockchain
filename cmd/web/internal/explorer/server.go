@@ -7,6 +7,7 @@ import (
 	"github.com/ariden83/blockchain/cmd/web/internal/auth/classic"
 	"github.com/ariden83/blockchain/cmd/web/internal/metrics"
 	"github.com/ariden83/blockchain/cmd/web/internal/model"
+	"github.com/ariden83/blockchain/cmd/web/internal/recaptcha"
 	"github.com/go-oauth2/oauth2/v4"
 	"github.com/go-oauth2/oauth2/v4/errors"
 	"github.com/go-oauth2/oauth2/v4/generates"
@@ -40,6 +41,7 @@ type Explorer struct {
 	metricsServer *http.Server
 	metrics       *metrics.Metrics
 	authServer    *server.Server
+	reCaptcha     *recaptcha.Captcha
 }
 
 type Healthz struct {
@@ -92,6 +94,16 @@ func WithModel(evt *model.Model) func(*Explorer) {
 func WithAuth(a *auth.Auth) func(*Explorer) {
 	return func(e *Explorer) {
 		e.auth = a
+	}
+}
+
+func WithRecaptcha(cfg config.ReCaptcha, log *zap.Logger) func(*Explorer) {
+	c := recaptcha.New(cfg, log)
+	if c == nil {
+		return func(e *Explorer) {}
+	}
+	return func(e *Explorer) {
+		e.reCaptcha = c
 	}
 }
 
