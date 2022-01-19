@@ -58,6 +58,8 @@ type Metadata struct {
 type ReCaptcha struct {
 	SiteKey   string
 	SecretKey string
+	Timeout   time.Duration `config:"recpatcha_timeout"`
+	URL       string
 }
 
 type Config struct {
@@ -123,8 +125,9 @@ func getDefaultConfig() *Config {
 			Title: "blockchain-altcoin",
 		},
 		ReCaptcha: ReCaptcha{
-			SiteKey:   "6LfmdSAeAAAAAPf5oNQ1UV0wf6QhnH9dQFDSop7V",
-			SecretKey: "6LfmdSAeAAAAANZ1946vLQqqaVWS2fNCQmc4YJoc",
+			SiteKey:   "",
+			SecretKey: "",
+			URL:       "https://www.google.com/recaptcha/api/siteverify",
 		},
 	}
 }
