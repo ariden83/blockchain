@@ -63,6 +63,11 @@ type ReCaptcha struct {
 	URL       string
 }
 
+type Locales struct {
+	Path string
+	Lang []string
+}
+
 type Config struct {
 	Name          string `config:"name" yaml:"name"`
 	Version       string `config:"version"`
@@ -70,6 +75,7 @@ type Config struct {
 	Domain        string `config:"domain"`
 	TemplatesDir  string `config:"template_dir"`
 	StaticDir     string `config:"static_dir"`
+	LocalesDir    string `config:"locales_dir"`
 	StaticRoute   string `config:"static_route"`
 	Port          int    `config:"port"`
 	Log           config.Log
@@ -80,6 +86,7 @@ type Config struct {
 	BlockchainAPI BlockchainAPI
 	Metadata      Metadata
 	ReCaptcha     ReCaptcha
+	Locales       Locales
 }
 
 func getDefaultConfig() *Config {
@@ -91,6 +98,7 @@ func getDefaultConfig() *Config {
 		Domain:       "http://localhost:4000",
 		TemplatesDir: "cmd/web/templates/",
 		StaticDir:    "./cmd/web/static/",
+		LocalesDir:   "./cmd/web/locales/",
 		StaticRoute:  "/static/",
 		Log: config.Log{
 			CLILevel: "info",
@@ -129,6 +137,10 @@ func getDefaultConfig() *Config {
 			SiteKey:   "",
 			SecretKey: "",
 			URL:       "https://www.google.com/recaptcha/api/siteverify",
+		},
+		Locales: Locales{
+			Path: "./cmd/web/locales/",
+			Lang: []string{"en-US", "fr-FR"},
 		},
 	}
 }

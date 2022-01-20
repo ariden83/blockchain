@@ -1,8 +1,9 @@
 {{ define "privacy-policy" }}<!DOCTYPE html>
 <html lang="en">
-  {{ template "head" .PageTitle }}
-  <body>
-  <div class="container-fluid">
+{{ template "head" . }}
+<body>
+<div class="container-fluid">
+  {{ template "header" . }}
     <main>
       <section>
         <header>
@@ -22,7 +23,8 @@
         <p>Our website may contain links to other websites such as but not limited to Twitter & Youtube. Once you have used these links to leave our site, you should note that we do not have any control over that other website. Therefore, we cannot be responsible for the protection and privacy of any information which you provide whilst visiting such sites and such sites are not governed by this privacy statement. You should exercise caution and look at the privacy statement applicable to the website in question.</p>
       </section>
     </main>
-    {{ template "footer" }}
-  </div>
-  </body>
+  </main>
+  {{ template "footer" . }}
+</div>
+</body>
 </html>{{ end }}

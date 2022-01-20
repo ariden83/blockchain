@@ -1,8 +1,9 @@
 {{ define "inscription" }}<!DOCTYPE html>
 <html lang="en">
-  {{ template "head" .PageTitle }}
-  <body>
-  <div class="container-fluid">
+{{ template "head" . }}
+<body>
+<div class="container-fluid">
+    {{ template "header" . }}
     <main>
       <section>
         <header>
@@ -26,9 +27,8 @@
           </p>
       </div>
     </section>
-  </main>
-    {{ template "footer" }}
-  </div>
-  </body>
-</html>
-{{ end }}
+    </main>
+    {{ template "footer" . }}
+</div>
+</body>
+</html>{{ end }}

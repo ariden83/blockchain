@@ -3,6 +3,7 @@ module github.com/ariden83/blockchain
 go 1.17
 
 require (
+	github.com/BurntSushi/toml v1.0.0
 	github.com/LuisAcerv/btchdwallet v0.0.0-20200802014842-cc7fde1007e3
 	github.com/blockcypher/gobcy v2.0.1+incompatible
 	github.com/brianium/mnemonic v0.0.0-20180124190051-72af92c51f88
@@ -29,6 +30,7 @@ require (
 	github.com/libp2p/go-libp2p-swarm v0.5.3
 	github.com/libp2p/go-libp2p-tls v0.2.0
 	github.com/multiformats/go-multiaddr v0.4.1
+	github.com/nicksnyder/go-i18n/v2 v2.1.2
 	github.com/prometheus/client_golang v1.11.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/urfave/negroni v1.0.0
@@ -36,6 +38,7 @@ require (
 	go.uber.org/zap v1.19.0
 	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d
 	golang.org/x/oauth2 v0.0.0-20210514164344-f6687ab2804c
+	golang.org/x/text v0.3.7
 	google.golang.org/grpc v1.40.0
 	google.golang.org/protobuf v1.27.1
 )
@@ -43,7 +46,6 @@ require (
 require (
 	cloud.google.com/go v0.65.0 // indirect
 	github.com/AndreasBriese/bbloom v0.0.0-20190825152654-46b345b51c96 // indirect
-	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/benbjohnson/clock v1.1.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/btcsuite/btcd v0.22.0-beta // indirect
@@ -160,7 +162,6 @@ require (
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20210816183151-1e6c022a8912 // indirect
-	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/tools v0.1.1 // indirect
 	google.golang.org/appengine v1.6.6 // indirect
 	google.golang.org/genproto v0.0.0-20200825200019-8632dd797987 // indirect

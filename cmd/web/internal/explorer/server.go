@@ -5,6 +5,7 @@ import (
 	"github.com/ariden83/blockchain/cmd/web/config"
 	"github.com/ariden83/blockchain/cmd/web/internal/auth"
 	"github.com/ariden83/blockchain/cmd/web/internal/auth/classic"
+	"github.com/ariden83/blockchain/cmd/web/internal/locales"
 	"github.com/ariden83/blockchain/cmd/web/internal/metrics"
 	"github.com/ariden83/blockchain/cmd/web/internal/model"
 	"github.com/ariden83/blockchain/cmd/web/internal/recaptcha"
@@ -42,6 +43,7 @@ type Explorer struct {
 	metrics       *metrics.Metrics
 	authServer    *server.Server
 	reCaptcha     *recaptcha.Captcha
+	locales       *locales.Locales
 }
 
 type Healthz struct {
@@ -97,6 +99,12 @@ func WithAuth(a *auth.Auth) func(*Explorer) {
 	}
 }
 
+func WithLocales(cfg config.Locales) func(*Explorer) {
+	return func(e *Explorer) {
+		e.locales = locales.New(cfg)
+	}
+}
+
 func WithRecaptcha(cfg config.ReCaptcha, log *zap.Logger) func(*Explorer) {
 	c := recaptcha.New(cfg, log)
 	if c == nil {
@@ -110,7 +118,6 @@ func WithRecaptcha(cfg config.ReCaptcha, log *zap.Logger) func(*Explorer) {
 func (e *Explorer) Start(stop chan error) {
 	e.log.Info("start web server")
 	e.loadTemplates()
-
 	e.loadRoutes()
 	e.loadConnectedRoutes()
 	e.loadNonConnectedRoutes()

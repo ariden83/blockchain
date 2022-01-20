@@ -44,6 +44,7 @@ func main() {
 			auth.WithClassic(cfg.Auth.Classic),
 		)),
 		explorer.WithMetrics(metrics.New(cfg.Name)),
+		explorer.WithLocales(cfg.Locales),
 	)
 
 	stop := make(chan error, 1)

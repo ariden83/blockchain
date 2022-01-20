@@ -1,4 +1,5 @@
-{{ define "home" }}<!DOCTYPE html>
+{{ define "home" }}
+<!DOCTYPE html>
 <html lang="en">
   {{ template "head" . }}
   <body>
@@ -8,12 +9,17 @@
     <main>
     <section>
       <header>
-        <h1>Le web décentralisé vous attend</h1>
+        <h1>The decentralized web awaits you</h1>
       </header>
     </section>
     <section>
-      <p><a href="/login" title="Connectez-vous à votre compte blockchain altcoin">Connectez-vous</a></p>
-      <p><a href="/inscription" title="Créez votre nouveau compte blockchain altcoin">Nouveau compte</a></p>
+      <h4>No, I already have a mnemonic phrase</h4>
+      <p>Import your existing wallet using a Secret Recovery Phrase</p>
+      <p><a href="/login" title="Log in to your altcoin blockchain account">Login</a>
+      </p>
+      <h4>I'm new, let's get to the configuration!</h4>
+      <p>This will create a new wallet and a new mnemonic phrase</p>
+      <p><a href="/inscription" title="Create your new altcoin blockchain account">New account</a></p>
     </section>
   </main>
     {{ template "footer" }}

@@ -14,6 +14,18 @@ func getMenus() []Menus {
 			Title:      "this is the login section",
 			URL:        "/login",
 		},
+		{
+			Identifier: "about",
+			Name:       "about",
+			Title:      "this is the about-us page section",
+			URL:        "/about",
+		},
+		{
+			Identifier: "contact",
+			Name:       "contact",
+			Title:      "this is the contact page section",
+			URL:        "/contact",
+		},
 	}
 }
 
@@ -30,6 +42,12 @@ func getMenusAuth() []Menus {
 			Name:       "wallet",
 			Title:      "this is the wallet section",
 			URL:        "/wallets",
+		},
+		{
+			Identifier: "contact",
+			Name:       "contact",
+			Title:      "this is the contact page section",
+			URL:        "/contact",
 		},
 	}
 }

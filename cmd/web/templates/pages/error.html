@@ -1,23 +1,19 @@
-{{ define "error" }}
-<!DOCTYPE html>
+{{ define "error" }}<!DOCTYPE html>
 <html lang="en">
-{{ template "head" .PageTitle }}
+{{ template "head" . }}
 <body>
-{{ template "header" . }}
-<div class="main-container-wrapper">
-    <div class="first-time-flow">
-        <div class="first-time-flow__wrapper">
-            <div class="reveal-seed-phrase">
-                <div class="seed-phrase__sections">
-                    <div class="seed-phrase__main">
-                        <div class="first-time-flow__header">Error</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="container-fluid">
+    {{ template "header" . }}
+    <main>
+        <section>
+            <header>
+                <h1>Error</h1>
+            </header>
+        </section>
+        <section>
+        </section>
+    </main>
+    {{ template "footer" . }}
 </div>
-
-{{ template "footer" }}
 </body>
 </html>{{ end }}

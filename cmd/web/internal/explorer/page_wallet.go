@@ -11,7 +11,7 @@ type UnspTxOutput struct {
 	Amount uint   `json:"amount"`
 }
 
-type walletsShowData struct {
+type walletsData struct {
 	*FrontData
 	Address       string
 	Balance       uint
@@ -40,16 +40,16 @@ func (e *Explorer) walletPage(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := walletsShowData{
+	data := walletsData{
 		Address:       wallet.Address,
 		Balance:       balance,
 		UnspTxOutputs: outputs,
-	}
-	data.FrontData = &FrontData{
-		PageTitle:    "Wallets page",
-		Authentified: true,
-		Menus:        getMenus(),
-		Javascripts:  []string{},
+		FrontData: &FrontData{
+			PageTitle:    e.metadata.Title + " - " + "Wallets page",
+			Authentified: true,
+			Menus:        getMenus(),
+			Javascripts:  []string{},
+		},
 	}
 
 	templates.ExecuteTemplate(rw, "wallet", data)

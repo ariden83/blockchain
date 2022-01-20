@@ -32,14 +32,12 @@
         </tr>
 
         {{ range $index, $unspent_tx_output := .UnspTxOutputs }}
-          <tr>
-            <td>{{ $index }}</td>
-            {{ template "unspent_tx_output_row" $unspent_tx_output }}
-          </tr>
+        <tr>
+          <td>{{ $index }}</td>
+          {{ template "unspent_tx_output_row" $unspent_tx_output }}
+        </tr>
+        {{ end }}
 
-        {{
-        end
-        }}
       </table>
     </section>
   </main>

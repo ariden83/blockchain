@@ -1,27 +1,19 @@
-{{ define "not_found" }}
-<!DOCTYPE html>
+{{ define "not_found" }}<!DOCTYPE html>
 <html lang="en">
-  {{ template "head" .PageTitle }}
-  <body>
-  <p class="container-fluid">
+{{ template "head" . }}
+<body>
+<div class="container-fluid">
+  {{ template "header" . }}
   <main>
     <section>
       <header>
-        <h1 style="color: red">404 - Not Found</h1>
+        <h1>Page Not Found</h1>
       </header>
     </section>
     <section>
-        <p>
-          The resource you're looking for doesn't exist!
-          <br />
-          <br />
-          <a href="{{ homeURL }}">Return home...</a>
-        </p>
     </section>
   </main>
-
-    {{ template "footer" }}
-  </body>
-</html>
-
-{{ end }}
+  {{ template "footer" . }}
+</div>
+</body>
+</html>{{ end }}

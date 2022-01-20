@@ -1,0 +1,12 @@
+HomePageTitle = "welcome on new site"
+HomeH1 = "The decentralized web awaits you"
+
+[MyUnreadEmails]
+description = "The number of unread emails I have"
+one = "I have {{.PluralCount}} unread email."
+other = "I have {{.PluralCount}} unread emails."
+
+[PersonUnreadEmails]
+description = "The number of unread emails a person has"
+one = "{{.Name}} has {{.UnreadEmailCount}} unread email."
+other = "{{.Name}} has {{.UnreadEmailCount}} unread emails."

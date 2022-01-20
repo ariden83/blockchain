@@ -1,0 +1,34 @@
+{{ define "contact" }}<!DOCTYPE html>
+<html lang="en">
+{{ template "head" . }}
+<body>
+<div class="container-fluid">
+    {{ template "header" . }}
+    <main>
+        <section>
+            <header>
+                <h1>Contact us</h1>
+            </header>
+        </section>
+        <section>
+            {{if .Success}}
+            <p>Your message has been sent!</p>
+            {{else}}
+            <form action="/contact" method="POST">
+                <label>Name:</label><br />
+                <input type="text" name="name"><br />
+                <label>Email:</label><br />
+                <input type="text" name="email"><br />
+                <label>Subject:</label><br />
+                <input type="text" name="subject"><br />
+                <label>Message:</label><br />
+                <textarea name="message"></textarea><br /><br />
+                <input type="submit">
+            </form>
+            {{end}}
+        </section>
+    </main>
+    {{ template "footer" . }}
+</div>
+</body>
+</html>{{ end }}

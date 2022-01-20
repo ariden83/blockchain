@@ -1,0 +1,28 @@
+{{ define "home-es" }}
+<!DOCTYPE html>
+<html lang="en">
+  {{ template "head" . }}
+  <body>
+  <div class="container-fluid">
+    {{ template "header" . }}
+
+    <main>
+    <section>
+      <header>
+        <h1>La web descentralizada te espera</h1>
+      </header>
+    </section>
+    <section>
+      <h4>Non, j'ai déjà une phrase mnémotechnique</h4>
+      <p>Import your existing wallet using a Secret Recovery Phrase</p>
+      <p><a href="/login" title="Connectez-vous à votre compte blockchain altcoin">Connectez-vous</a>
+      </p>
+      <h4>Je suis nouveau, passons à la configuration !</h4>
+      <p>Cela créera un nouveau portefeuille et une nouvelle phrase mnémotechnique</p>
+      <p><a href="/inscription" title="Créez votre nouveau compte blockchain altcoin">Nouveau compte</a></p>
+    </section>
+  </main>
+    {{ template "footer" }}
+  </div>
+  </body>
+</html>{{ end }}

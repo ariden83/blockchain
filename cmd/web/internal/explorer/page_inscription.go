@@ -4,22 +4,29 @@ import (
 	"net/http"
 )
 
+type inscriptionData struct {
+	*FrontData
+	Mnemonic string
+}
+
 func (e *Explorer) inscriptionPage(rw http.ResponseWriter, r *http.Request) {
 	_, authorized := e.authorized(rw, r)
 	if authorized {
 		http.Redirect(rw, r, "/wallet", http.StatusFound)
 		return
 	}
-	frontData := FrontData{
-		PageTitle:    "Seed creation",
-		Authentified: authorized,
-		Menus:        getMenus(),
-		Javascripts: []string{
-			"https://www.google.com/recaptcha/api.js",
-		},
+
+	frontData := inscriptionData{
+		FrontData: e.frontData(rw, r).
+			JS([]string{
+				"https://www.google.com/recaptcha/api.js?render=" + e.cfg.ReCaptcha.SiteKey,
+				"/static/inscription.js?v0.0.0",
+			}).
+			Title("inscription"),
+		Mnemonic: "",
 	}
 
-	templates.ExecuteTemplate(rw, "inscription", frontData)
+	e.ExecuteTemplate(rw, r, "inscription", frontData)
 }
 
 type postInscriptionAPIBodyReq struct{}

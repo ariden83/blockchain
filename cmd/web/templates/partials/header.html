@@ -32,15 +32,12 @@
             </li>
           {{ end }}
         {{ end }}
-        <li>
-          <a href="#" target="_blank">Hardcoded Link 1</a>
-        </li>
-        <li>
-          <a href="#" target="_blank">Hardcoded Link 2</a>
-        </li>
       </ul>
     </aside>
-
+    {{ if not .Authentified}}
+    <a href="/login" title="Logout">Login</a>
+    {{ else }}
     <a href="/logout" title="Logout">Logout</a>
+    {{end}}
   </section>
 {{ end }}

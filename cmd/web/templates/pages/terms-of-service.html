@@ -1,8 +1,9 @@
 {{ define "terms-of-service" }}<!DOCTYPE html>
 <html lang="en">
-  {{ template "head" .PageTitle }}
-  <body>
-  <div class="container-fluid">
+{{ template "head" . }}
+<body>
+<div class="container-fluid">
+    {{ template "header" . }}
     <main>
       <section>
         <header>
@@ -332,7 +333,7 @@
           <h2>33. Contact Information and Complaints</h2>
       </section>
     </main>
-    {{ template "footer" }}
-  </div>
-  </body>
+    {{ template "footer" . }}
+</div>
+</body>
 </html>{{ end }}

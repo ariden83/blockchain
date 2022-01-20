@@ -1,7 +1,9 @@
-{{ define "login" }}<!DOCTYPE html><html lang="en">
-  {{ template "head" . }}
-  <body>
-  <p class="container-fluid">
+{{ define "login" }}<!DOCTYPE html>
+<html lang="en">
+{{ template "head" . }}
+<body>
+<div class="container-fluid">
+  {{ template "header" . }}
     <main>
       <section>
         <header>
@@ -19,7 +21,7 @@
         </div>
       </section>
     </main>
-    {{ template "footer" }}
-  </div>
+{{ template "footer" . }}
+</div>
 </body>
 </html>{{ end }}
