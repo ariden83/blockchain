@@ -6,7 +6,7 @@ import (
 
 type inscriptionData struct {
 	*FrontData
-	Mnemonic string
+	Success bool
 }
 
 func (e *Explorer) inscriptionPage(rw http.ResponseWriter, r *http.Request) {
@@ -20,10 +20,18 @@ func (e *Explorer) inscriptionPage(rw http.ResponseWriter, r *http.Request) {
 		FrontData: e.frontData(rw, r).
 			JS([]string{
 				"https://www.google.com/recaptcha/api.js?render=" + e.cfg.ReCaptcha.SiteKey,
-				"/static/inscription.js?v0.0.0",
+				"/static/inscription.js?v0.0.3",
+			}).
+			Css([]string{
+				"/static/inscription.css?0.0.8",
 			}).
 			Title("inscription"),
-		Mnemonic: "",
+		Success: false,
+	}
+
+	if r.Method != http.MethodPost {
+		e.ExecuteTemplate(rw, r, "inscription", frontData)
+		return
 	}
 
 	e.ExecuteTemplate(rw, r, "inscription", frontData)

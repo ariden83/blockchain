@@ -1,0 +1,32 @@
+.mg-tp-20{margin-top:20px}
+.mg-bt-20{margin-bottom:20px}
+.btn-big{
+    margin: 35px 0 14px;
+    width: 170px;
+    height: 44px;
+    font-size: .8em;
+    position: relative;
+    border-radius: 50px;
+    display: inline-block;
+    padding: 15px 10px;
+    width: 250px;
+    background: #41b883;
+    color: #fff;
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+    font-weight: 700;
+    line-height: 20px;
+    cursor: pointer;
+}
+.btn-primary {
+    color: #fff;
+    border: 1px solid #037dd6;
+    background-color: #037dd6;
+}
+.btn--rounded {
+    border-radius: 100px;
+    will-change: box-shadow;
+    transition: box-shadow cubic-bezier(0.6, -0.28, 0.735, 0.045) 200ms;
+}
+

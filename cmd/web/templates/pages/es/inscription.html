@@ -5,6 +5,7 @@
 <div class="container-fluid">
     {{ template "header" . }}
     <main>
+<<<<<<< HEAD
       <section>
         <header>
           <h1>Inscription</h1>
@@ -27,8 +28,42 @@
           </p>
       </div>
     </section>
+=======
+        <section>
+            <header>
+                <h1>Créer un mot de passe</h1>
+            </header>
+        </section>
+        <section>
+            {{if .Success}}
+            <p>Nouveau mot de passe créé</p>
+            {{else}}
+            <form action="/contact" method="POST">
+                <label>Nouveau mot de passe (min 8 caractères)</label><br />
+                <input aria-invalid="false" autocomplete="new-password" id="create-password" type="password" dir="auto" value="">>
+                <label>Confirmer le mot de passe</label><br />
+                <input aria-invalid="false" autocomplete="confirm-password" id="confirm-password" type="password" dir="auto" value=""/><br />
+                <div class="first-time-flow__checkbox-container">
+                    <div class="first-time-flow__checkbox" tabindex="0" role="checkbox" aria-checked="true" aria-labelledby="ftf-chk1-label">
+                        <i class="fa fa-check fa-2x"></i>
+                    </div>
+                    <span id="ftf-chk1-label" class="first-time-flow__checkbox-label"> I have read and agree to the <a href="/terms.html" target="_blank" rel="noopener noreferrer">
+                        <span class="first-time-flow__link-text">Conditions d'Utilisation</span>
+                    </a>
+                    </span>
+                </div>
+                <input type="submit">
+                <button class="button btn--rounded btn-primary first-time-flow__button" disabled="" role="button" tabindex="0">Créer</button>
+            </form>
+            {{end}}
+        </section>
+>>>>>>> [web] add langages
     </main>
     {{ template "footer" . }}
 </div>
 </body>
+<<<<<<< HEAD
 </html>{{ end }}
+=======
+</html>{{ end }}
+>>>>>>> [web] add langages

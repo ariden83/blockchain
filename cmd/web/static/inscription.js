@@ -1,82 +1,58 @@
 // Full spec-compliant TodoMVC with localStorage persistence
 // and hash-based routing in ~120 effective lines of JavaScript.
-console.log("******************************* v0.0.0")
+console.log("******************************* v0.0.8")
 
 document.addEventListener("DOMContentLoaded", () => {
-// app Vue instance
+    // app Vue instance
     const app = Vue.createApp({
+        name: "VuePincode",
         delimiters: ['${', '}'],
-        // app initial state
         data() {
             return {
-                newTodo: "",
-                errorTodo: "",
+                pincode: "",
+                pincodeError: false,
+                pincodeSuccess: false
+            };
+        },
+        computed: {
+            pincodeLength() {
+                return this.pincode.length;
+            },
+            buttonDisabled() {
+                return this.pincodeError || this.pincodeSuccess;
             }
         },
-
         watch: {
+            pincode() {
+                if (this.pincodeLength === 6) {
+                    this.$emit("pincode", this.pincode);
+                }
+            }
         },
-
-        // http://vuejs.org/guide/computed.html
-        computed: {
+        destroyed() {
+            this.resetPincode();
         },
-
-        // methods that implement data logic.
-        // note there's no DOM manipulation here at all.
         methods: {
-            addTodo() {
-                var value = this.newTodo && this.newTodo.trim();
-                if (!value) {
-                    this.errorTodo = "";
-                    return;
-                }
-
-                var wordsNB = (value.trim().split(' ').filter(function(v, index, arr){
-                    return v != "";
-                }).length);
-
-                if (wordsNB < 12) {
-                    this.errorTodo = 'Missing words in your seed, need 12 or 24...';
-                    return
-                }
-
-                this.callAPILogin(this.newTodo);
+            submit() {
+                console.log(this.pincode);
             },
-
-            callAPILogin(mnemonic) {
-                this.errorTodo = 'Current connection...';
-                var t = this
-                grecaptcha.execute('6LfmdSAeAAAAAPf5oNQ1UV0wf6QhnH9dQFDSop7V', {action: 'submit'})
-                    .then(function(token) {
-                        return axios.post('/api/login', {
-                            mnemonic: mnemonic,
-                            recaptcha: token,
-                        })
-                    })
-                    .then(function (response) {
-                        console.log(response);
-                        if (response.data && response.data.status === 'ok') {
-                            window.location.replace("/authorize");
-                        } else {
-                            t.errorTodo = 'Error! Could not reach the API. ' + error;
-                        }
-                    })
-                    .catch(function (error) {
-                        t.errorTodo = 'Error! Could not reach the API. ' + error;
-                    });
-            },
-        },
-
-        // a custom directive to wait for the DOM to be updated
-        // before focusing on the input field.
-        // http://vuejs.org/guide/custom-directive.html
-        directives: {
-            "todo-focus": {
-                updated(el, binding) {
-                    if (binding.value) {
-                        el.focus();
-                    }
+            clickPinButton(pressedNumber) {
+                if (this.pincodeLength < 6) {
+                    this.pincode = this.pincode + pressedNumber;
                 }
+            },
+            resetPincode() {
+                this.pincode = "";
+                this.pincodeError = false;
+                this.pincodeSuccess = false;
+            },
+            triggerMiss() {
+                this.pincodeError = true;
+                setTimeout(() => this.resetPincode(), 800);
+            },
+            triggerSuccess() {
+                this.pincodeSuccess = true;
+                setTimeout(() => this.resetPincode(), 2500);
             }
         }
     });

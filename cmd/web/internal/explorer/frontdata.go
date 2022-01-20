@@ -9,6 +9,7 @@ type FrontData struct {
 	Authentified bool
 	Menus        []Menus
 	Javascripts  []string
+	CSS          []string
 	siteTitle    string
 }
 
@@ -33,6 +34,11 @@ func (e *Explorer) frontData(rw http.ResponseWriter, r *http.Request) *FrontData
 
 func (f *FrontData) JS(js []string) *FrontData {
 	f.Javascripts = js
+	return f
+}
+
+func (f *FrontData) Css(css []string) *FrontData {
+	f.CSS = css
 	return f
 }
 

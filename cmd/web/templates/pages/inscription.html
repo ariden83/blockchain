@@ -1,32 +1,39 @@
-{{ define "inscription" }}<!DOCTYPE html>
+{{ define "inscription" }}
+<!DOCTYPE html>
 <html lang="en">
 {{ template "head" . }}
 <body>
 <div class="container-fluid">
     {{ template "header" . }}
     <main>
-      <section>
-        <header>
-          <h1>Inscription</h1>
-        </header>
-        <a href="/" title="go back to homepage">&lt; Back</a>
-      </section>
-    <section>
-      <div class="col-xs-6">
-          <p>Phrase de sauvegarde secrète</p>
-          <p>Votre phrase de sauvegarde secrète facilite la sauvegarde et la restauration de votre compte.</p>
-          <p>AVERTISSEMENT : ne révélez jamais votre phrase de sauvegarde. N'importe qui avec cette phrase peut voler votre Ether pour toujours.</p>
-          <p class="hidden">{{ .Mnemonic }}</p>
-      </div>
-      <div class="col-xs-6">
-          <p>Stockez cette phrase dans un gestionnaire de mots de passe comme 1Password.</p>
-          <p>Écrivez cette phrase sur une feuille de papier et rangez-la dans un endroit sûr. Si vous voulez encore plus de sécurité, notez-la sur plusieurs feuilles de papier et rangez-les dans deux ou trois endroits différents.</p>
-          <p>Mémorisez cette phrase.</p>
-          <p>
-            <a class="reveal-seed-phrase__export-text">Téléchargez cette phrase de sauvegarde secrète et conservez-la en lieu sûr sur un disque dur ou un support de stockage externe chiffré.</a>
-          </p>
-      </div>
-    </section>
+        <section>
+            <header>
+                <h1>Créer un mot de passe</h1>
+            </header>
+        </section>
+        <section>
+            {{if .Success}}
+            <p>Nouveau mot de passe créé</p>
+            {{else}}
+            <form action="/inscription" method="POST">
+                <label>Nouveau mot de passe (min 8 caractères)</label><br />
+                <input aria-invalid="false" autocomplete="new-password" id="create-password" type="password" dir="auto" value="">>
+                <label>Confirmer le mot de passe</label><br />
+                <input aria-invalid="false" autocomplete="confirm-password" id="confirm-password" type="password" dir="auto" value=""/><br />
+                <div class="first-time-flow__checkbox-container">
+                    <div class="first-time-flow__checkbox" tabindex="0" role="checkbox" aria-checked="true" aria-labelledby="ftf-chk1-label">
+                        <i class="fa fa-check fa-2x"></i>
+                    </div>
+                    <span id="ftf-chk1-label" class="first-time-flow__checkbox-label"> I have read and agree to the <a href="/terms.html" target="_blank" rel="noopener noreferrer">
+                        <span class="first-time-flow__link-text">Conditions d'Utilisation</span>
+                    </a>
+                    </span>
+                </div>
+                <input type="submit">
+                <button class="button btn--rounded btn-primary first-time-flow__button" disabled="" role="button" tabindex="0">Créer</button>
+            </form>
+            {{end}}
+        </section>
     </main>
     {{ template "footer" . }}
 </div>

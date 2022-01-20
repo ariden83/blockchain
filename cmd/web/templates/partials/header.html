@@ -1,43 +1,33 @@
 {{ define "header" }}
-  <section>
-    <header>
-      <h2>Blockchain altcoins</h2>
-    </header>
-
-    <!-- sidebar start -->
-    <aside>
-      <ul>
-        {{ $currentPage := . }}
-        {{ range .Menus }}
-          {{ if .HasChildren }}
-            <li class="{{ if $currentPage.HasMenuCurrent "main" . }}active{{ end }}">
-              <a href="#" title="{{ .Title }}">
-                {{ .Pre }}
-                <span>{{ .Name }}</span>
-              </a>
-            </li>
-            <ul class="sub-menu">
-              {{ range .Children }}
-                <li class="{{ if $currentPage.IsMenuCurrent "main" . }}active{{ end }}">
-                  <a href="{{ .URL }}" title="{{ .Title }}">{{ .Name }}</a>
-                </li>
-              {{ end }}
-            </ul>
-          {{ else }}
-            <li>
-              <a href="{{ .URL }}" title="{{ .Title }}">
-                {{ .Pre }}
-                <span>{{ .Name }}</span>
-              </a>
-            </li>
-          {{ end }}
+<section>
+  <header>
+    <h2>Blockchain altcoins</h2>
+  </header>
+  <!-- sidebar start -->
+  <aside>
+    <ul>
+{{ $currentPage := . }}{{ range .Menus }}{{ if .HasChildren }}
+      <li class="{{ if $currentPage.HasMenuCurrent "main" . }}active{{ end }}">
+        <a href="#" title="{{ .Title }}">{{ .Pre }} <span>{{ .Name }}</span></a>
+      </li>
+      <ul class="sub-menu">
+        {{ range .Children }}
+          <li class="{{ if $currentPage.IsMenuCurrent "main" . }}active{{ end }}">
+            <a href="{{ .URL }}" title="{{ .Title }}">{{ .Name }}</a>
+          </li>
         {{ end }}
       </ul>
-    </aside>
+    {{ else }}
+      <li>
+        <a href="{{ .URL }}" title="{{ .Title }}">{{ .Pre }} <span>{{ .Name }}</span></a>
+      </li>
+    {{ end }}{{ end }}
+    </ul>
     {{ if not .Authentified}}
     <a href="/login" title="Logout">Login</a>
     {{ else }}
     <a href="/logout" title="Logout">Logout</a>
     {{end}}
-  </section>
+  </aside>
+</section>
 {{ end }}

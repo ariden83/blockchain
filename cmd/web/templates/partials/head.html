@@ -11,6 +11,12 @@
   <link rel="stylesheet" href="/static/index.css?0.0.0" />
   <link rel="icon" type="image/jpg" href="/static/favicon.ico"/>
 
+  {{if .CSS }}
+  {{range $i, $a := .CSS}}
+  <link rel="stylesheet" href="{{$a}}" />
+  {{ end }}
+  {{ end }}
+
   <script src="https://unpkg.com/vue@next"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
