@@ -1,7 +1,5 @@
 // Full spec-compliant TodoMVC with localStorage persistence
 // and hash-based routing in ~120 effective lines of JavaScript.
-console.log("******************************* v0.0.8")
-
 document.addEventListener("DOMContentLoaded", () => {
     // app Vue instance
     const app = Vue.createApp({
@@ -11,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return {
                 errorTodo: "",
                 errorSend: "",
-                validTerms: false,
+                terms: false,
                 step: 1,
                 pincode: "",
                 pincode_confirm: "",
@@ -89,6 +87,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                 }, 700);
             },
+            validterms() {
+                if (this.terms && this.step > 3) {
+                    this.step = 5
+                } else if (!this.terms && this.step > 3) {
+                    this.step = 4
+                }
+            },
             triggerMiss() {
                 this.errorTodo = 'Les mots de passe ne correspondent pas';
                 this.pincodeError = true;
@@ -98,21 +103,23 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             triggerSuccess() {
                 this.pincodeSuccess = true;
-                this.step = 4
-                // this.callAPILogin(this.pincode)
-                // setTimeout(() => this.resetPincode(), 2500);
+                if (this.terms) {
+                    this.step = 5
+                } else {
+                    this.step = 4
+                }
             },
             submit() {
-                this.errorTodo = '';
-                if (this.step === 5 && this.pincodeLength == 6 && validTerms) {
+                this.errorSend = '';
+                if (this.step === 5 && this.pincodeLength == 6 && this.terms) {
                     this.callAPILogin(this.pincode)
-                } else if (!validTerms) {
-                    this.errorTodo = 'Vous devez accepter les conditions générales';
+                } else if (!this.terms) {
+                    this.errorSend = 'Vous devez accepter les conditions générales';
                     setTimeout(() => this.resetErrorMessageForAPI(), 5000);
                 }
             },
             callAPILogin(code) {
-                this.errorTodo = '... wait ...';
+                this.errorSend = '... wait ...';
                 var t = this
                 this.step = 3
                 grecaptcha.execute('6LfmdSAeAAAAAPf5oNQ1UV0wf6QhnH9dQFDSop7V', {action: 'submit'})
@@ -123,7 +130,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         })
                     })
                     .then(function (response) {
-                        console.log(response);
                         if (response.data && response.data.status === 'ok') {
                             window.location.replace("/inscription/seed");
                         } else {
@@ -138,7 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             resetErrorMessageForAPI() {
                 this.errorSend = '';
-                if (!validTerms) {
+                if (!this.terms) {
                     this.step = 4
                 } else {
                     this.step = 5

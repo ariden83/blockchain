@@ -62,7 +62,12 @@
                             </button>
                         </div>
                         <div class="vue-pincode__checkbox">
-                            I have read and agree to the <a href="/terms-of-service" title="Lire les conditions d'utilisation avant de valider le mot de passe" class="txt-bold" target="_blank">Conditions d'Utilisation</a>
+                            <div class="custom-control custom-checkbox">
+                                <input id="checkbox-1" type="checkbox" name="checkbox-1" v-model="terms" unchecked-value="not_accepted" class="custom-control-input" value="true" @change="validterms()">
+                                <label for="checkbox-1" class="custom-control-label">
+                                I accept the terms and use
+                                </label> <a href="/terms-of-service" title="Lire les conditions d'utilisation avant de valider le mot de passe" class="txt-bold" target="_blank">Conditions d'Utilisation</a>
+                            </div>
                         </div>
                         <div><p class="txt-error">${ errorSend }</p></div>
                         <button class="btn-big btn-primary btn-rounded" @click="submit()" :class="step > 4 ? '' : step > 3 ? 'opacity-50' : 'hidden'" :disabled="buttonSubmitDisabled">Retry</button>
