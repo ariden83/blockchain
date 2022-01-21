@@ -20,10 +20,10 @@ func (e *Explorer) inscriptionPage(rw http.ResponseWriter, r *http.Request) {
 		FrontData: e.frontData(rw, r).
 			JS([]string{
 				"https://www.google.com/recaptcha/api.js?render=" + e.cfg.ReCaptcha.SiteKey,
-				"/static/inscription.js?v0.0.3",
+				"/static/inscription.js?v0.0.20",
 			}).
 			Css([]string{
-				"/static/inscription.css?0.0.8",
+				"/static/inscription.css?0.0.6",
 			}).
 			Title("inscription"),
 		Success: false,

@@ -1,5 +1,8 @@
 .mg-tp-20{margin-top:20px}
 .mg-bt-20{margin-bottom:20px}
+.opacity-50{
+    opacity: 0.5;
+}
 .btn-big{
     margin: 35px 0 14px;
     width: 170px;
@@ -24,9 +27,14 @@
     border: 1px solid #037dd6;
     background-color: #037dd6;
 }
-.btn--rounded {
+.btn-rounded {
     border-radius: 100px;
     will-change: box-shadow;
     transition: box-shadow cubic-bezier(0.6, -0.28, 0.735, 0.045) 200ms;
 }
-
+.txt-error{
+    color: #f44336;
+}
+.txt-bold{
+    font-weight: bold;
+}

@@ -21,14 +21,29 @@
             <div id="app">
                 <div class="container-inscription">
                     <div class="vue-pincode" :class="pincodeSuccess ? 'vue-pincode--success' : ''">
-                        <div class="vue-pincode__fields" :class="pincodeError ? 'vue-pincode__fields--miss' : ''">
-                            <span :class="pincode.length >= 1 ? 'active' : ''" ></span>
-                            <span :class="pincode.length >= 2 ? 'active' : ''" ></span>
-                            <span :class="pincode.length >= 3 ? 'active' : ''" ></span>
-                            <span :class="pincode.length >= 4 ? 'active' : ''" ></span>
-                            <span :class="pincode.length >= 5 ? 'active' : ''" ></span>
-                            <span :class="pincode.length >= 6 ? 'active' : ''" ></span>
+                        <div class="step1">
+                            <p>Tappez votre mot de passe</p>
+                            <div class="vue-pincode__fields" :class="pincodeError ? 'vue-pincode__fields--miss' : ''">
+                                <span :class="pincode.length >= 1 ? 'active' : ''" ></span>
+                                <span :class="pincode.length >= 2 ? 'active' : ''" ></span>
+                                <span :class="pincode.length >= 3 ? 'active' : ''" ></span>
+                                <span :class="pincode.length >= 4 ? 'active' : ''" ></span>
+                                <span :class="pincode.length >= 5 ? 'active' : ''" ></span>
+                                <span :class="pincode.length >= 6 ? 'active' : ''" ></span>
+                            </div>
                         </div>
+                        <div class="block-confirm" :class="step > 1 ? '' : 'opacity-50'">
+                            <p>Confirmer le mot de passe</p>
+                            <div class="vue-pincode_confirm__fields">
+                                <span :class="pincode_confirm.length >= 1 ? 'active' : ''" ></span>
+                                <span :class="pincode_confirm.length >= 2 ? 'active' : ''" ></span>
+                                <span :class="pincode_confirm.length >= 3 ? 'active' : ''" ></span>
+                                <span :class="pincode_confirm.length >= 4 ? 'active' : ''" ></span>
+                                <span :class="pincode_confirm.length >= 5 ? 'active' : ''" ></span>
+                                <span :class="pincode_confirm.length >= 6 ? 'active' : ''" ></span>
+                            </div>
+                        </div>
+                        <div><p class="txt-error">${ errorTodo }</p></div>
                         <div class="vue-pincode__numbers">
                             <button v-for="(number, idx) in [1, 2, 3, 4, 5, 6, 7, 8, 9]" :key="idx" class="shadow" @click="clickPinButton(number)" :disabled="buttonDisabled">
                                 <span>${ number }</span>
@@ -46,7 +61,11 @@
                                 </span>
                             </button>
                         </div>
-                        <button class="btn-big btn-primary btn--rounded" @click="submit()">Valider</button>
+                        <div class="vue-pincode__checkbox">
+                            I have read and agree to the <a href="/terms-of-service" title="Lire les conditions d'utilisation avant de valider le mot de passe" class="txt-bold" target="_blank">Conditions d'Utilisation</a>
+                        </div>
+                        <div><p class="txt-error">${ errorSend }</p></div>
+                        <button class="btn-big btn-primary btn-rounded" @click="submit()" :class="step > 4 ? '' : step > 3 ? 'opacity-50' : 'hidden'" :disabled="buttonSubmitDisabled">Retry</button>
                     </div>
                 </div>
             </div>
