@@ -1,5 +1,5 @@
 # blockchain
-My first own blockchain. See website of project [blockchain-altcoin.com](https://www.blockchain-altcoin.com/)
+New blockchain. See website of project [blockchain-altcoin.com](https://www.blockchain-altcoin.com/)
 
 ## Resources
 
@@ -20,15 +20,6 @@ My first own blockchain. See website of project [blockchain-altcoin.com](https:/
 * p2p discovery mdns [code source](https://gitlab.dms3.io/p2p/go-p2p/-/blob/master/p2p/discovery/mdns.go)
 * p2P examples [examples](https://github.com/libp2p/go-libp2p/tree/master/examples/)
 * blockchain go project by Nomad [code source](https://github.com/librity/nc_nomadcoin)
-
-### Others
-
-* Authentification with global id [tutorial](https://developer.global.id)
-* oauth2 tutorial by medium [tutorial](https://medium.com/@cyantarek/build-your-own-oauth2-server-in-go-7d0f660732c3)
-* oauth2 tutorial [tutorial](https://tutorialedge.net/golang/go-oauth2-tutorial/)
-| [code source](https://github.com/go-oauth2/oauth2/tree/master/example) 
-| [code source](https://github.com/TutorialEdge/go-oauth-tutorial)
-* How to mock OAuth 2.0 in Go [tutorial](https://blog.seriesci.com/how-to-mock-oauth-in-go/)
 
 ## Installation
 
