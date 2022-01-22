@@ -73,6 +73,7 @@ message GetWalletInput {
     // Mandatory field
     Context context = 1;
     string mnemonic = 2;
+    string password = 3;
 }
 
 message GetWalletOutput {
@@ -85,6 +86,7 @@ message GetWalletOutput {
 message CreateWalletInput {
     // Mandatory field
     Context context = 1;
+    string password = 2;
 }
 
 message CreateWalletOutput {

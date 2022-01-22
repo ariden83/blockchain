@@ -34,7 +34,7 @@ func (e *Explorer) walletPage(rw http.ResponseWriter, r *http.Request) {
 	outputs := []*UnspTxOutput{}
 	balance := uint(0)
 
-	wallet, err := e.model.GetWallet(r.Context(), token.GetUserID())
+	wallet, err := e.model.GetBalance(r.Context(), token.GetUserID(), token.GetUserID())
 	if err != nil {
 		e.fail(http.StatusNotFound, err, rw)
 		return

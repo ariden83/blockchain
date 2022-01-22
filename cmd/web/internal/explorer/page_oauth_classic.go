@@ -1,13 +1,16 @@
 package explorer
 
 import (
-	"github.com/ariden83/blockchain/cmd/web/internal/auth/classic"
-	"github.com/ariden83/blockchain/cmd/web/internal/ip"
+	"errors"
+	"net/http"
+	"net/url"
+
 	"github.com/go-oauth2/oauth2/v4"
 	"github.com/go-session/session"
 	"go.uber.org/zap"
-	"net/http"
-	"net/url"
+
+	"github.com/ariden83/blockchain/cmd/web/internal/auth/classic"
+	"github.com/ariden83/blockchain/cmd/web/internal/ip"
 )
 
 func (e *Explorer) loginPage(rw http.ResponseWriter, r *http.Request) {
@@ -131,6 +134,7 @@ func (e *Explorer) authorizePage(rw http.ResponseWriter, r *http.Request) {
 
 type postLoginAPIBodyReq struct {
 	Mnemonic  string `json:"mnemonic"`
+	Password  string `json:"password"`
 	Recaptcha string `json:"recaptcha"`
 }
 
@@ -229,6 +233,10 @@ func (e *Explorer) loginAPI(rw http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	if req.Password == "" || req.Mnemonic == "" {
+		e.fail(http.StatusPreconditionFailed, errors.New("missing fields"), rw)
+		return
+	}
 
 	ip, err := ip.User(r)
 	if e.reCaptcha != nil {
@@ -238,7 +246,7 @@ func (e *Explorer) loginAPI(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	wallet, err := e.model.GetWallet(r.Context(), req.Mnemonic)
+	wallet, err := e.model.GetWallet(r.Context(), req.Mnemonic, req.Password)
 	if err != nil {
 		e.fail(http.StatusNotFound, err, rw)
 		return

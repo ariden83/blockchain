@@ -43,7 +43,7 @@ func (ws *Wallets) GetAllPublicSeeds() []SeedNoPrivKey {
 	return allSeeds
 }
 
-func GetKeys(mnemonic string) SeedNoPrivKey {
+func GetKeys(mnemonic, password string) SeedNoPrivKey {
 	// Get private key from mnemonic
 	masterPrv := hdwallet.MasterKey([]byte(mnemonic))
 	// Convert a private key to public key

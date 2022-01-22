@@ -1,13 +1,23 @@
 package explorer
 
 import (
+	"errors"
+	"github.com/ariden83/blockchain/cmd/web/internal/decoder"
+	"go.uber.org/zap"
 	"net/http"
+
+	"github.com/go-session/session"
+
+	"github.com/ariden83/blockchain/cmd/web/internal/ip"
 )
 
 type inscriptionData struct {
 	*FrontData
-	Success bool
+	Success    bool
+	Paraphrase string
 }
+
+const passwordKey string = "~NB8CcOL#J!H?|Yr"
 
 func (e *Explorer) inscriptionPage(rw http.ResponseWriter, r *http.Request) {
 	_, authorized := e.authorized(rw, r)
@@ -19,14 +29,16 @@ func (e *Explorer) inscriptionPage(rw http.ResponseWriter, r *http.Request) {
 	frontData := inscriptionData{
 		FrontData: e.frontData(rw, r).
 			JS([]string{
+				"https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js",
 				"https://www.google.com/recaptcha/api.js?render=" + e.cfg.ReCaptcha.SiteKey,
-				"/static/inscription.js?v0.0.28",
+				"/static/inscription/inscription.js?v0.0.12",
 			}).
 			Css([]string{
-				"/static/inscription.css?0.0.6",
+				"/static/inscription/inscription.css?0.0.0",
 			}).
 			Title("inscription"),
-		Success: false,
+		Success:    false,
+		Paraphrase: passwordKey,
 	}
 
 	if r.Method != http.MethodPost {
@@ -37,12 +49,14 @@ func (e *Explorer) inscriptionPage(rw http.ResponseWriter, r *http.Request) {
 	e.ExecuteTemplate(rw, r, "inscription", frontData)
 }
 
-type postInscriptionAPIBodyReq struct{}
+type postInscriptionAPIBodyReq struct {
+	Cipher    string `json:"cipher"`
+	IV        string `json:"iv"`
+	Recaptcha string `json:"recaptcha"`
+}
 
 type postInscriptionAPIBodyRes struct {
-	Address  string `json:"address"`
-	PubKey   string `json:"pubkey"`
-	Mnemonic string `json:"mnemonic"`
+	Status string `json:"status"`
 }
 
 // postInscriptionAPIResp
@@ -108,16 +122,57 @@ type postInscriptionAPIReq struct {
 //        412: genericError
 //        500: genericError
 func (e *Explorer) inscriptionAPI(rw http.ResponseWriter, r *http.Request) {
+	_, authorized := e.authorized(rw, r)
+	if authorized {
+		http.Redirect(rw, r, defaultPageLogged, http.StatusFound)
+		return
+	}
 
-	wallet, err := e.model.CreateWallet(r.Context())
+	req := &postInscriptionAPIBodyReq{}
+	log := e.log.With(zap.String("input", "oauthClassicInscription"))
+	if err := e.decodeBody(rw, log, r.Body, req); err != nil {
+		e.fail(http.StatusPreconditionFailed, err, rw)
+		return
+	}
+	if r.Form == nil {
+		if err := r.ParseForm(); err != nil {
+			e.fail(http.StatusInternalServerError, err, rw)
+			return
+		}
+	}
+
+	if req.Cipher == "" || req.IV == "" {
+		e.fail(http.StatusPreconditionFailed, errors.New("missing fields"), rw)
+		return
+	}
+
+	ip, err := ip.User(r)
+	if e.reCaptcha != nil {
+		if valid := e.reCaptcha.Verify(req.Recaptcha, ip); !valid {
+			http.Error(rw, "fail to verify capcha", http.StatusPreconditionFailed)
+			return
+		}
+	}
+
+	password, err := decoder.Password(req.Cipher, req.IV, passwordKey)
+	if err != nil {
+		http.Error(rw, "fail to decode password", http.StatusPreconditionFailed)
+		return
+	}
+
+	wallet, err := e.model.CreateWallet(r.Context(), password)
 	if err != nil {
 		e.fail(http.StatusNotFound, err, rw)
 		return
 	}
 
-	e.JSON(rw, postInscriptionAPIBodyRes{
-		Address:  wallet.Address,
-		PubKey:   wallet.PubKey,
-		Mnemonic: wallet.Mnemonic,
-	})
+	store, err := session.Start(r.Context(), rw, r)
+	if err != nil {
+		e.fail(http.StatusNotFound, err, rw)
+		return
+	}
+	store.Set(sessionLabelUserID, wallet.Address)
+	store.Save()
+
+	e.JSON(rw, postInscriptionAPIBodyRes{"ok"})
 }

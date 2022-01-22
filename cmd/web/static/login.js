@@ -1,7 +1,6 @@
+"use strict";
 // Full spec-compliant TodoMVC with localStorage persistence
 // and hash-based routing in ~120 effective lines of JavaScript.
-console.log("******************************* v0.0.7")
-
 document.addEventListener("DOMContentLoaded", () => {
 // app Vue instance
     const app = Vue.createApp({

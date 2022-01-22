@@ -1,8 +1,8 @@
 {{ define "inscription-fr" }}
 <!DOCTYPE html>
-<html lang="en">
-{{ template "head" . }}
-<body>
+<html lang="en">{{
+template "head" .
+}}<body>
 <div class="container-fluid">
     {{ template "header" . }}
     <main>
@@ -18,8 +18,8 @@
             <noscript>
                 <strong>We're sorry but password auth doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
             </noscript>
-            <div id="app">
-                <div class="container-inscription">
+            <div id="app" class="{{ .Paraphrase }}">
+                <div class="container-inscription" :key="paraphrase">
                     <div class="vue-pincode" :class="pincodeSuccess ? 'vue-pincode--success' : ''">
                         <div class="step1">
                             <p>Tappez votre mot de passe</p>

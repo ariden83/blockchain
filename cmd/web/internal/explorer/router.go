@@ -33,6 +33,7 @@ func (e *Explorer) loadAPIRoutes() {
 func (e *Explorer) loadAPINonConnectedRoutes() {
 	s := e.router.PathPrefix("/api").Subrouter().StrictSlash(true)
 	s.HandleFunc("/login", e.loginAPI).Methods(http.MethodPost)
+	s.HandleFunc("/inscription", e.inscriptionAPI).Methods(http.MethodPost)
 	s.Use(jsonHeader)
 }
 func (e *Explorer) loadAPIConnectedRoutes() {
