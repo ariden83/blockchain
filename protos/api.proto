@@ -92,8 +92,7 @@ message CreateWalletInput {
 message CreateWalletOutput {
     string mnemonic = 1;
     string address = 2;
-    string timestamp = 3;
-    string pubKey = 4;
+    string pubKey = 3;
 }
 
 message GetBalanceInput{

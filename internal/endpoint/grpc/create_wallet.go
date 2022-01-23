@@ -2,14 +2,19 @@ package grpc
 
 import (
 	"context"
+	"errors"
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/pkg/api"
 	"go.uber.org/zap"
-	"time"
 )
 
-func (e *EndPoint) CreateWallet(_ context.Context, _ *api.CreateWalletInput) (*api.CreateWalletOutput, error) {
-	newSeed, err := e.wallets.Create()
+func (e *EndPoint) CreateWallet(_ context.Context, input *api.CreateWalletInput) (*api.CreateWalletOutput, error) {
+	if input.Password != "" {
+		err := errors.New("missing parameters")
+		e.log.Error("Fail to create wallet", zap.Error(err))
+		return nil, err
+	}
+	seed, err := e.wallets.Create([]byte(input.Password))
 	if err != nil {
 		e.log.Error("Fail to create wallet", zap.Error(err))
 		return nil, err
@@ -18,9 +23,8 @@ func (e *EndPoint) CreateWallet(_ context.Context, _ *api.CreateWalletInput) (*a
 	e.event.Push(event.Message{Type: event.Wallet})
 
 	return &api.CreateWalletOutput{
-		Address:   newSeed.Address,
-		Timestamp: time.Unix(newSeed.Timestamp, 0).String(),
-		PubKey:    newSeed.PubKey,
-		Mnemonic:  newSeed.Mnemonic,
+		Mnemonic: seed.Mnemonic,
+		Address:  seed.Address,
+		PubKey:   seed.PubKey,
 	}, nil
 }

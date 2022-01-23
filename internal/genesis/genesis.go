@@ -77,7 +77,7 @@ func (g *Genesis) Load(stop chan error) {
 			return
 		}
 
-		block, err := utils.Deserialize(val)
+		block, err := utils.DeserializeBlock(val)
 		if err != nil {
 			stop <- fmt.Errorf("fail to deserialize hash serializesd")
 			return

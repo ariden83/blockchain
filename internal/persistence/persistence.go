@@ -81,7 +81,7 @@ func (p *Persistence) GetLastHash() ([]byte, error) {
 				return err
 			}
 			err = item.Value(func(val []byte) error {
-				lastHash = val
+				lastHash = append([]byte{}, val...)
 				return nil
 			})
 			return err

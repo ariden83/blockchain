@@ -2,16 +2,27 @@ package grpc
 
 import (
 	"context"
-	"github.com/ariden83/blockchain/internal/wallet"
+	"errors"
 	"github.com/ariden83/blockchain/pkg/api"
+	"go.uber.org/zap"
 )
 
-func (EndPoint) GetWallet(_ context.Context, req *api.GetWalletInput) (*api.GetWalletOutput, error) {
+func (e *EndPoint) GetWallet(_ context.Context, req *api.GetWalletInput) (*api.GetWalletOutput, error) {
+	if req.GetMnemonic() == "" || req.GetPassword() == "" {
+		err := errors.New("missing fields")
+		e.log.Error("fail to get wallet", zap.Error(err))
+		return nil, err
+	}
 
-	keys := wallet.GetKeys(req.GetMnemonic())
+	seed, err := e.wallets.GetSeed([]byte(req.GetMnemonic()), []byte(req.GetPassword()))
+	if err != nil {
+		e.log.Error("fail to get wallet", zap.Error(err))
+		return nil, err
+	}
 
 	return &api.GetWalletOutput{
-		Address: keys.Address,
-		PubKey:  keys.PubKey,
+		Address:  seed.Address,
+		PubKey:   seed.PubKey,
+		Mnemonic: seed.Mnemonic,
 	}, nil
 }

@@ -52,7 +52,7 @@ func (e *EndPoint) getLastBlock() ([]byte, *big.Int) {
 
 	serializeBloc, err := e.persistence.GetCurrentHashSerialize(lastHash)
 	e.Handle(err)
-	block, err := utils.Deserialize(serializeBloc)
+	block, err := utils.DeserializeBlock(serializeBloc)
 	e.Handle(err)
 
 	return lastHash, block.Index

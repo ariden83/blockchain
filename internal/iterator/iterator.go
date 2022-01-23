@@ -18,7 +18,7 @@ func (b *BlockChainIterator) Next() (*blockchain.Block, error) {
 		return nil, err
 	}
 
-	block, err := utils.Deserialize(val)
+	block, err := utils.DeserializeBlock(val)
 	if err != nil {
 		return nil, err
 	}

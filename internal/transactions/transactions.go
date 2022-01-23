@@ -107,7 +107,6 @@ func (t *Transactions) New(from, to string, amount *big.Int) (*blockchain.Transa
 	amountLessFees := t.setTransactionFees(amount)
 
 	outputs = append(outputs, blockchain.TxOutput{amountLessFees, to})
-
 	outputs = t.payTransactionFees(outputs)
 
 	// S'il reste de l'argent, faites de nouvelles sorties à partir de la différence.

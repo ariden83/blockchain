@@ -20,6 +20,7 @@ New blockchain. See website of project [blockchain-altcoin.com](https://www.bloc
 * p2p discovery mdns [code source](https://gitlab.dms3.io/p2p/go-p2p/-/blob/master/p2p/discovery/mdns.go)
 * p2P examples [examples](https://github.com/libp2p/go-libp2p/tree/master/examples/)
 * blockchain go project by Nomad [code source](https://github.com/librity/nc_nomadcoin)
+* badger - database [tutorial](https://dgraph.io/docs/badger/get-started/)
 
 ## Installation
 
@@ -29,7 +30,6 @@ New blockchain. See website of project [blockchain-altcoin.com](https://www.bloc
 
 - `make local` - launch the app
 - `local-light` - launch the app without files generators (logs, blockchain, ...)
-- `make web` - launch the web app
 
 ### Build
 
@@ -70,7 +70,12 @@ http://127.0.0.1:8082/readiness
 
 ### Future
 - [ ] Fully Tested
+- [ ] Add bench
 - [ ] GRPC endpoint
+- [ ] Update seed database
+- [ ] Create seed database with seed database on network
+- [ ] Add oauth
+- [ ] Encryt data with cypher key
 - ...
 
 ### Godocs

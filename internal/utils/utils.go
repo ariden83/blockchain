@@ -6,7 +6,7 @@ import (
 	"github.com/ariden83/blockchain/internal/blockchain"
 )
 
-func Deserialize(data []byte) (*blockchain.Block, error) {
+func DeserializeBlock(data []byte) (*blockchain.Block, error) {
 	var block blockchain.Block
 
 	decoder := gob.NewDecoder(bytes.NewReader(data))

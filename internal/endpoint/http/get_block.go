@@ -15,7 +15,8 @@ func (e *EndPoint) handlePrintBlockChain(w http.ResponseWriter, _ *http.Request)
 	for {
 		block, err := iterator.Next()
 		if err != nil {
-			e.log.Fatal("fail to iterate next block", zap.Error(err))
+			e.log.Error("fail to iterate next block", zap.Error(err))
+			return
 		}
 
 		if _, err := io.WriteString(w, fmt.Sprintf("Previous hash: %x\ndata: %+v\nhash: %x\n",
@@ -23,6 +24,7 @@ func (e *EndPoint) handlePrintBlockChain(w http.ResponseWriter, _ *http.Request)
 			block,
 			block.Hash)); err != nil {
 			e.log.Error("fail to write string", zap.Error(err))
+			return
 		}
 
 		/*pow := blockchain.NewProofOfWork(block)
