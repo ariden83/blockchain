@@ -75,7 +75,9 @@ http://127.0.0.1:8082/readiness
 - [ ] Update seed database
 - [ ] Create seed database with seed database on network
 - [ ] Add oauth
-- [ ] Encryt data with cypher key
+- [ ] Encrypt data with cypher key
+- [ ] Load seed database in many times
+- [ ] Load blockchain database in many times
 - ...
 
 ### Godocs

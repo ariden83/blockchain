@@ -49,6 +49,7 @@ func main() {
 	if err != nil {
 		logs.Fatal("fail to init persistence", zap.Error(err))
 	}
+	defer per.Close()
 
 	trans := transactions.Init(cfg.Transactions, per, logs)
 
@@ -56,6 +57,7 @@ func main() {
 	if err != nil {
 		logs.Fatal("fail to init wallet", zap.Error(err))
 	}
+	defer wallets.Close()
 
 	mtc := metrics.New(cfg.Metrics)
 
@@ -112,5 +114,4 @@ func main() {
 	stopCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	s.Shutdown(stopCtx)
-
 }
