@@ -78,6 +78,7 @@ http://127.0.0.1:8082/readiness
 - [ ] Encrypt data with cypher key
 - [ ] Load seed database in many times
 - [ ] Load blockchain database in many times
+- [ ] Ajouter un champ metadata dans chaque seed (pour infos complementaires) 
 - ...
 
 ### Godocs

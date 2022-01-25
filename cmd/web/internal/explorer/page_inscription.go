@@ -41,11 +41,6 @@ func (e *Explorer) inscriptionPage(rw http.ResponseWriter, r *http.Request) {
 		Paraphrase: passwordKey,
 	}
 
-	if r.Method != http.MethodPost {
-		e.ExecuteTemplate(rw, r, "inscription", frontData)
-		return
-	}
-
 	e.ExecuteTemplate(rw, r, "inscription", frontData)
 }
 

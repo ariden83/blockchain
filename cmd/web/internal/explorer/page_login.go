@@ -13,22 +13,35 @@ import (
 	"github.com/ariden83/blockchain/cmd/web/internal/ip"
 )
 
+type loginData struct {
+	*FrontData
+	Success    bool
+	Paraphrase string
+}
+
 func (e *Explorer) loginPage(rw http.ResponseWriter, r *http.Request) {
 	_, authorized := e.authorized(rw, r)
 	if authorized {
 		http.Redirect(rw, r, defaultPageLogged, http.StatusFound)
 		return
 	}
-	data := FrontData{
-		PageTitle:    e.metadata.Title + "- log-in",
-		Authentified: authorized,
-		Menus:        getMenus(),
-		Javascripts: []string{
-			"https://www.google.com/recaptcha/api.js?render=" + e.cfg.ReCaptcha.SiteKey,
-			"/static/login.js?v0.0.7",
-		},
+
+	frontData := loginData{
+		FrontData: e.frontData(rw, r).
+			JS([]string{
+				"https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js",
+				"https://www.google.com/recaptcha/api.js?render=" + e.cfg.ReCaptcha.SiteKey,
+				"/static/login/login.js?v0.0.15",
+			}).
+			Css([]string{
+				"/static/login/login.css?0.0.0",
+			}).
+			Title("login"),
+		Success:    false,
+		Paraphrase: passwordKey,
 	}
-	templates.ExecuteTemplate(rw, "login", data)
+
+	e.ExecuteTemplate(rw, r, "login", frontData)
 }
 
 func (e *Explorer) logoutPage(rw http.ResponseWriter, r *http.Request) {
