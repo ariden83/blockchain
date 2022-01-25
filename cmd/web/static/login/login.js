@@ -192,7 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 grecaptcha.execute('6LfmdSAeAAAAAPf5oNQ1UV0wf6QhnH9dQFDSop7V', {action: 'submit'})
                     .then(function(token) {
                         return axios.post('/api/login', {
-                            cipher: cipher.cipher,
+                            password: cipher.cipher,
                             iv: cipher.iv,
                             mnemonic: cipherMn.cipher,
                             ivm: cipherMn.iv,

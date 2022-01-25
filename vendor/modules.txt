@@ -443,6 +443,9 @@ github.com/minio/blake2b-simd
 # github.com/minio/sha256-simd v1.0.0
 ## explicit; go 1.13
 github.com/minio/sha256-simd
+# github.com/mohoff/CryptoWrapper v0.0.0-20151013135414-85277f4ff8ad
+## explicit
+github.com/mohoff/CryptoWrapper
 # github.com/mr-tron/base58 v1.2.0
 ## explicit; go 1.12
 github.com/mr-tron/base58/base58
@@ -529,6 +532,9 @@ github.com/opentracing/opentracing-go/log
 # github.com/pkg/errors v0.9.1
 ## explicit
 github.com/pkg/errors
+# github.com/pmezard/go-difflib v1.0.0
+## explicit
+github.com/pmezard/go-difflib/difflib
 # github.com/polydawn/refmt v0.0.0-20190807091052-3d65705ee9f1
 ## explicit
 github.com/polydawn/refmt/cbor
@@ -561,6 +567,10 @@ github.com/satori/go.uuid
 # github.com/spacemonkeygo/spacelog v0.0.0-20180420211403-2296661a0572
 ## explicit
 github.com/spacemonkeygo/spacelog
+# github.com/stretchr/testify v1.7.0
+## explicit; go 1.13
+github.com/stretchr/testify/assert
+github.com/stretchr/testify/require
 # github.com/tidwall/btree v0.0.0-20191029221954-400434d76274
 ## explicit
 github.com/tidwall/btree
@@ -792,3 +802,6 @@ gopkg.in/tomb.v1
 # gopkg.in/yaml.v2 v2.4.0
 ## explicit; go 1.15
 gopkg.in/yaml.v2
+# gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+## explicit
+gopkg.in/yaml.v3
