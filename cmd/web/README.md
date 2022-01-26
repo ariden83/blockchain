@@ -19,3 +19,13 @@ Wallet website. See website of project [blockchain-altcoin.com](https://www.bloc
 
 - `make proto` - generate proto files
 - `make local-vendor` - generate vendor files
+
+### Features
+
+- [x] Login / inscription
+
+### Future
+- [ ] Fully Tested
+- [ ] Modification du mot de passe
+- [ ] Redemander le mot de passe en cas de changement d'onglet
+- 
