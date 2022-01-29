@@ -56,7 +56,7 @@ func (m *Model) ShutDown() {
 	}
 }
 
-func (m *Model) GetWallet(ctx context.Context, mnemonic, password string) (*api.GetWalletOutput, error) {
+func (m *Model) GetWallet(ctx context.Context, mnemonic, password []byte) (*api.GetWalletOutput, error) {
 
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(m.timeOut)*time.Second)
 	defer cancel()
@@ -66,13 +66,13 @@ func (m *Model) GetWallet(ctx context.Context, mnemonic, password string) (*api.
 		Mnemonic: mnemonic,
 	})
 	if err != nil {
-		m.log.Info("Cannot get user wallet", zap.Error(err), zap.String("mnemonic", mnemonic))
+		m.log.Info("Cannot get user wallet", zap.Error(err))
 		return data, err
 	}
 	return data, nil
 }
 
-func (m *Model) CreateWallet(ctx context.Context, password string) (*api.CreateWalletOutput, error) {
+func (m *Model) CreateWallet(ctx context.Context, password []byte) (*api.CreateWalletOutput, error) {
 
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(m.timeOut)*time.Second)
 	defer cancel()

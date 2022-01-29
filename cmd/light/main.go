@@ -33,7 +33,7 @@ func main() {
 	logs = logs.With(zap.String("v", cfg.Version))
 	defer logs.Sync()
 
-	wallets, err := wallet.Init(cfg.Wallet)
+	wallets, err := wallet.Init(cfg.Wallet, logs)
 	if err != nil {
 		logs.Fatal("fail to init wallet", zap.Error(err))
 	}

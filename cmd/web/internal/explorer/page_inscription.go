@@ -152,7 +152,7 @@ func (e *Explorer) inscriptionAPI(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	wallet, err := e.model.CreateWallet(r.Context(), string(password))
+	wallet, err := e.model.CreateWallet(r.Context(), password)
 	if err != nil {
 		e.fail(http.StatusNotFound, err, rw)
 		return

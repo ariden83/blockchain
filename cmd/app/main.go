@@ -53,7 +53,7 @@ func main() {
 
 	trans := transactions.Init(cfg.Transactions, per, logs)
 
-	wallets, err := wallet.Init(cfg.Wallet)
+	wallets, err := wallet.Init(cfg.Wallet, logs)
 	if err != nil {
 		logs.Fatal("fail to init wallet", zap.Error(err))
 	}

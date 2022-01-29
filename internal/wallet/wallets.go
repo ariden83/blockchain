@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"errors"
-	"fmt"
+	"go.uber.org/zap"
 	"os"
 	"sync"
 	"time"
@@ -18,6 +18,7 @@ import (
 
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/utils"
+	pkgError "github.com/ariden83/blockchain/pkg/errors"
 )
 
 type Wallets struct {
@@ -25,6 +26,7 @@ type Wallets struct {
 	Seeds    []Seed
 	withFile bool
 	db       *badger.DB
+	log      *zap.Logger
 }
 
 type IWallets interface {
@@ -63,19 +65,18 @@ type SeedNoPrivKey struct {
 	Address   string
 }
 
-var mutex = &sync.Mutex{}
+var (
+	mutex = &sync.Mutex{}
+)
 
-var ErrorFailEncryptPassword = errors.New("fail to encrypt password")
-
-var ErrorCannotSerialize = errors.New("cannot serialize new seed")
-
-func Init(cfg config.Wallet) (*Wallets, error) {
+func Init(cfg config.Wallet, log *zap.Logger) (*Wallets, error) {
 	var err error
 	opts := badger.DefaultOptions(cfg.Path)
 
 	wallets := Wallets{
 		File:     cfg.File,
 		withFile: cfg.WithFile,
+		log:      log.With(zap.String("service", "wallet")),
 	}
 
 	if wallets.db, err = badger.Open(opts); err != nil {
@@ -113,7 +114,8 @@ func (w *Wallets) UpdateSeeds(seed []Seed) {
 func (w *Wallets) Save(seed Seed) error {
 	serializeBLock, err := utils.Serialize(&seed)
 	if err != nil {
-		return fmt.Errorf("%s %w", ErrorCannotSerialize, err)
+		w.log.Error("cannot serialize new seed", zap.Error(err))
+		return pkgError.ErrInternalDependencyError
 	}
 	return w.db.Update(func(txn *badger.Txn) error {
 		e := badger.NewEntry([]byte(seed.Mnemonic), serializeBLock)
@@ -124,13 +126,15 @@ func (w *Wallets) Save(seed Seed) error {
 func (w *Wallets) Create(password []byte) (*SeedNoPrivKey, error) {
 	password, err := encryptPassword(password)
 	if err != nil {
-		return nil, err
+		w.log.Error("fail to encrypt password", zap.Error(err))
+		return nil, pkgError.ErrInternalDependencyError
 	}
 
 	seed := crypt.CreateHash()
 	mnemonic, err := mnemonic.New([]byte(seed), mnemonic.English)
 	if err != nil {
-		return nil, err
+		w.log.Error("fail to generate new mnemonic", zap.Error(err))
+		return nil, pkgError.ErrInternalDependencyError
 	}
 
 	// Create a master private key
@@ -177,15 +181,18 @@ func (w *Wallets) GetSeed(mnemonic, password []byte) (*SeedNoPrivKey, error) {
 		}
 		return nil
 	}); err != nil {
-		return nil, err
+		w.log.Error("fail to get mnemonic in database", zap.Error(err))
+		return nil, pkgError.ErrSeedNotFound
 	}
 
 	seed, err := deserialize(valCopy)
 	if err != nil {
-		return nil, err
+		w.log.Error("fail to deserialize mnemonic", zap.Error(err))
+		return nil, pkgError.ErrInternalDependencyError
 	}
 	if err := seed.verifyPassword(password); err != nil {
-		return nil, err
+		w.log.Info("invalid password", zap.Error(err))
+		return nil, pkgError.ErrInvalidPassword
 	}
 	return &SeedNoPrivKey{
 		PubKey:   seed.PubKey,
@@ -213,7 +220,7 @@ func encryptPassword(password []byte) ([]byte, error) {
 	// Generate "hash" to store from user password
 	hash, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
 	if err != nil {
-		return []byte{}, ErrorFailEncryptPassword
+		return []byte{}, errors.New("fail to encrypt password")
 	}
 	return hash, nil
 }

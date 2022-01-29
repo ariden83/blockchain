@@ -2,7 +2,6 @@ package explorer
 
 import (
 	"errors"
-	"github.com/ariden83/blockchain/cmd/web/internal/decoder"
 	"net/http"
 	"net/url"
 
@@ -11,7 +10,9 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/ariden83/blockchain/cmd/web/internal/auth/classic"
+	"github.com/ariden83/blockchain/cmd/web/internal/decoder"
 	"github.com/ariden83/blockchain/cmd/web/internal/ip"
+	pkgErr "github.com/ariden83/blockchain/pkg/errors"
 )
 
 type loginData struct {
@@ -275,9 +276,10 @@ func (e *Explorer) loginAPI(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	wallet, err := e.model.GetWallet(r.Context(), string(mnemonic), string(password))
+	wallet, err := e.model.GetWallet(r.Context(), mnemonic, password)
+
 	if err != nil {
-		e.fail(http.StatusNotFound, err, rw)
+		e.fail(pkgErr.StatusCode(err), err, rw)
 		return
 	}
 

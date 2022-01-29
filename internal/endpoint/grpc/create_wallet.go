@@ -2,19 +2,20 @@ package grpc
 
 import (
 	"context"
-	"errors"
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/pkg/api"
+	"github.com/ariden83/blockchain/pkg/errors"
 	"go.uber.org/zap"
 )
 
 func (e *EndPoint) CreateWallet(_ context.Context, input *api.CreateWalletInput) (*api.CreateWalletOutput, error) {
-	if input.Password != "" {
-		err := errors.New("missing parameters")
+	if input.GetPassword() == nil {
+		err := errors.ErrMissingPassword
 		e.log.Error("Fail to create wallet", zap.Error(err))
 		return nil, err
 	}
-	seed, err := e.wallets.Create([]byte(input.Password))
+
+	seed, err := e.wallets.Create(input.Password)
 	if err != nil {
 		e.log.Error("Fail to create wallet", zap.Error(err))
 		return nil, err
