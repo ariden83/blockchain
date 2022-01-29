@@ -1,8 +1,8 @@
 package explorer
 
 import (
-	"errors"
 	"github.com/ariden83/blockchain/cmd/web/internal/decoder"
+	pkgErr "github.com/ariden83/blockchain/pkg/errors"
 	"go.uber.org/zap"
 	"net/http"
 
@@ -43,7 +43,7 @@ func (e *Explorer) inscriptionPage(rw http.ResponseWriter, r *http.Request) {
 }
 
 type postInscriptionAPIBodyReq struct {
-	Cipher    string `json:"cipher"`
+	Password  string `json:"password"`
 	Recaptcha string `json:"recaptcha"`
 }
 
@@ -121,46 +121,55 @@ func (e *Explorer) inscriptionAPI(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	req := &postInscriptionAPIBodyReq{}
-	log := e.log.With(zap.String("input", "oauthClassicInscription"))
-	if err := e.decodeBody(rw, log, r.Body, req); err != nil {
-		e.fail(http.StatusPreconditionFailed, err, rw)
+	logCTX := e.logCTX("inscriptionAPI")
+	if err := e.decodeBody(rw, logCTX, r.Body, req); err != nil {
+		logCTX.Error("fail to decode body", zap.Error(err))
+		e.JSONfail(pkgErr.ErrMissingFields, rw)
 		return
 	}
 	if r.Form == nil {
 		if err := r.ParseForm(); err != nil {
-			e.fail(http.StatusInternalServerError, err, rw)
+			logCTX.Error("fail to parse form", zap.Error(err))
+			e.JSONfail(pkgErr.ErrMissingFields, rw)
 			return
 		}
 	}
 
-	if req.Cipher == "" {
-		e.fail(http.StatusPreconditionFailed, errors.New("missing fields"), rw)
+	if req.Password == "" {
+		logCTX.Error("missing password", zap.String("password", req.Password))
+		e.JSONfail(pkgErr.ErrMissingPassword, rw)
 		return
 	}
 
 	ip, err := ip.User(r)
+	if err != nil {
+		logCTX.Warn("fail to get user ip", zap.Error(err))
+	}
 	if e.reCaptcha != nil {
 		if valid := e.reCaptcha.Verify(req.Recaptcha, ip); !valid {
-			http.Error(rw, "fail to verify capcha", http.StatusPreconditionFailed)
+			logCTX.Warn("fail to verify captcha", zap.String("captcha", req.Recaptcha))
+			e.JSONfail(err, rw)
 			return
 		}
 	}
 
-	password, err := decoder.Decrypt(req.Cipher, decoder.GetPrivateKey())
+	password, err := decoder.Decrypt(req.Password, decoder.GetPrivateKey())
 	if err != nil {
-		http.Error(rw, "fail to decode password", http.StatusPreconditionFailed)
+		logCTX.Error("fail to decode password", zap.String("password", req.Password))
+		e.JSONfail(err, rw)
 		return
 	}
 
 	wallet, err := e.model.CreateWallet(r.Context(), password)
 	if err != nil {
-		e.fail(http.StatusNotFound, err, rw)
+		e.JSONfail(err, rw)
 		return
 	}
 
 	store, err := session.Start(r.Context(), rw, r)
 	if err != nil {
-		e.fail(http.StatusNotFound, err, rw)
+		logCTX.Error("fail to start session", zap.Error(err))
+		e.JSONfail(pkgErr.ErrInternalError, rw)
 		return
 	}
 	store.Set(sessionLabelUserID, wallet.Address)

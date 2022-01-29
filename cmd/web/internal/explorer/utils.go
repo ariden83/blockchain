@@ -2,6 +2,7 @@ package explorer
 
 import (
 	"encoding/json"
+	pkgErr "github.com/ariden83/blockchain/pkg/errors"
 	"go.uber.org/zap"
 	"io"
 	"net/http"
@@ -32,13 +33,16 @@ type ErrorResponse struct {
 
 type BodyReceived interface{}
 
-// fail Respond error to json format
-func (e *Explorer) fail(statusCode int, err error, w http.ResponseWriter) {
-	w.WriteHeader(statusCode)
+func (e *Explorer) fail(err error, w http.ResponseWriter) {
+	http.Error(w, err.Error(), pkgErr.StatusCode(err))
+}
 
+// fail Respond error to json format
+func (e *Explorer) JSONfail(err error, w http.ResponseWriter) {
+	w.WriteHeader(pkgErr.StatusCode(err))
 	error := ErrorResponse{
 		Message: err.Error(),
-		Code:    statusCode,
+		Code:    pkgErr.StatusCode(err),
 	}
 	js, err := json.Marshal(error)
 	if err != nil {

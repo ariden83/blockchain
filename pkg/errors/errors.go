@@ -43,8 +43,10 @@ func StatusCode(err error) int {
 
 var (
 	ErrMissingPassword         = New("missing password", WithStatus(http.StatusBadRequest))
-	ErrInvalidPassword         = New("password invalid", WithStatus(http.StatusUnauthorized))
+	ErrMissingFields           = New("missing fields", WithStatus(http.StatusPreconditionFailed))
+	ErrInvalidPassword         = New("password invalid", WithStatus(http.StatusPreconditionFailed))
 	ErrInternalError           = New("internal error", WithStatus(http.StatusForbidden))
 	ErrInternalDependencyError = New("internal error", WithStatus(http.StatusFailedDependency))
 	ErrSeedNotFound            = New("seed not found", WithStatus(http.StatusNotFound))
+	ErrInvalidCaptcha          = New("invalid captcha", WithStatus(http.StatusUnauthorized))
 )

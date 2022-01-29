@@ -15,11 +15,13 @@ func Test_Error(t *testing.T) {
 		statusWaiting int
 	}{
 		{"bad request", New("bad request", WithStatus(http.StatusBadRequest)), http.StatusBadRequest},
-		{"missing password", New("missing password", WithStatus(http.StatusBadRequest)), http.StatusBadRequest},
-		{"password invalid", New("password invalid", WithStatus(http.StatusUnauthorized)), http.StatusUnauthorized},
-		{"internal error", New("internal error", WithStatus(http.StatusForbidden)), http.StatusForbidden},
-		{"internal error", New("internal error", WithStatus(http.StatusFailedDependency)), http.StatusFailedDependency},
-		{"seed not found", New("seed not found", WithStatus(http.StatusNotFound)), http.StatusNotFound},
+		{"missing password", ErrMissingPassword, http.StatusBadRequest},
+		{"missing fields", ErrMissingFields, http.StatusPreconditionFailed},
+		{"password invalid", ErrInvalidPassword, http.StatusPreconditionFailed},
+		{"internal error", ErrInternalError, http.StatusForbidden},
+		{"internal error", ErrInternalDependencyError, http.StatusFailedDependency},
+		{"seed not found", ErrSeedNotFound, http.StatusNotFound},
+		{"invalid captcha", ErrInvalidCaptcha, http.StatusUnauthorized},
 		{"error", errors.New("error"), http.StatusUpgradeRequired},
 	} {
 		t.Run(test.messageTest, func(t *testing.T) {

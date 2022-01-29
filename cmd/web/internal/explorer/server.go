@@ -129,6 +129,10 @@ func (e *Explorer) Start(stop chan error) {
 	e.listenOrDie(stop)
 }
 
+func (e *Explorer) logCTX(handler string) *zap.Logger {
+	return e.log.With(zap.String("handler", handler))
+}
+
 func (e *Explorer) listenOrDie(stop chan error) {
 	e.log.Info("Start listening HTTP Server", zap.Int("port", e.cfg.Port))
 

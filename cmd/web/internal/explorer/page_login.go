@@ -1,7 +1,6 @@
 package explorer
 
 import (
-	"errors"
 	"net/http"
 	"net/url"
 
@@ -238,54 +237,63 @@ func (e *Explorer) loginAPI(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	req := &postLoginAPIBodyReq{}
-	log := e.log.With(zap.String("input", "oauthClassicLogin"))
-	if err := e.decodeBody(rw, log, r.Body, req); err != nil {
-		e.fail(http.StatusPreconditionFailed, err, rw)
+	logCTX := e.logCTX("loginAPI")
+	if err := e.decodeBody(rw, logCTX, r.Body, req); err != nil {
+		logCTX.Error("fail to decode body", zap.Error(err))
+		e.JSONfail(pkgErr.ErrMissingFields, rw)
 		return
 	}
 
 	if r.Form == nil {
 		if err := r.ParseForm(); err != nil {
-			e.fail(http.StatusPreconditionFailed, err, rw)
+			logCTX.Error("fail to parse form", zap.Error(err))
+			e.JSONfail(pkgErr.ErrMissingFields, rw)
 			return
 		}
 	}
 
 	if req.Password == "" || req.Mnemonic == "" {
-		e.fail(http.StatusPreconditionFailed, errors.New("missing fields"), rw)
+		logCTX.Error("missing fields", zap.String("password", req.Password), zap.String("mnemonic", req.Mnemonic))
+		e.JSONfail(pkgErr.ErrMissingFields, rw)
 		return
 	}
 
 	password, err := decoder.Decrypt(req.Password, decoder.GetPrivateKey())
 	if err != nil {
-		http.Error(rw, "fail to decode password", http.StatusPreconditionFailed)
+		logCTX.Error("fail to decode password", zap.String("password", req.Password))
+		e.JSONfail(err, rw)
 		return
 	}
 
 	mnemonic, err := decoder.Decrypt(req.Mnemonic, decoder.GetPrivateKey())
 	if err != nil {
-		http.Error(rw, "fail to decode Mnemonic", http.StatusPreconditionFailed)
+		logCTX.Error("fail to decode mnemonic", zap.String("mnemonic", req.Mnemonic))
+		e.JSONfail(err, rw)
 		return
 	}
 
 	ip, err := ip.User(r)
+	if err != nil {
+		logCTX.Warn("fail to get user ip", zap.Error(err))
+	}
 	if e.reCaptcha != nil {
 		if valid := e.reCaptcha.Verify(req.Recaptcha, ip); !valid {
-			http.Error(rw, "fail to verify capcha", http.StatusPreconditionFailed)
+			logCTX.Warn("fail to verify captcha", zap.String("captcha", req.Recaptcha))
+			e.JSONfail(err, rw)
 			return
 		}
 	}
 
 	wallet, err := e.model.GetWallet(r.Context(), mnemonic, password)
-
 	if err != nil {
-		e.fail(pkgErr.StatusCode(err), err, rw)
+		e.JSONfail(err, rw)
 		return
 	}
 
 	store, err := session.Start(r.Context(), rw, r)
 	if err != nil {
-		e.fail(http.StatusNotFound, err, rw)
+		logCTX.Error("fail to start session", zap.Error(err))
+		e.JSONfail(pkgErr.ErrInternalError, rw)
 		return
 	}
 	store.Set(sessionLabelUserID, wallet.Address)

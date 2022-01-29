@@ -1,7 +1,9 @@
 package explorer
 
 import (
+	pkgErr "github.com/ariden83/blockchain/pkg/errors"
 	"github.com/go-session/session"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -19,15 +21,18 @@ type walletsData struct {
 }
 
 func (e *Explorer) walletPage(rw http.ResponseWriter, r *http.Request) {
+	logCTX := e.logCTX("walletPage")
 	store, err := session.Start(r.Context(), rw, r)
 	if err != nil {
-		e.fail(http.StatusInternalServerError, err, rw)
+		logCTX.Error("fail to start session", zap.Error(err))
+		e.fail(pkgErr.ErrInternalError, rw)
 		return
 	}
 	accessToken, _ := store.Get(sessionLabelAccessToken)
 	token, err := e.authServer.Manager.LoadAccessToken(r.Context(), accessToken.(string))
 	if err != nil {
-		e.fail(http.StatusInternalServerError, err, rw)
+		logCTX.Error("fail to load access token", zap.Error(err))
+		e.fail(pkgErr.ErrInternalError, rw)
 		return
 	}
 
@@ -36,7 +41,8 @@ func (e *Explorer) walletPage(rw http.ResponseWriter, r *http.Request) {
 
 	wallet, err := e.model.GetBalance(r.Context(), token.GetUserID(), token.GetUserID())
 	if err != nil {
-		e.fail(http.StatusNotFound, err, rw)
+		logCTX.Error("fail to get balance", zap.Error(err))
+		e.fail(pkgErr.ErrInternalError, rw)
 		return
 	}
 

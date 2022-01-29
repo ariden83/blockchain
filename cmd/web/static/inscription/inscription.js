@@ -141,7 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         return grecaptcha.execute('6LfmdSAeAAAAAPf5oNQ1UV0wf6QhnH9dQFDSop7V', {action: 'submit'});
                     })
                     .then(token => axios.post('/api/inscription', {
-                        cipher: cipher,
+                        password: cipher,
                         recaptcha: token,
                     }))
                     .then(function (response) {
