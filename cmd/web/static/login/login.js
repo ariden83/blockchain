@@ -191,14 +191,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 })
                 .catch(error => {
                     if (error.response) {
-                        if (error.response.status === "400") {
+                        if (error.response.status === "404" || error.response.status === "412") {
                             t.errorSend = error.response.data;
                             this.step = 1;
                         } else {
                             t.errorSend = 'Error! Could not reach the API. ' + error;
-                            setTimeout(() => t.resetErrorMessageForAPI(), 3500);
                         }
+                    } else {
+                        t.errorSend = 'Error! Could not reach the API';
+                        this.step = 1;
                     }
+                    setTimeout(() => t.resetErrorMessageForAPI(), 3500);
                 });
             },
             resetErrorMessageForAPI() {

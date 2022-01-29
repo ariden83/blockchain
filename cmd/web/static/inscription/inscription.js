@@ -154,6 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     })
                     .catch(function (error) {
                         t.errorSend = 'Error! Could not reach the API. ' + error;
+                        this.step = 1;
                         setTimeout(() => t.resetErrorMessageForAPI(), 3500);
                     });
             },

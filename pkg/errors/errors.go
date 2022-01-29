@@ -1,6 +1,8 @@
 package errors
 
 import (
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"net/http"
 )
 
@@ -16,8 +18,9 @@ func New(text string, options ...func(*errorString)) error {
 
 // errorString is a trivial implementation of error.
 type errorString struct {
-	s      string
-	status int
+	s          string
+	status     int
+	grpcStatus codes.Code
 }
 
 func (e *errorString) Error() string {
@@ -31,6 +34,7 @@ func (e *errorString) Status() int {
 func WithStatus(status int) func(*errorString) {
 	return func(e *errorString) {
 		e.status = status
+		e.grpcStatus = listStatus[status]
 	}
 }
 
@@ -39,6 +43,28 @@ func StatusCode(err error) int {
 		return errWithStatus.Status()
 	}
 	return http.StatusUpgradeRequired
+}
+
+func GRPC(e error) error {
+	if err, ok := e.(*errorString); ok {
+		return status.Errorf(
+			err.grpcStatus,
+			err.Error(),
+		)
+	}
+	return status.Errorf(
+		codes.InvalidArgument,
+		e.Error(),
+	)
+}
+
+var listStatus = map[int]codes.Code{
+	http.StatusBadRequest:         codes.InvalidArgument,
+	http.StatusPreconditionFailed: codes.FailedPrecondition,
+	http.StatusForbidden:          codes.Internal,
+	http.StatusFailedDependency:   codes.Internal,
+	http.StatusNotFound:           codes.NotFound,
+	http.StatusUnauthorized:       codes.PermissionDenied,
 }
 
 var (

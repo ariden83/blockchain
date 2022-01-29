@@ -1,7 +1,7 @@
 package http
 
 import (
-	"errors"
+	pkgErr "github.com/ariden83/blockchain/pkg/errors"
 	"go.uber.org/zap"
 	"net/http"
 )
@@ -27,14 +27,13 @@ func (e *EndPoint) handleGetWallet(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.Mnemonic == "" || req.Password == "" {
-		err := errors.New("invalid params")
-		e.log.Error("fail to get wallet", zap.Error(err))
+		err := pkgErr.ErrMissingFields
+		e.log.Error(err.Error(), zap.String("mnemonic", req.Mnemonic))
 		return
 	}
 
 	seed, err := e.wallets.GetSeed([]byte(req.Mnemonic), []byte(req.Password))
 	if err != nil {
-		e.log.Error("wallet not found", zap.Error(err))
 		return
 	}
 
