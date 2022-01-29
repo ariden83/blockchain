@@ -17,8 +17,6 @@ type inscriptionData struct {
 	Paraphrase string
 }
 
-const passwordKey string = "~NB8CcOL#J!H?|Yr"
-
 func (e *Explorer) inscriptionPage(rw http.ResponseWriter, r *http.Request) {
 	_, authorized := e.authorized(rw, r)
 	if authorized {
@@ -29,16 +27,16 @@ func (e *Explorer) inscriptionPage(rw http.ResponseWriter, r *http.Request) {
 	frontData := inscriptionData{
 		FrontData: e.frontData(rw, r).
 			JS([]string{
-				"https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js",
 				"https://www.google.com/recaptcha/api.js?render=" + e.cfg.ReCaptcha.SiteKey,
-				"/static/inscription/inscription.js?v0.0.12",
+				"/static/inscription/inscription.js?v0.0.22",
+				"/static/cipher.js?v0.0.4",
 			}).
 			Css([]string{
 				"/static/inscription/inscription.css?0.0.0",
 			}).
 			Title("inscription"),
 		Success:    false,
-		Paraphrase: passwordKey,
+		Paraphrase: decoder.GetPrivateKey(),
 	}
 
 	e.ExecuteTemplate(rw, r, "inscription", frontData)
@@ -46,7 +44,6 @@ func (e *Explorer) inscriptionPage(rw http.ResponseWriter, r *http.Request) {
 
 type postInscriptionAPIBodyReq struct {
 	Cipher    string `json:"cipher"`
-	IV        string `json:"iv"`
 	Recaptcha string `json:"recaptcha"`
 }
 
@@ -136,7 +133,7 @@ func (e *Explorer) inscriptionAPI(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if req.Cipher == "" || req.IV == "" {
+	if req.Cipher == "" {
 		e.fail(http.StatusPreconditionFailed, errors.New("missing fields"), rw)
 		return
 	}
@@ -149,13 +146,13 @@ func (e *Explorer) inscriptionAPI(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	password, err := decoder.Password(req.Cipher, req.IV, passwordKey)
+	password, err := decoder.Decrypt(req.Cipher, decoder.GetPrivateKey())
 	if err != nil {
 		http.Error(rw, "fail to decode password", http.StatusPreconditionFailed)
 		return
 	}
 
-	wallet, err := e.model.CreateWallet(r.Context(), password)
+	wallet, err := e.model.CreateWallet(r.Context(), string(password))
 	if err != nil {
 		e.fail(http.StatusNotFound, err, rw)
 		return

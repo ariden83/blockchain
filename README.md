@@ -21,6 +21,7 @@ New blockchain. See website of project [blockchain-altcoin.com](https://www.bloc
 * p2P examples [examples](https://github.com/libp2p/go-libp2p/tree/master/examples/)
 * blockchain go project by Nomad [code source](https://github.com/librity/nc_nomadcoin)
 * badger - database [tutorial](https://dgraph.io/docs/badger/get-started/)
+* cipher GCM [tutorial](https://pilabor.com/blog/2021/05/js-gcm-encrypt-dotnet-decrypt/)
 
 ## Installation
 

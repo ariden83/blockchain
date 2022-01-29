@@ -1,27 +1,5 @@
 "use strict";
 
-function parseToHex(str) {
-    var hex = '';
-    for(var i=0;i<str.length;i++) {
-        hex += ''+str.charCodeAt(i).toString(16);
-    }
-    return hex;
-}
-
-function encryptData(message, key) {
-    let keyHex = CryptoJS.enc.Hex.parse(parseToHex(key))
-    let iv = CryptoJS.lib.WordArray.random(128 / 8);
-    let wordArray = CryptoJS.enc.Utf8.parse(message);
-    let base64 = CryptoJS.enc.Base64.stringify(wordArray);
-    let encrypted = CryptoJS.AES.encrypt(base64, keyHex, { iv: iv });
-    return {
-        cipher: encrypted.ciphertext.toString(CryptoJS.enc.Base64),
-        iv: CryptoJS.enc.Base64.stringify(iv),
-        length: base64.length,
-        size: encrypted.ciphertext.sigBytes,
-    }
-}
-
 // Full spec-compliant TodoMVC with localStorage persistence
 // and hash-based routing in ~120 effective lines of JavaScript.
 document.addEventListener("DOMContentLoaded", () => {
@@ -178,39 +156,43 @@ document.addEventListener("DOMContentLoaded", () => {
                     setTimeout(() => this.resetErrorMessageForAPI(), 5000);
                 }
             },
-            encrypt(code) {
-                return encryptData(code, this.paraphrase)
+            async encrypt(code) {
+                let c = (new TextEncoder()).encode(code, 'utf-8');
+                return await cryptGcm(this.paraphrase, c);
             },
             callAPILogin(code) {
                 this.errorSend = '... wait ...';
-                let t = this
-                this.step = 3
+                let t = this;
+                this.step = 3;
+                let cipher = "";
+                let cipherMn = "";
 
-                let cipher = t.encrypt(code)
-                let cipherMn = t.encrypt(t.newTodo.trim())
-
-                grecaptcha.execute('6LfmdSAeAAAAAPf5oNQ1UV0wf6QhnH9dQFDSop7V', {action: 'submit'})
-                    .then(function(token) {
-                        return axios.post('/api/login', {
-                            password: cipher.cipher,
-                            iv: cipher.iv,
-                            mnemonic: cipherMn.cipher,
-                            ivm: cipherMn.iv,
-                            recaptcha: token,
-                        })
-                    })
-                    .then(function (response) {
-                        if (response.data && response.data.status === 'ok') {
-                            window.location.replace("/wallet");
-                        } else {
-                            t.errorSend = 'Error! Could not reach the API. ' + error;
-                            setTimeout(() => t.resetErrorMessageForAPI(), 3500);
-                        }
-                    })
-                    .catch(function (error) {
+                return t.encrypt(code)
+                .then(c => {
+                    cipher = c;
+                    return t.encrypt(t.newTodo.trim());
+                })
+                .then(c => {
+                    cipherMn = c;
+                    return grecaptcha.execute('6LfmdSAeAAAAAPf5oNQ1UV0wf6QhnH9dQFDSop7V', {action: 'submit'});
+                })
+                .then(token => axios.post('/api/login', {
+                    password: cipher,
+                    mnemonic: cipherMn,
+                    recaptcha: token,
+                }))
+                .then(response => {
+                    if (response.data && response.data.status === 'ok') {
+                        window.location.replace("/wallet");
+                    } else {
                         t.errorSend = 'Error! Could not reach the API. ' + error;
                         setTimeout(() => t.resetErrorMessageForAPI(), 3500);
-                    });
+                    }
+                })
+                .catch(error => {
+                    t.errorSend = 'Error! Could not reach the API. ' + error;
+                    setTimeout(() => t.resetErrorMessageForAPI(), 3500);
+                });
             },
             resetErrorMessageForAPI() {
                 this.errorSend = '';

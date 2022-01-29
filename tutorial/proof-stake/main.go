@@ -256,7 +256,7 @@ func calculateHash(s string) string {
 
 //calculateBlockHash returns the hash of all block information
 func calculateBlockHash(block Block) string {
-	record := string(block.Index) + block.Timestamp + string(block.BPM) + block.PrevHash
+	record := fmt.Sprintf("%d", block.Index) + block.Timestamp + fmt.Sprintf("%d", block.BPM) + block.PrevHash
 	return calculateHash(record)
 }
 

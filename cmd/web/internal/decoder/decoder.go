@@ -5,67 +5,78 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/base64"
+	"errors"
 	"io"
 )
 
-type Cipher int
-type Mode int
+var privateKey = ""
 
-func Password(ciphertext, iv, key string) (string, error) {
-	decodedText, err := base64.StdEncoding.DecodeString(ciphertext)
-	if err != nil {
-		return "", err
+func GetPrivateKey() string {
+	if privateKey != "" {
+		return privateKey
 	}
-	decodedIv, err := base64.StdEncoding.DecodeString(iv)
-	if err != nil {
-		return "", err
+	key := make([]byte, 32)
+	if _, err := io.ReadFull(rand.Reader, key); err != nil {
+		return GetPrivateKey()
 	}
 
-	newCipher, err := aes.NewCipher([]byte(key))
-	if err != nil {
-		return "", err
-	}
-	cfbdec := cipher.NewCBCDecrypter(newCipher, decodedIv)
-	cfbdec.CryptBlocks(decodedText, decodedText)
-
-	decodedText = removeBadPadding(decodedText)
-
-	//println(string(decodedText))
-	data, err := base64.RawStdEncoding.DecodeString(string(decodedText))
-	if err != nil {
-		return "", err
-	}
-	return string(data), nil
+	privateKey = base64.StdEncoding.EncodeToString(key)
+	return privateKey
 }
 
-func removeBadPadding(b64 []byte) []byte {
-	last := b64[len(b64)-1]
-	if last > 16 {
-		return b64
+func Encrypt(plaintext []byte, key64 string) (string, error) {
+
+	key, err := base64.StdEncoding.DecodeString(key64)
+	if err != nil {
+		return "", err
 	}
-	return b64[:len(b64)-int(last)]
+
+	c, err := aes.NewCipher(key)
+	if err != nil {
+		return "", err
+	}
+
+	gcm, err := cipher.NewGCM(c)
+	if err != nil {
+		return "", err
+	}
+
+	nonce := make([]byte, gcm.NonceSize())
+	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
+		return "", err
+	}
+
+	ciphertext := gcm.Seal(nonce, nonce, plaintext, nil)
+
+	return base64.StdEncoding.EncodeToString(ciphertext), nil
 }
 
-// Encrypt serves as wrapper function for encrypting any plaintext,key with specified
-// cipher and mode of operation
-func Encrypt(plaintext, key []byte) ([]byte, []byte, error) {
-	if len(plaintext)%aes.BlockSize != 0 {
-		plaintext = addPadding(plaintext, aes.BlockSize)
-	}
+func Decrypt(cipherTxt64 string, key64 string) ([]byte, error) {
 
-	block, err := aes.NewCipher(key)
+	ciphertext, err := base64.StdEncoding.DecodeString(cipherTxt64)
 	if err != nil {
-		return nil, nil, err
+		return []byte{}, err
+	}
+	key, err := base64.StdEncoding.DecodeString(key64)
+	if err != nil {
+		return []byte{}, err
 	}
 
-	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
-	iv := ciphertext[:aes.BlockSize]
-	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-		return nil, nil, err
+	c, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
 	}
 
-	mode := cipher.NewCBCEncrypter(block, iv)
-	mode.CryptBlocks(ciphertext[aes.BlockSize:], plaintext)
+	gcm, err := cipher.NewGCM(c)
+	if err != nil {
+		return nil, err
+	}
 
-	return ciphertext, iv, err
+	nonceSize := gcm.NonceSize()
+	if len(ciphertext) < nonceSize {
+		return nil, errors.New("ciphertext too short")
+	}
+
+	nonce, ciphertext := ciphertext[:nonceSize], ciphertext[nonceSize:]
+	return gcm.Open(nil, nonce, ciphertext, nil)
 }

@@ -30,16 +30,16 @@ func (e *Explorer) loginPage(rw http.ResponseWriter, r *http.Request) {
 	frontData := loginData{
 		FrontData: e.frontData(rw, r).
 			JS([]string{
-				"https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js",
 				"https://www.google.com/recaptcha/api.js?render=" + e.cfg.ReCaptcha.SiteKey,
-				"/static/login/login.js?v0.0.19",
+				"/static/login/login.js?v0.0.29<",
+				"/static/cipher.js?v0.0.8",
 			}).
 			Css([]string{
 				"/static/login/login.css?0.0.0",
 			}).
 			Title("login"),
 		Success:    false,
-		Paraphrase: passwordKey,
+		Paraphrase: decoder.GetPrivateKey(),
 	}
 
 	e.ExecuteTemplate(rw, r, "login", frontData)
@@ -150,8 +150,6 @@ type postLoginAPIBodyReq struct {
 	Mnemonic  string `json:"mnemonic"`
 	Password  string `json:"password"`
 	Recaptcha string `json:"recaptcha"`
-	IV        string `json:"iv"`
-	IVM       string `json:"ivm"`
 }
 
 type postLoginAPIBodyRes struct {
@@ -252,18 +250,18 @@ func (e *Explorer) loginAPI(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if req.Password == "" || req.IV == "" || req.IVM == "" || req.Mnemonic == "" {
+	if req.Password == "" || req.Mnemonic == "" {
 		e.fail(http.StatusPreconditionFailed, errors.New("missing fields"), rw)
 		return
 	}
 
-	password, err := decoder.Password(req.Password, req.IV, passwordKey)
+	password, err := decoder.Decrypt(req.Password, decoder.GetPrivateKey())
 	if err != nil {
 		http.Error(rw, "fail to decode password", http.StatusPreconditionFailed)
 		return
 	}
 
-	mnemonic, err := decoder.Password(req.Mnemonic, req.IVM, passwordKey)
+	mnemonic, err := decoder.Decrypt(req.Mnemonic, decoder.GetPrivateKey())
 	if err != nil {
 		http.Error(rw, "fail to decode Mnemonic", http.StatusPreconditionFailed)
 		return
@@ -277,7 +275,7 @@ func (e *Explorer) loginAPI(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	wallet, err := e.model.GetWallet(r.Context(), mnemonic, password)
+	wallet, err := e.model.GetWallet(r.Context(), string(mnemonic), string(password))
 	if err != nil {
 		e.fail(http.StatusNotFound, err, rw)
 		return

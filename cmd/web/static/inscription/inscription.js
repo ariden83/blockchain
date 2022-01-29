@@ -1,27 +1,5 @@
 "use strict";
 
-function parseToHex(str) {
-    var hex = '';
-    for(var i=0;i<str.length;i++) {
-        hex += ''+str.charCodeAt(i).toString(16);
-    }
-    return hex;
-}
-
-function encryptData(message, key) {
-    let keyHex = CryptoJS.enc.Hex.parse(parseToHex(key))
-    let iv = CryptoJS.lib.WordArray.random(128 / 8);
-    let wordArray = CryptoJS.enc.Utf8.parse(message);
-    let base64 = CryptoJS.enc.Base64.stringify(wordArray);
-    let encrypted = CryptoJS.AES.encrypt(base64, keyHex, { iv: iv });
-    return {
-        cipher: encrypted.ciphertext.toString(CryptoJS.enc.Base64),
-        iv: CryptoJS.enc.Base64.stringify(iv),
-        length: base64.length,
-        size: encrypted.ciphertext.sigBytes,
-    }
-}
-
 // Full spec-compliant TodoMVC with localStorage persistence
 // and hash-based routing in ~120 effective lines of JavaScript.
 document.addEventListener("DOMContentLoaded", () => {
@@ -147,24 +125,25 @@ document.addEventListener("DOMContentLoaded", () => {
                     setTimeout(() => this.resetErrorMessageForAPI(), 5000);
                 }
             },
-            passwordEncrypt(code) {
-                return encryptData(code, this.paraphrase)
+            async encrypt(code) {
+                let c = (new TextEncoder()).encode(code, 'utf-8');
+                return await cryptGcm(this.paraphrase, c);
             },
             callAPILogin(code) {
                 this.errorSend = '... wait ...';
                 let t = this
                 this.step = 3
+                let cipher;
 
-                let cipher = t.passwordEncrypt(code)
-
-                grecaptcha.execute('6LfmdSAeAAAAAPf5oNQ1UV0wf6QhnH9dQFDSop7V', {action: 'submit'})
-                    .then(function(token) {
-                        return axios.post('/api/inscription', {
-                            cipher: cipher.cipher,
-                            iv: cipher.iv,
-                            recaptcha: token,
-                        })
+                return t.encrypt(code)
+                    .then(c => {
+                        cipher = c;
+                        return grecaptcha.execute('6LfmdSAeAAAAAPf5oNQ1UV0wf6QhnH9dQFDSop7V', {action: 'submit'});
                     })
+                    .then(token => axios.post('/api/inscription', {
+                        cipher: cipher,
+                        recaptcha: token,
+                    }))
                     .then(function (response) {
                         if (response.data && response.data.status === 'ok') {
                             window.location.replace("/inscription/seed");
