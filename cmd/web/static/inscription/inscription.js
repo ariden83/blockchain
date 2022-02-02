@@ -15,13 +15,16 @@ document.addEventListener("DOMContentLoaded", () => {
             return {
                 errorTodo: "",
                 errorSend: "",
+                seed: "",
                 terms: false,
                 step: 1,
                 pincode: "",
                 pincode_confirm: "",
                 pincodeError: false,
                 pincodeSuccess: false,
-                paraphrase: ""
+                paraphrase: "",
+                understood: false,
+                saveseed: false,
             };
         },
         computed: {
@@ -36,6 +39,9 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             buttonSubmitDisabled() {
                 return this.step < 5;
+            },
+            buttonSubmitStep2Disabled() {
+                return this.step < 9;
             },
         },
         watch: {
@@ -146,7 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     }))
                     .then(function (response) {
                         if (response.data && response.data.status === 'ok') {
-                            window.location.replace("/inscription/seed");
+                            this.step = 6;
                         } else {
                             t.errorSend = 'Error! Could not reach the API. ' + error;
                             setTimeout(() => t.resetErrorMessageForAPI(), 3500);
@@ -164,6 +170,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     this.step = 4
                 } else {
                     this.step = 5
+                }
+            },
+            validunderstood() {
+                if (this.understood) {
+                    this.step = 7;
+                }
+            },
+            copierpress(){
+
+            },
+            validsaveseed() {
+                if (this.saveseed) {
+                    this.step = 8;
                 }
             },
         }

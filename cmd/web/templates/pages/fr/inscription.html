@@ -70,7 +70,36 @@ template "head" .
                             </div>
                         </div>
                         <div><p class="txt-error">${ errorSend }</p></div>
-                        <button class="btn-big btn-primary btn-rounded" @click="submit()" :class="step > 4 ? '' : step > 3 ? 'opacity-50' : 'hidden'" :disabled="buttonSubmitDisabled">Retry</button>
+                        <button class="btn-big btn-primary btn-rounded" @click="submit()" :class="step > 4 ? '' : step > 3 ? 'opacity-50' : 'hidden'" :disabled="buttonSubmitDisabled">Valider</button>
+                    </div>
+                </div>
+                <div class="paraphrase" :class="step > 5 && step <= 7 ? '' : 'hidden'">
+                    <h2>Secret Recovery Phrase</h2>
+                    <p>À l'étape suivante, vous verrez une phrase de récupération, que vous pouvez utiliser pour récupérer vos comptes cryptos principaux. Conservez-la en lieu sûr. Votre phrase de récupération est le seul moyen de retrouver l'accès à votre compte en cas d'oubli du mot de passe, de perte ou de vol de votre appareil, ou si vous souhaitez changer de portefeuille.</p>
+                    <div class="vue-pincode__checkbox">
+                        <div class="custom-control custom-checkbox">
+                            <input id="checkbox-2" type="checkbox" name="checkbox-2" v-model="understood" unchecked-value="not_accepted" class="custom-control-input" value="true">
+                            <label for="checkbox-2" class="custom-control-label">
+                                Je comprends que si je perds ma phrase de récupération, je ne pourrai plus accéder à mon portefeuille crypto.
+                            </label> <a href="/terms-of-service" title="Lire les conditions d'utilisation avant de valider le mot de passe" class="txt-bold" target="_blank">Conditions d'Utilisation</a>
+                        </div>
+                    </div>
+                    <button class="btn-big btn-primary btn-rounded" @click="submitStep2()" :disabled="buttonSubmitStep2Disabled">Valider</button>
+                </div>
+                <div class="paraphrase" :class="step > 7 ? '' : 'hidden'">
+                    <h2>Votre phrase de récupération</h2>
+                    <p>Notez ou copiez ces mots dans l'ordre exact indiqué ci-dessous, et conservez-les en lieu sûr. Votre phrase de récupération est le seul moyen de retrouver l'accès à votre compte en cas d'oubli du mot de passe, de perte ou de vol de votre appareil, ou si vous souhaitez changer de portefeuille.</p>
+                    <p>ATTENTION : Ne partagez jamais votre phrase de récupération.</p>
+                    <p>N'importe qui détenant cette phrase peut voler vos actifs sans aucun recours possible.</p>
+                    <p id="my-seed">${ seed }</p>
+                    <button class="btn-big btn-primary btn-rounded" @click="copierpress()">Copier</button>
+                    <div class="vue-pincode__checkbox">
+                        <div class="custom-control custom-checkbox">
+                            <input id="checkbox-3" type="checkbox" name="checkbox-3" v-model="saveseed" unchecked-value="not_accepted" class="custom-control-input" value="true">
+                            <label for="checkbox-3" class="custom-control-label">
+                                J'ai sauvegardé ma phrase en lieu sûr.
+                            </label> <a href="/terms-of-service" title="Lire les conditions d'utilisation avant de valider le mot de passe" class="txt-bold" target="_blank">Conditions d'Utilisation</a>
+                        </div>
                     </div>
                 </div>
             </div>

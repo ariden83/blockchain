@@ -4,21 +4,21 @@ import (
 	"context"
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/pkg/api"
-	"github.com/ariden83/blockchain/pkg/errors"
+	pkgErr "github.com/ariden83/blockchain/pkg/errors"
 	"go.uber.org/zap"
 )
 
 func (e *EndPoint) CreateWallet(_ context.Context, input *api.CreateWalletInput) (*api.CreateWalletOutput, error) {
 	if input.GetPassword() == nil {
-		err := errors.ErrMissingPassword
+		err := pkgErr.ErrMissingPassword
 		e.log.Error("Fail to create wallet", zap.Error(err))
-		return nil, err
+		return nil, pkgErr.GRPC(err)
 	}
 
 	seed, err := e.wallets.Create(input.Password)
 	if err != nil {
 		e.log.Error("Fail to create wallet", zap.Error(err))
-		return nil, err
+		return nil, pkgErr.GRPC(err)
 	}
 
 	e.event.Push(event.Message{Type: event.Wallet})

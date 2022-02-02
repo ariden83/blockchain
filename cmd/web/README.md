@@ -28,4 +28,12 @@ Wallet website. See website of project [blockchain-altcoin.com](https://www.bloc
 - [ ] Fully Tested
 - [ ] Modification du mot de passe
 - [ ] Redemander le mot de passe en cas de changement d'onglet
-- 
+- [ ] Ajout de la fonctionnalité Recevoir notre newsletter
+- [ ] Ajout doc developpers
+- [ ] Ajout lien github
+- [ ] Ajout faqs
+- [ ] Ajout page support
+- [ ] Ajout sitemaps
+- [ ] Ajout lien twitter
+- [ ] Ajout dans le header, un onglet notification
+

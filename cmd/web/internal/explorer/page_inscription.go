@@ -28,7 +28,7 @@ func (e *Explorer) inscriptionPage(rw http.ResponseWriter, r *http.Request) {
 		FrontData: e.frontData(rw, r).
 			JS([]string{
 				"https://www.google.com/recaptcha/api.js?render=" + e.cfg.ReCaptcha.SiteKey,
-				"/static/inscription/inscription.js?v0.0.22",
+				"/static/inscription/inscription.js?v0.0.23",
 				"/static/cipher.js?v0.0.4",
 			}).
 			Css([]string{
@@ -49,6 +49,7 @@ type postInscriptionAPIBodyReq struct {
 
 type postInscriptionAPIBodyRes struct {
 	Status string `json:"status"`
+	Seed   string `json:"seed"`
 }
 
 // postInscriptionAPIResp
@@ -172,8 +173,18 @@ func (e *Explorer) inscriptionAPI(rw http.ResponseWriter, r *http.Request) {
 		e.JSONfail(pkgErr.ErrInternalError, rw)
 		return
 	}
-	store.Set(sessionLabelUserID, wallet.Address)
+	store.Set(sessionLabelUserID, wallet.PubKey)
 	store.Save()
 
-	e.JSON(rw, postInscriptionAPIBodyRes{"ok"})
+	mnemonic, err := decoder.Encrypt([]byte(wallet.Mnemonic), decoder.GetPrivateKey())
+	if err != nil {
+		logCTX.Error("fail to Encrypt mnemonic", zap.String("mnemonic", wallet.Mnemonic))
+		e.JSONfail(pkgErr.ErrInternalError, rw)
+		return
+	}
+
+	e.JSON(rw, postInscriptionAPIBodyRes{
+		Status: "ok",
+		Seed:   mnemonic,
+	})
 }

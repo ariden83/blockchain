@@ -31,7 +31,7 @@ func (e *Explorer) loginPage(rw http.ResponseWriter, r *http.Request) {
 		FrontData: e.frontData(rw, r).
 			JS([]string{
 				"https://www.google.com/recaptcha/api.js?render=" + e.cfg.ReCaptcha.SiteKey,
-				"/static/login/login.js?v0.0.29<",
+				"/static/login/login.js?v0.0.30",
 				"/static/cipher.js?v0.0.8",
 			}).
 			Css([]string{
@@ -296,7 +296,7 @@ func (e *Explorer) loginAPI(rw http.ResponseWriter, r *http.Request) {
 		e.JSONfail(pkgErr.ErrInternalError, rw)
 		return
 	}
-	store.Set(sessionLabelUserID, wallet.Address)
+	store.Set(sessionLabelUserID, wallet.PubKey)
 	store.Save()
 
 	e.JSON(rw, postLoginAPIBodyRes{"ok"})

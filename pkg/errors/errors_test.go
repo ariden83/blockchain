@@ -13,7 +13,7 @@ func Test_Error(t *testing.T) {
 		messageTest   string
 		error         error
 		statusWaiting int
-		messageGRPC error
+		messageGRPC   error
 	}{
 		{
 			"bad request",

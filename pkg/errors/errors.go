@@ -38,8 +38,20 @@ func WithStatus(status int) func(*errorString) {
 	}
 }
 
+func (e *errorString) statusFromGRPC() int {
+	for statusCode, num := range listStatus {
+		if num == e.grpcStatus {
+			return statusCode
+		}
+	}
+	return 0
+}
+
 func StatusCode(err error) int {
 	if errWithStatus, ok := err.(*errorString); ok {
+		if errWithStatus.grpcStatus != 0 {
+			return errWithStatus.statusFromGRPC()
+		}
 		return errWithStatus.Status()
 	}
 	return http.StatusUpgradeRequired

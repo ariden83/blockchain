@@ -1,5 +1,7 @@
 "use strict";
 
+const listErrors = {401: "password erroné", 404: "not found", 412: "missing fields", 426: "need upgrade"};
+
 // Full spec-compliant TodoMVC with localStorage persistence
 // and hash-based routing in ~120 effective lines of JavaScript.
 document.addEventListener("DOMContentLoaded", () => {
@@ -191,8 +193,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 })
                 .catch(error => {
                     if (error.response) {
-                        if (error.response.status === "404" || error.response.status === "412") {
-                            t.errorSend = error.response.data;
+                        if (error.response.status in listErrors) {
+                            t.errorSend = error.response.message;
                             this.step = 1;
                         } else {
                             t.errorSend = 'Error! Could not reach the API. ' + error;

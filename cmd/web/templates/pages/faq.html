@@ -1,0 +1,76 @@
+{{ define "faq" }}<!DOCTYPE html>
+<html lang="en">
+{{ template "head" . }}
+<body>
+<div class="container-fluid">
+    {{ template "header" . }}
+    <main>
+        <section>
+            <header>
+                <h1>Frequently Asked Questions</h1>
+                <p>Answers to commonly asked questions</p>
+            </header>
+        </section>
+        <section>
+            <h3>Getting started</h3>
+            <div>
+                <p> Do I need cryptocurrency to use Blockain-Altcoin ?</p>
+                <p>Technically no, you can accept signature requests from sites without any value in an account. Adding cryptocurrencies in your Blockain-Altcoin account  (such as ETH and ERC-20 or, ERC-721 tokens) allow you to invest, trade, play games, own unique digital items (NFT collectibless), and much more.</p>
+            </div>
+            <div>
+                <p>How do I transfer my existing ETH and tokens to Blockain-Altcoin ?</p>
+                <p>In the app, click the menu button (top left), then click Send.</p>
+            </div>
+            <div>
+                <p>How do I send ETH and tokens ?</p>
+                <p>In the app, click the menu button (top left), then click Send.</p>
+            </div>
+            <h3>Manage my digital assets</h3>
+            <div>
+                <p>Which tokens does Blockain-Altcoin support ?</p>
+                <p>ETH and any ETH based token (erc20, 721, and more).</p>
+            </div>
+            <h3>Security</h3>
+            <div>
+                <p>How do I import an account in Blockain-Altcoin ?</p>
+                <p>You can add an additional, “loose” account to Blockain-Altcoin using a private key or json file. Please note: your Secret Recovery Phrase will not recover any “loose accounts” (accounts added with a private key/json file). Make sure to keep BOTH your Secret Recovery Phrase and private key(s) securely stored to recover all your accounts.</p>
+            </div>
+            <div>
+                <p>How do I import my wallet in Blockain-Altcoin ?</p>
+                <p>With your wallet’s Secret Recovery Phrase. Blockain-Altcoin can only load one Secret Recovery Phrase at a time. If you already have a wallet, select the “import Secret Recovery Phrase” option when you set up your wallet.</p>
+            </div>
+            <div>
+                <p>How do I keep my wallet safe ?</p>
+                <p>Backup your Secret Recovery Phrase</p>
+                <p>Blockain-Altcoin requires that you store your Secret Recovery Phrase in a safe place. It is the only way to recover your funds should your device crash or your browser reset. We recommend you to write it down. The most common method is to write your 12-word phrase on a piece of paper and store it safely in a place where only you have access. Note: if you lose your Secret Recovery Phrase, Blockain-Altcoin can’t help you recover your wallet. Never give you Secret Recovery Phrase or your private key(s) to anyone or any site, unless you want them to have full control over your funds.</p>
+                <p>Use Blockain-Altcoin on a personal device</p>
+                <p>Blockain-Altcoin stores the Secret Recovery Phrase, passwords, and private keys in an encrypted format locally on the device where it's installed.</p>
+            </div>
+            <div>
+                <p>Lost my password: How do I restore my wallet ?</p>
+                <p>If you cannot remember your password, you must restore your account using your Secret Recovery Phrase and create a new password.</p>
+            </div>
+            <div>
+                <p>Lost my Secret Recovery Phrase: Can I restore my wallet ?</p>
+                <p>The Secret Recovery Phrase is the last resort when it comes to recovering an account. There are ways to try to find and restore the Secret Recovery Phrase on a computer his requires access to the computer with the installation of Blockain-Altcoin or a backup of the computer.</p>
+            </div>
+            <h3>Troubleshooting: Support FAQs</h3>
+            <div>
+                <p>I found a bug, what do I do ?</p>
+                <p>Email <a target="_blank" rel="noopener noreferrer" href="mailto:adrienparrochia@gmail.com">adrienparrochia@gmail.com</a> or submit a bug report directly as a Github issue (for devs): <a href="https://github.com/ariden83/blockchain" title="Submit a bug report directly as a Github issue (for devs)" target="_blank">https://github.com/ariden83/blockchain</a></p>
+            </div>
+            <div>
+                <p>How do I give feedback to the developer team ?</p>
+                <p>Open a Github issue <a href="https://github.com/ariden83/blockchain/issues/new" title="Submit a bug report directly as a Github issue (for devs)" target="_blank">here</a>
+            </div>
+            <h3>Additional Support & Content</h3>
+            <div>
+                <p>Where can I go if I have more questions ?</p>
+                <p>You can view our knowledge base articles at <a target="_blank" rel="noopener noreferrer" href="mailto:adrienparrochia@gmail.com">adrienparrochia@gmail.com</a> You can learn more about the Ethereum network at <a target="_blank" href="https://ethereum.org/en/what-is-ethereum/">Ethereum.org</a> If you still need assistance, feel free to contact our support team with submit a github issue ticket <a href="https://github.com/ariden83/blockchain/issues/new" title="Submit a bug report directly as a Github issue (for devs)" target="_blank">here</a>.</a>
+            </div>
+        </section>
+    </main>
+    {{ template "footer" . }}
+</div>
+</body>
+</html>{{ end }}

@@ -8,6 +8,7 @@ func (e *Explorer) loadRoutes() {
 	e.router.HandleFunc("/", e.homePage).Methods(http.MethodGet)
 	e.router.HandleFunc("/contact", e.contactPage).Methods(http.MethodGet, http.MethodPost)
 	e.router.HandleFunc("/about", e.aboutPage).Methods(http.MethodGet)
+	e.router.HandleFunc("/faq", e.faqPage).Methods(http.MethodGet)
 	e.router.HandleFunc("/404", notFoundPage).Methods(http.MethodGet)
 	e.router.HandleFunc("/privacy-policy", e.privacyPolicyPage).Methods(http.MethodGet)
 	e.router.HandleFunc("/terms-of-service", e.termsOfServicePage).Methods(http.MethodGet)
