@@ -10,6 +10,7 @@ Wallet website. See website of project [blockchain-altcoin.com](https://www.bloc
   | [code source](https://github.com/TutorialEdge/go-oauth-tutorial)
 * How to mock OAuth 2.0 in Go [tutorial](https://blog.seriesci.com/how-to-mock-oauth-in-go/)
 * Cipher [tutorial](https://stackoverflow.com/questions/43103343/cryptojs-encrypt-go-decrypt)
+* Metamask API [](https://eth.wiki/json-rpc/API#json-rpc-methods)
 
 ## Command
 
