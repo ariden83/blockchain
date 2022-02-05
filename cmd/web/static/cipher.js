@@ -31,36 +31,29 @@ const cryptGcm = async (base64Key, seed) => {
     const bytes = (new TextEncoder()).encode(seed, 'utf-8');
     const key = await loadKey(base64Key);
     const iv = window.crypto.getRandomValues(new Uint8Array(12));
-    const algorithm = {
-        iv,
-        name: 'AES-GCM'
-    };
     const cipherData = await window.crypto.subtle.encrypt(
-        algorithm,
+        {
+            iv,
+            name: 'AES-GCM'
+        },
         key,
         bytes
     );
-
-    // prepend the random IV bytes to raw cipherdata
     const cipherText = concatArrayBuffers(iv.buffer, cipherData);
     return bufferToBase64(cipherText);
 }
 
 const DecryptGcm = async (base64Key, cipherText) => {
     const key = await loadKey(base64Key);
-    // cipherText = base64ToBuffer(cipherText);
     const data = ArrayBuffersDecoder(cipherText);
-    const algorithm = {
-        iv: data.iv,
-        name: 'AES-GCM'
-    };
-
     const decrypted = await window.crypto.subtle.decrypt(
-        algorithm,
+        {
+            iv: data.iv,
+            name: 'AES-GCM'
+        },
         key,
         data.cipher,
     );
-
     const decoder = new TextDecoder();
     const plaintext = decoder.decode(decrypted);
     return plaintext;
