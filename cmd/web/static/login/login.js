@@ -159,8 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             },
             async encrypt(code) {
-                let c = (new TextEncoder()).encode(code, 'utf-8');
-                return await cryptGcm(this.paraphrase, c);
+                return await cryptGcm(this.paraphrase, code);
             },
             callAPILogin(code) {
                 this.errorSend = '... wait ...';

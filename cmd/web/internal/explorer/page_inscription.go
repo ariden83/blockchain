@@ -28,8 +28,8 @@ func (e *Explorer) inscriptionPage(rw http.ResponseWriter, r *http.Request) {
 		FrontData: e.frontData(rw, r).
 			JS([]string{
 				"https://www.google.com/recaptcha/api.js?render=" + e.cfg.ReCaptcha.SiteKey,
-				"/static/inscription/inscription.js?v0.0.23",
-				"/static/cipher.js?v0.0.4",
+				"/static/inscription/inscription.js?v0.0.32",
+				"/static/cipher.js?v0.0.11",
 			}).
 			Css([]string{
 				"/static/inscription/inscription.css?0.0.0",

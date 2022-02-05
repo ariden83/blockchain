@@ -132,8 +132,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             },
             async encrypt(code) {
-                let c = (new TextEncoder()).encode(code, 'utf-8');
-                return await cryptGcm(this.paraphrase, c);
+                return await cryptGcm(this.paraphrase, code);
+            },
+            async decrypt(seed) {
+                return await DecryptGcm(this.paraphrase, seed);
             },
             callAPILogin(code) {
                 this.errorSend = '... wait ...';
@@ -152,15 +154,22 @@ document.addEventListener("DOMContentLoaded", () => {
                     }))
                     .then(function (response) {
                         if (response.data && response.data.status === 'ok') {
-                            this.step = 6;
+                            t.step = 6;
+                            console.log("*********************", response.data.seed)
+                            return t.decrypt(response.data.seed)
+                            .then(seed => {
+                                t.seed = seed;
+                            });
                         } else {
                             t.errorSend = 'Error! Could not reach the API. ' + error;
+                            console.log(error);
                             setTimeout(() => t.resetErrorMessageForAPI(), 3500);
                         }
                     })
                     .catch(function (error) {
+                        console.log(error)
                         t.errorSend = 'Error! Could not reach the API. ' + error;
-                        this.step = 1;
+                        t.step = 1;
                         setTimeout(() => t.resetErrorMessageForAPI(), 3500);
                     });
             },

@@ -48,8 +48,8 @@ const cryptGcm = async (base64Key, seed) => {
 
 const DecryptGcm = async (base64Key, cipherText) => {
     const key = await loadKey(base64Key);
-    // cipherText = base64ToBuffer(cipherText);
-    const data = ArrayBuffersDecoder(cipherText);
+    let data = ArrayBuffersDecoder(cipherText);
+
     const algorithm = {
         iv: data.iv,
         name: 'AES-GCM'
@@ -84,3 +84,66 @@ const ArrayBuffersDecoder = (buffer) => {
     }
 }
 
+const cipher_coder_decoder = (base64Key, code) => {
+    let base64CipherText = cryptGcm(base64Key, code);
+    return DecryptGcm(base64Key, base64CipherText);
+}
+
+const cipher_coder_decoder_decompress = async (base64Key, code) => {
+    let bytes = (new TextEncoder()).encode(code, 'utf-8');
+
+    let key = await loadKey(base64Key);
+    const iv = window.crypto.getRandomValues(new Uint8Array(12));
+    algorithm = {
+        iv,
+        name: 'AES-GCM'
+    };
+    const cipherData = await window.crypto.subtle.encrypt(
+        algorithm,
+        key,
+        bytes
+    );
+
+    // prepend the random IV bytes to raw cipherdata
+    const cipherText = concatArrayBuffers(iv.buffer, cipherData);
+    key = await loadKey(base64Key);
+    // cipherText = base64ToBuffer(cipherText);
+    let data = ArrayBuffersDecoder(cipherText);
+    algorithm = {
+        iv: data.iv,
+        name: 'AES-GCM'
+    };
+
+
+    const decrypted = await window.crypto.subtle.decrypt(
+        algorithm,
+        key,
+        data.cipher,
+    );
+
+    const decoder = new TextDecoder();
+    const plaintext = decoder.decode(decrypted);
+    return plaintext;
+}
+
+let data_to_test = [
+    "1234556",
+    "couple robot escape silent main once smoke check good basket mimic similar"
+];
+
+const test_cipher_coder_decoder_decompress = async () => {
+    let base64Key = "MYKS4F9T28bF1WJy/FxeGJ7JfkeTSBPhK5vOy/mZuMw=";
+    try {
+        for (const data of data_to_test) {
+            if (data === cipher_coder_decoder_decompress(base64Key, data)) {
+                throw Error('Assert failed: ' + (data || ''));
+            } else {
+                console.log("assert ok: "+ (data || ''));
+            }
+        }
+    } catch (e) {
+        console.log("error :: ", e);
+    }
+}
+
+test_cipher_coder_decoder_decompress();
