@@ -79,10 +79,18 @@ const ArrayBuffersDecoder = (buffer) => {
     }
 }
 
+const encrypt = async (base64Key, code) => {
+    let e = await cryptGcm(base64Key, code);
+    return e
+}
+
+const decrypt = async (base64Key, seed) => {
+    let e = await DecryptGcm(base64Key, seed);
+    return e;
+}
+
 const cipher_coder_decoder = async (base64Key, seed) => {
-    return cryptGcm(base64Key, seed).then(cipherTextBase64 => {
-        return DecryptGcm(base64Key, cipherTextBase64);
-    });
+    return encrypt(base64Key, seed).then(cipherTextBase64 => decrypt(base64Key, cipherTextBase64));
 }
 
 const cipher_coder_decoder_decompress = async (base64Key, seed) => {

@@ -15,7 +15,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return {
                 errorTodo: "",
                 errorSend: "",
-                seed: "",
                 terms: false,
                 step: 1,
                 pincode: "",
@@ -25,6 +24,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 paraphrase: "",
                 understood: false,
                 saveseed: false,
+                errorStep2: "",
+                errorStep3: "",
+                seedOver: false,
+                seed: "",
             };
         },
         computed: {
@@ -41,7 +44,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 return this.step < 5;
             },
             buttonSubmitStep2Disabled() {
-                return this.step < 9;
+                return this.step == 6;
+            },
+            buttonSubmitStep3Disabled() {
+                return this.step == 8;
             },
         },
         watch: {
@@ -155,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     .then(function (response) {
                         if (response.data && response.data.status === 'ok') {
                             t.step = 6;
-                            console.log("*********************", response.data.seed)
+                            t.errorSend = '';
                             return t.decrypt(response.data.seed)
                             .then(seed => {
                                 t.seed = seed;
@@ -184,14 +190,83 @@ document.addEventListener("DOMContentLoaded", () => {
             validunderstood() {
                 if (this.understood) {
                     this.step = 7;
+                } else {
+                    this.step = 6;
+                }
+            },
+            submitStep2() {
+                if (this.step == 7) {
+                    this.step = 8;
+                    this.cutSeed(this.seed)
+                } else {
+                    this.errorStep2 = "You must agree to the terms that you can no longer access your crypto wallet if you lose your recovery phrase";
                 }
             },
             copierpress(){
+                let x = document.createElement("INPUT");
+                x.setAttribute("type", "text");
+                x.setAttribute("id", "myseed");
+                document.getElementById("copy").appendChild(x);
+                document.getElementById("myseed").value = this.seed;
+                let copyText = document.getElementById("myseed");
+                copyText.select();
+                document.execCommand("copy");
+                document.getElementById("myseed").remove();
+                this.errorStep2 = "Your Secret Recovery Phrase is copied to the clipboard";
+            },
+            cutSeed(str) {
+                const words = str.split(' ');
+                for (const w of words) {
+                    let c = document.createElement("CANVAS");
+                    let ctx = c.getContext("2d");
+                    ctx.font = "30px Calibri";
+                    ctx.setTransform((Math.random() / 10) + 0.9,    //scalex
+                        0.1 - (Math.random() / 5),      //skewx
+                        0.1 - (Math.random() / 5),      //skewy
+                        (Math.random() / 10) + 0.9,     //scaley
+                        (Math.random() * 3) + 3,      //transx
+                        0);                           //transy
+                    ctx.fillText(w, 10, 50);
 
+                    let div = document.createElement("DIV");
+                    div.className = "col-xs-3"
+                    div.appendChild(c);
+                    document.getElementById("my-seed").appendChild(div);
+                }
             },
             validsaveseed() {
                 if (this.saveseed) {
+                    this.step = 9;
+                } else {
                     this.step = 8;
+                }
+            },
+            mouseOver(){
+                this.seedOver = true;
+            },
+            mouseOut(){
+                this.seedOver = false;
+            },
+            submitStep3() {
+                var t = this;
+                if (this.step == 9) {
+                   return axios.post('/api/inscription/validate', {})
+                    .then(function (response) {
+                        if (response.data && response.data.status === 'ok') {
+                            window.location.replace("/wallet");
+                        } else {
+                            t.errorSend = 'Error! Could not reach the API. ' + error;
+                            console.log(error);
+                            setTimeout(() => t.resetErrorMessageForAPI(), 3500);
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error)
+                        t.errorSend = 'Error! Could not reach the API. ' + error;
+                        setTimeout(() => t.resetErrorMessageForAPI(), 3500);
+                    });
+                } else {
+                    this.errorStep2 = "You must confirm that you have saved your Secret Recovery Phrase in a safe place";
                 }
             },
         }

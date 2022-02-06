@@ -1,5 +1,5 @@
 // arrayBuffer to base64
-const bufferToBase64 = (arrayBuffer) => {
+const bufferToBase64 = arrayBuffer => {
     return window.btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
 }
 
@@ -17,7 +17,7 @@ const loadKey = async (base64Key) => {
 }
 
 // base64 to arrayBuffer
-const base64ToBuffer = (base64) => {
+const base64ToBuffer = base64 => {
     const binary_string = window.atob(base64);
     const len = binary_string.length;
     let bytes = new Uint8Array(len);
@@ -43,10 +43,11 @@ const cryptGcm = async (base64Key, seed) => {
     return bufferToBase64(cipherText);
 }
 
-const DecryptGcm = async (base64Key, cipherTextbase64) => {
-    const cipherText = base64ToBuffer(cipherTextbase64)
+const DecryptGcm = async (base64Key, cipherTextBase64) => {
+    const cipherText = base64ToBuffer(cipherTextBase64)
     const key = await loadKey(base64Key);
     const data = ArrayBuffersDecoder(cipherText);
+
     const decrypted = await window.crypto.subtle.decrypt(
         {
             iv: data.iv,
@@ -55,6 +56,7 @@ const DecryptGcm = async (base64Key, cipherTextbase64) => {
         key,
         data.cipher,
     );
+
     const decoder = new TextDecoder();
     const plaintext = decoder.decode(decrypted);
     return plaintext;
@@ -68,7 +70,6 @@ const concatArrayBuffers = (buffer1, buffer2) => {
     return tmp.buffer;
 }
 
-// deconcatArrayBuffers two array buffers
 const ArrayBuffersDecoder = (buffer) => {
     let iv = new Uint8Array(buffer.slice(0, 12));
     let cipher = new Uint8Array(buffer.slice(12, buffer.length));
@@ -77,4 +78,3 @@ const ArrayBuffersDecoder = (buffer) => {
         cipher: cipher,
     }
 }
-

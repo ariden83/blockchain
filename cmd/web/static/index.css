@@ -3,6 +3,9 @@
 .opacity-50{
     opacity: 0.5;
 }
+.blur-50{
+    filter: blur(0.5rem);
+}
 .btn-big{
     margin: 35px 0 14px;
     width: 170px;

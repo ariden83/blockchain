@@ -28,11 +28,11 @@ func (e *Explorer) inscriptionPage(rw http.ResponseWriter, r *http.Request) {
 		FrontData: e.frontData(rw, r).
 			JS([]string{
 				"https://www.google.com/recaptcha/api.js?render=" + e.cfg.ReCaptcha.SiteKey,
-				"/static/inscription/inscription.js?v0.0.33",
-				"/static/cipher.js?v0.0.12",
+				"/static/inscription/inscription.js?v0.0.12",
+				"/static/cipher.js?v0.0.3",
 			}).
 			Css([]string{
-				"/static/inscription/inscription.css?0.0.0",
+				"/static/inscription/inscription.css?0.0.2",
 			}).
 			Title("inscription"),
 		Success:    false,
@@ -117,7 +117,7 @@ type postInscriptionAPIReq struct {
 func (e *Explorer) inscriptionAPI(rw http.ResponseWriter, r *http.Request) {
 	_, authorized := e.authorized(rw, r)
 	if authorized {
-		http.Redirect(rw, r, defaultPageLogged, http.StatusFound)
+		e.JSONfail(pkgErr.ErrAlreadyConnected, rw)
 		return
 	}
 
@@ -186,5 +186,16 @@ func (e *Explorer) inscriptionAPI(rw http.ResponseWriter, r *http.Request) {
 	e.JSON(rw, postInscriptionAPIBodyRes{
 		Status: "ok",
 		Seed:   mnemonic,
+	})
+}
+
+func (e *Explorer) inscriptionValidateAPI(rw http.ResponseWriter, r *http.Request) {
+	_, authorized := e.authorized(rw, r)
+	if authorized {
+		http.Redirect(rw, r, defaultPageLogged, http.StatusFound)
+		return
+	}
+	e.JSON(rw, postInscriptionAPIBodyRes{
+		Status: "ok",
 	})
 }

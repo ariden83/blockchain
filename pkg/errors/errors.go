@@ -87,4 +87,5 @@ var (
 	ErrInternalDependencyError = New("internal error", WithStatus(http.StatusFailedDependency))
 	ErrSeedNotFound            = New("seed not found", WithStatus(http.StatusNotFound))
 	ErrInvalidCaptcha          = New("invalid captcha", WithStatus(http.StatusUnauthorized))
+	ErrAlreadyConnected        = New("alreadyConnected", WithStatus(http.StatusFound))
 )
