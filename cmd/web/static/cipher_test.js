@@ -27,28 +27,27 @@ const base64ToBuffer = (base64) => {
     return bytes.buffer;
 }
 
-const cryptGcm = async (base64Key, code) => {
-    let bytes = (new TextEncoder()).encode(code, 'utf-8');
-    let key = await loadKey(base64Key);
+const cryptGcm = async (base64Key, seed) => {
+    const bytes = (new TextEncoder()).encode(seed, 'utf-8');
+    const key = await loadKey(base64Key);
     const iv = window.crypto.getRandomValues(new Uint8Array(12));
-    algorithm = {
-        iv,
-        name: 'AES-GCM'
-    };
     const cipherData = await window.crypto.subtle.encrypt(
-        algorithm,
+        {
+            iv,
+            name: 'AES-GCM'
+        },
         key,
         bytes
     );
-
-    // prepend the random IV bytes to raw cipherdata
-    return concatArrayBuffers(iv.buffer, cipherData);
+    const cipherText = concatArrayBuffers(iv.buffer, cipherData);
+    return bufferToBase64(cipherText);
 }
 
-const DecryptGcm = async (base64Key, cipherText) => {
-    let key = await loadKey(base64Key);
-    // cipherText = base64ToBuffer(cipherText);
-    let data = ArrayBuffersDecoder(cipherText);
+const DecryptGcm = async (base64Key, cipherTextBase64) => {
+    const cipherText = base64ToBuffer(cipherTextBase64)
+    const key = await loadKey(base64Key);
+    const data = ArrayBuffersDecoder(cipherText);
+
     const decrypted = await window.crypto.subtle.decrypt(
         {
             iv: data.iv,
@@ -71,7 +70,6 @@ const concatArrayBuffers = (buffer1, buffer2) => {
     return tmp.buffer;
 }
 
-// deconcatArrayBuffers two array buffers
 const ArrayBuffersDecoder = (buffer) => {
     let iv = new Uint8Array(buffer.slice(0, 12));
     let cipher = new Uint8Array(buffer.slice(12, buffer.length));
@@ -81,26 +79,15 @@ const ArrayBuffersDecoder = (buffer) => {
     }
 }
 
-const cipher_coder_decoder = async (base64Key, code) => {
-    let bytes = (new TextEncoder()).encode(code, 'utf-8');
-    let key = await loadKey(base64Key);
-    const iv = window.crypto.getRandomValues(new Uint8Array(12));
-    const cipherData = await window.crypto.subtle.encrypt(
-        {
-            iv,
-            name: 'AES-GCM'
-        },
-        key,
-        bytes
-    );
-
-    // prepend the random IV bytes to raw cipherdata
-    const cipherText = concatArrayBuffers(iv.buffer, cipherData);
-    return DecryptGcm(base64Key, cipherText);
+const cipher_coder_decoder = async (base64Key, seed) => {
+    return cryptGcm(base64Key, seed).then(cipherTextBase64 => {
+        return DecryptGcm(base64Key, cipherTextBase64);
+    });
 }
 
-const cipher_coder_decoder_decompress = async (base64Key, code) => {
-    let bytes = (new TextEncoder()).encode(code, 'utf-8');
+const cipher_coder_decoder_decompress = async (base64Key, seed) => {
+    /************************ encode ********************************/
+    const bytes = (new TextEncoder()).encode(seed, 'utf-8');
     let key = await loadKey(base64Key);
     const iv = window.crypto.getRandomValues(new Uint8Array(12));
     const cipherData = await window.crypto.subtle.encrypt(
@@ -111,27 +98,10 @@ const cipher_coder_decoder_decompress = async (base64Key, code) => {
         key,
         bytes
     );
-
-    // prepend the random IV bytes to raw cipherdata
-    const cipherText = concatArrayBuffers(iv.buffer, cipherData);
-
-    key = await loadKey(base64Key);
-    let data = ArrayBuffersDecoder(cipherText);
-    algorithm = {
-        iv: data.iv,
-        name: 'AES-GCM'
-    };
-
-
-    const decrypted = await window.crypto.subtle.decrypt(
-        algorithm,
-        key,
-        data.cipher,
-    );
-
-    const decoder = new TextDecoder();
-    const plaintext = decoder.decode(decrypted);
-    return plaintext;
+    let cipherText = concatArrayBuffers(iv.buffer, cipherData);
+    let cipherTextBase64 = bufferToBase64(cipherText);
+    /************************ decode ********************************/
+    return DecryptGcm(base64Key, cipherTextBase64)
 }
 
 let data_to_test = [

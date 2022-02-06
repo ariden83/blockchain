@@ -43,7 +43,8 @@ const cryptGcm = async (base64Key, seed) => {
     return bufferToBase64(cipherText);
 }
 
-const DecryptGcm = async (base64Key, cipherText) => {
+const DecryptGcm = async (base64Key, cipherTextbase64) => {
+    const cipherText = base64ToBuffer(cipherTextbase64)
     const key = await loadKey(base64Key);
     const data = ArrayBuffersDecoder(cipherText);
     const decrypted = await window.crypto.subtle.decrypt(
