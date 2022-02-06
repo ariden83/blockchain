@@ -48,11 +48,11 @@ type Seed struct {
 	PubKey    string
 	PrivKey   string
 	Mnemonic  string
-	Password  []byte
+	ExtraData map[string]interface{}
 }
 
 func (s *Seed) verifyPassword(password []byte) error {
-	if err := bcrypt.CompareHashAndPassword(s.Password, password); err != nil {
+	if err := bcrypt.CompareHashAndPassword(s.ExtraData["password"].([]byte), password); err != nil {
 		return ErrorSeedPasswordInvalid
 	}
 	return nil
@@ -78,11 +78,11 @@ func Init(cfg config.Wallet, log *zap.Logger) (*Wallets, error) {
 		withFile: cfg.WithFile,
 		log:      log.With(zap.String("service", "wallet")),
 	}
-
-	if wallets.db, err = badger.Open(opts); err != nil {
-		return nil, err
+	if cfg.WithFile {
+		if wallets.db, err = badger.Open(opts); err != nil {
+			return nil, err
+		}
 	}
-
 	return &wallets, err
 }
 
@@ -112,6 +112,9 @@ func (w *Wallets) UpdateSeeds(seed []Seed) {
 }
 
 func (w *Wallets) Save(seed Seed) error {
+	if w.db == nil {
+		return nil
+	}
 	serializeBLock, err := utils.Serialize(&seed)
 	if err != nil {
 		w.log.Error("cannot serialize new seed", zap.Error(err))
@@ -152,8 +155,11 @@ func (w *Wallets) Create(password []byte) (*SeedNoPrivKey, error) {
 		PubKey:    masterPub.String(),
 		PrivKey:   masterPrv.String(),
 		Mnemonic:  mnemonic.Sentence(),
-		Password:  password,
 		Timestamp: t,
+		ExtraData: map[string]interface{}{
+			"password":  password,
+			"confirmed": false,
+		},
 	}
 
 	w.Save(newSeed)
@@ -167,22 +173,26 @@ func (w *Wallets) Create(password []byte) (*SeedNoPrivKey, error) {
 
 func (w *Wallets) GetSeed(mnemonic, password []byte) (*SeedNoPrivKey, error) {
 	var valCopy []byte
-	if err := w.db.View(func(txn *badger.Txn) error {
-		item, err := txn.Get(mnemonic)
-		if err != nil {
-			return err
-		}
+	if w.db != nil {
+		if err := w.db.View(func(txn *badger.Txn) error {
+			item, err := txn.Get(mnemonic)
+			if err != nil {
+				return err
+			}
 
-		if err := item.Value(func(val []byte) error {
-			valCopy = append([]byte{}, val...)
+			if err := item.Value(func(val []byte) error {
+				valCopy = append([]byte{}, val...)
+				return nil
+			}); err != nil {
+				return err
+			}
 			return nil
 		}); err != nil {
-			return err
+			w.log.Error("fail to get mnemonic in database", zap.Error(err))
+			return nil, pkgError.ErrSeedNotFound
 		}
-		return nil
-	}); err != nil {
-		w.log.Error("fail to get mnemonic in database", zap.Error(err))
-		return nil, pkgError.ErrSeedNotFound
+	} else {
+		// @TODO recherche dans la mémoire
 	}
 
 	seed, err := deserialize(valCopy)
@@ -206,7 +216,10 @@ func (w *Wallets) GetSeeds() *[]Seed {
 }
 
 func (w *Wallets) Close() error {
-	return w.db.Close()
+	if w.db != nil {
+		return w.db.Close()
+	}
+	return nil
 }
 
 func deserialize(data []byte) (*Seed, error) {
