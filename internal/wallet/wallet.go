@@ -22,21 +22,23 @@ import (
 )
 
 type Wallets struct {
-	File     string
-	Seeds    []Seed
-	withFile bool
-	db       *badger.DB
-	log      *zap.Logger
+	File      string
+	Seeds     []Seed
+	TempSeeds []Seed
+	withFile  bool
+	db        *badger.DB
+	log       *zap.Logger
 }
 
 type IWallets interface {
-	Create([]byte) (*SeedNoPrivKey, error)
+	Create([]byte) (*Seed, error)
 	Close() error
 	DBExists() bool
 	GetAllPublicSeeds() []SeedNoPrivKey
 	GetSeed([]byte, []byte) (*SeedNoPrivKey, error)
 	GetSeeds() *[]Seed
 	UpdateSeeds([]Seed)
+	Validate(pubKey []byte) bool
 }
 
 var ErrorSeedPasswordInvalid = errors.New("invalid seed password")
@@ -47,7 +49,7 @@ type Seed struct {
 	Timestamp int64
 	PubKey    string
 	PrivKey   string
-	Mnemonic  string
+	Mnemonic  []byte
 	ExtraData map[string]interface{}
 }
 
@@ -61,7 +63,6 @@ func (s *Seed) verifyPassword(password []byte) error {
 type SeedNoPrivKey struct {
 	Timestamp int64
 	PubKey    string
-	Mnemonic  string
 	Address   string
 }
 
@@ -97,9 +98,7 @@ func (w *Wallets) GetAllPublicSeeds() []SeedNoPrivKey {
 	var allSeeds []SeedNoPrivKey
 	for _, j := range w.Seeds {
 		allSeeds = append(allSeeds, SeedNoPrivKey{
-			Mnemonic:  j.Mnemonic,
 			Timestamp: j.Timestamp,
-			PubKey:    j.PubKey,
 			Address:   j.Address,
 		})
 	}
@@ -126,7 +125,7 @@ func (w *Wallets) Save(seed Seed) error {
 	})
 }
 
-func (w *Wallets) Create(password []byte) (*SeedNoPrivKey, error) {
+func (w *Wallets) Create(password []byte) (*Seed, error) {
 	password, err := encryptPassword(password)
 	if err != nil {
 		w.log.Error("fail to encrypt password", zap.Error(err))
@@ -150,30 +149,52 @@ func (w *Wallets) Create(password []byte) (*SeedNoPrivKey, error) {
 	address := masterPub.Address()
 
 	t := time.Now().UnixNano() / int64(time.Millisecond)
+
+	mnemonicStr := mnemonic.Sentence()
+	mnemonicHash, err := hash([]byte(mnemonicStr))
+	if err != nil {
+		w.log.Error("fail to hash mnemonic", zap.Error(err))
+		return nil, pkgError.ErrInternalDependencyError
+	}
+
 	newSeed := Seed{
 		Address:   address,
 		PubKey:    masterPub.String(),
 		PrivKey:   masterPrv.String(),
-		Mnemonic:  mnemonic.Sentence(),
+		Mnemonic:  mnemonicHash,
 		Timestamp: t,
 		ExtraData: map[string]interface{}{
-			"password":  password,
-			"confirmed": false,
+			"password": password,
 		},
 	}
 
-	w.Save(newSeed)
+	w.TempSeeds = append(w.TempSeeds, newSeed)
 
-	return &SeedNoPrivKey{
-		Mnemonic: newSeed.Mnemonic,
+	return &Seed{
+		Mnemonic: []byte(mnemonicStr),
 		Address:  newSeed.Address,
 		PubKey:   newSeed.PubKey,
 	}, nil
 }
 
+func (w *Wallets) Validate(pubKey []byte) bool {
+	for i, s := range w.TempSeeds {
+		if s.PubKey == string(pubKey) {
+			w.Save(s)
+			w.TempSeeds = append(w.TempSeeds[:i], w.TempSeeds[i+1:]...)
+			return true
+		}
+	}
+	return false
+}
+
 func (w *Wallets) GetSeed(mnemonic, password []byte) (*SeedNoPrivKey, error) {
-	var valCopy []byte
+	var (
+		err  error
+		seed *Seed
+	)
 	if w.db != nil {
+		var valCopy []byte
 		if err := w.db.View(func(txn *badger.Txn) error {
 			item, err := txn.Get(mnemonic)
 			if err != nil {
@@ -191,23 +212,37 @@ func (w *Wallets) GetSeed(mnemonic, password []byte) (*SeedNoPrivKey, error) {
 			w.log.Error("fail to get mnemonic in database", zap.Error(err))
 			return nil, pkgError.ErrSeedNotFound
 		}
+		seed, err = deserialize(valCopy)
+		if err != nil {
+			w.log.Error("fail to deserialize mnemonic", zap.Error(err))
+			return nil, pkgError.ErrInternalDependencyError
+		}
+
 	} else {
-		// @TODO recherche dans la mémoire
+		mnemonicHash, err := hash(mnemonic)
+		if err != nil {
+			w.log.Error("fail to deserialize mnemonic", zap.Error(err))
+			return nil, pkgError.ErrInternalDependencyError
+		}
+		for _, s := range w.Seeds {
+			if checkHash(s.Mnemonic, mnemonicHash) {
+				seed = &s
+			}
+		}
 	}
 
-	seed, err := deserialize(valCopy)
-	if err != nil {
-		w.log.Error("fail to deserialize mnemonic", zap.Error(err))
-		return nil, pkgError.ErrInternalDependencyError
+	if seed == nil {
+		return nil, pkgError.ErrSeedNotFound
 	}
+
 	if err := seed.verifyPassword(password); err != nil {
 		w.log.Info("invalid password", zap.Error(err))
 		return nil, pkgError.ErrInvalidPassword
 	}
+
 	return &SeedNoPrivKey{
-		PubKey:   seed.PubKey,
-		Address:  seed.Address,
-		Mnemonic: seed.Mnemonic,
+		PubKey:  seed.PubKey,
+		Address: seed.Address,
 	}, nil
 }
 
@@ -236,4 +271,14 @@ func encryptPassword(password []byte) ([]byte, error) {
 		return []byte{}, errors.New("fail to encrypt password")
 	}
 	return hash, nil
+}
+
+func hash(str []byte) ([]byte, error) {
+	bytes, err := bcrypt.GenerateFromPassword(str, 14)
+	return bytes, err
+}
+
+func checkHash(str, hash []byte) bool {
+	err := bcrypt.CompareHashAndPassword(hash, str)
+	return err == nil
 }

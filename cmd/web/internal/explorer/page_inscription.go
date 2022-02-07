@@ -178,7 +178,7 @@ func (e *Explorer) inscriptionAPI(rw http.ResponseWriter, r *http.Request) {
 
 	mnemonic, err := decoder.Encrypt([]byte(wallet.Mnemonic), decoder.GetPrivateKey())
 	if err != nil {
-		logCTX.Error("fail to Encrypt mnemonic", zap.String("mnemonic", wallet.Mnemonic))
+		logCTX.Error("fail to Encrypt mnemonic", zap.String("mnemonic", string(wallet.Mnemonic)))
 		e.JSONfail(pkgErr.ErrInternalError, rw)
 		return
 	}

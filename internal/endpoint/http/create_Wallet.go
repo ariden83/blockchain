@@ -13,7 +13,7 @@ type CreateWalletInput struct {
 type CreateWalletOutput struct {
 	Address  string `json:"address"`
 	PubKey   string `json:"public_key"`
-	Mnemonic string `json:"mnemonic"`
+	Mnemonic []byte `json:"mnemonic"`
 }
 
 func (e *EndPoint) handleCreateWallet(w http.ResponseWriter, r *http.Request) {

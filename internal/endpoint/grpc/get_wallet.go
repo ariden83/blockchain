@@ -20,8 +20,7 @@ func (e *EndPoint) GetWallet(_ context.Context, req *api.GetWalletInput) (*api.G
 	}
 
 	return &api.GetWalletOutput{
-		Address:  seed.Address,
-		PubKey:   seed.PubKey,
-		Mnemonic: seed.Mnemonic,
+		Address: seed.Address,
+		PubKey:  seed.PubKey,
 	}, nil
 }

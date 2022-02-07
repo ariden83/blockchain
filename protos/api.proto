@@ -11,6 +11,7 @@ service Api {
     rpc GetWallets(Ping) returns (Pong) {}
     rpc GetBlockChain(Ping) returns (Pong) {}
     rpc CreateWallet(CreateWalletInput) returns (CreateWalletOutput) {}
+    rpc ValidWallet(ValidWalletInput) returns (ValidWalletOutput) {}
     rpc GetWallet(GetWalletInput) returns (GetWalletOutput) {}
     rpc GetServersAddress(Ping) returns (Pong) {}
 }
@@ -77,10 +78,19 @@ message GetWalletInput {
 }
 
 message GetWalletOutput {
-    string mnemonic = 1;
-    string address = 2;
-    string timestamp = 3;
-    string pubKey = 4;
+    string address = 1;
+    string timestamp = 2;
+    string pubKey = 3;
+}
+
+message ValidWalletInput {
+    // Mandatory field
+    Context context = 1;
+    bytes pubKey = 2;
+}
+
+message ValidWalletOutput {
+    bool valid = 1;
 }
 
 message CreateWalletInput {
@@ -90,7 +100,7 @@ message CreateWalletInput {
 }
 
 message CreateWalletOutput {
-    string mnemonic = 1;
+    bytes mnemonic = 1;
     string address = 2;
     string pubKey = 3;
 }

@@ -34,7 +34,6 @@ func Test_Create(t *testing.T) {
 	seed, err := w.GetSeed([]byte(seedCreate.Mnemonic), password)
 	require.NoError(t, err)
 	require.NotNil(t, seed)
-	require.Equal(t, seed.Mnemonic, seedCreate.Mnemonic)
 	require.Equal(t, seed.PubKey, seedCreate.PubKey)
 	require.Equal(t, seed.Address, seedCreate.Address)
 }
