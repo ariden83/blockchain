@@ -9,12 +9,6 @@ func getMenus() []Menus {
 			URL:        "/",
 		},
 		{
-			Identifier: "login",
-			Name:       "login",
-			Title:      "this is the login section",
-			URL:        "/login",
-		},
-		{
 			Identifier: "about",
 			Name:       "about",
 			Title:      "this is the about-us page section",

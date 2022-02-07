@@ -1,0 +1,27 @@
+{{ define "sitemap" }}<!DOCTYPE html>
+<html lang="en">
+{{ template "head" . }}
+<body>
+<div class="container-fluid">
+    {{ template "header" . }}
+    <main class="row">
+        {{$title := "Blockchain-Altcoin - Sitemap"}}
+        {{ template "title" $title}}
+          <section class="container txt-16">
+            <div class="col-xs-4">
+                <h2>Features</h2>
+            </div>
+            <div class="col-xs-4">
+                <h2>Support</h2>
+                <p><a href="/faq" title="FAQs">FAQs</a></p>
+            </div>
+            <div class="col-xs-4">
+                <h2>About</h2>
+                <p><a href="/about " title="About-us">Team</a></p>
+            </div>
+          </section>
+    </main>
+    {{ template "footer" . }}
+</div>
+</body>
+</html>{{ end }}

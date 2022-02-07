@@ -1,16 +1,12 @@
 {{ define "faq-fr" }}<!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 {{ template "head" . }}
 <body>
 <div class="container-fluid">
     {{ template "header" . }}
     <main>
-        <section>
-            <header>
-                <h1>Frequently Asked Questions</h1>
-                <p>Answers to commonly asked questions</p>
-            </header>
-        </section>
+        {{$title := "Frequently Asked Questions"}}
+        {{ template "title" $title}}
         <section>
             <h3>Getting started</h3>
             <div>

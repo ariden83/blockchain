@@ -1,28 +1,31 @@
 {{ define "home-es" }}
 <!DOCTYPE html>
-<html lang="en">
-  {{ template "head" . }}
-  <body>
-  <div class="container-fluid">
-    {{ template "header" . }}
+<html lang="es">
+{{ template "head" . }}
+<body>
+<div class="container-fluid">
+  {{ template "header" . }}
 
-    <main>
-    <section>
-      <header>
-        <h1>La web descentralizada te espera</h1>
+  <main>
+    <section class="container">
+      <header class="col-xs-12">
+        <h1>Le web décentralisé vous attend</h1>
       </header>
     </section>
-    <section>
+    <section class="todoapp">
       <h4>Non, j'ai déjà une phrase mnémotechnique</h4>
-      <p>Import your existing wallet using a Secret Recovery Phrase</p>
-      <p><a href="/login" title="Connectez-vous à votre compte blockchain altcoin">Connectez-vous</a>
-      </p>
+      <p>Importez votre portefeuille existant à l'aide d'une phrase secrète de récupération</p>
+      <p><a href="/login" title="Connectez-vous à votre compte blockchain altcoin" class="btn-big btn-primary btn--rounded">Importer mon portefeuille</a></p>
+      <div :class="metamaskSuccess == true ? '' : 'hidden'">
+        <button class="enableEthereumButton btn-big btn-primary btn--rounded" id="logtometamask" @click="clickButton()">Log with MetaMask</button>
+      </div>
+      <div><p class="txt-error">${ errorTodo }</p></div>
       <h4>Je suis nouveau, passons à la configuration !</h4>
       <p>Cela créera un nouveau portefeuille et une nouvelle phrase mnémotechnique</p>
-      <p><a href="/inscription" title="Créez votre nouveau compte blockchain altcoin">Nouveau compte</a></p>
+      <p><a href="/inscription" title="Créez votre nouveau compte blockchain altcoin" class="btn-big btn-primary btn--rounded">Créer un portefeuille</a></p>
     </section>
   </main>
-    {{ template "footer" }}
-  </div>
-  </body>
+  {{ template "footer" }}
+</div>
+</body>
 </html>{{ end }}

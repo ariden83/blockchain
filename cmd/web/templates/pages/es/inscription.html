@@ -1,37 +1,113 @@
 {{ define "inscription-es" }}
 <!DOCTYPE html>
-<html lang="en">
-{{ template "head" . }}
-<body>
+<html lang="es">{{
+template "head" .
+}}<body>
 <div class="container-fluid">
     {{ template "header" . }}
     <main>
-        <section>
-            <header>
-                <h1>Créer un mot de passe</h1>
-            </header>
-        </section>
-        <section>
+        {{$title := "Créer un mot de passe"}}
+        {{ template "title" $title}}
+        <section class="todoapp">
             {{if .Success}}
             <p>Nouveau mot de passe créé</p>
             {{else}}
-            <form action="/contact" method="POST">
-                <label>Nouveau mot de passe (min 8 caractères)</label><br />
-                <input aria-invalid="false" autocomplete="new-password" id="create-password" type="password" dir="auto" value="">>
-                <label>Confirmer le mot de passe</label><br />
-                <input aria-invalid="false" autocomplete="confirm-password" id="confirm-password" type="password" dir="auto" value=""/><br />
-                <div class="first-time-flow__checkbox-container">
-                    <div class="first-time-flow__checkbox" tabindex="0" role="checkbox" aria-checked="true" aria-labelledby="ftf-chk1-label">
-                        <i class="fa fa-check fa-2x"></i>
+            <noscript>
+                <strong>We're sorry but password auth doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+            </noscript>
+            <div id="app" class="{{ .Paraphrase }}">
+
+                <div class="container-inscription" :key="paraphrase" :class="step < 6 ? '' : 'hidden'">
+                    <div class="vue-pincode" :class="pincodeSuccess ? 'vue-pincode--success' : ''">
+                        <div class="step1">
+                            <p>Tappez votre mot de passe</p>
+                            <div class="vue-pincode__fields" :class="pincodeError ? 'vue-pincode__fields--miss' : ''">
+                                <span :class="pincode.length >= 1 ? 'active' : ''" ></span>
+                                <span :class="pincode.length >= 2 ? 'active' : ''" ></span>
+                                <span :class="pincode.length >= 3 ? 'active' : ''" ></span>
+                                <span :class="pincode.length >= 4 ? 'active' : ''" ></span>
+                                <span :class="pincode.length >= 5 ? 'active' : ''" ></span>
+                                <span :class="pincode.length >= 6 ? 'active' : ''" ></span>
+                            </div>
+                        </div>
+                        <div class="block-confirm" :class="step > 1 ? '' : 'opacity-50'">
+                            <p>Confirmer le mot de passe</p>
+                            <div class="vue-pincode_confirm__fields">
+                                <span :class="pincode_confirm.length >= 1 ? 'active' : ''" ></span>
+                                <span :class="pincode_confirm.length >= 2 ? 'active' : ''" ></span>
+                                <span :class="pincode_confirm.length >= 3 ? 'active' : ''" ></span>
+                                <span :class="pincode_confirm.length >= 4 ? 'active' : ''" ></span>
+                                <span :class="pincode_confirm.length >= 5 ? 'active' : ''" ></span>
+                                <span :class="pincode_confirm.length >= 6 ? 'active' : ''" ></span>
+                            </div>
+                        </div>
+                        <div><p class="txt-error">${ errorTodo }</p></div>
+                        <div class="vue-pincode__numbers">
+                            <button v-for="(number, idx) in [1, 2, 3, 4, 5, 6, 7, 8, 9]" :key="idx" class="shadow" @click="clickPinButton(number)" :disabled="buttonDisabled">
+                                <span>${ number }</span>
+                            </button>
+                            <div></div>
+                            <button @click="clickPinButton(0)" :disabled="buttonDisabled">
+                                <span>0</span>
+                            </button>
+                            <button class="vue-pincode__undo" @click="resetPincode" :disabled="buttonDisabled">
+                                <span>
+                                  <svg height="512pt" viewBox="0 0 512 512" width="512pt" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="m154.667969 213.332031h-138.667969c-8.832031 0-16-7.167969-16-16v-138.664062c0-8.832031 7.167969-16 16-16s16 7.167969 16 16v122.664062h122.667969c8.832031 0 16 7.167969 16 16s-7.167969 16-16 16zm0 0"/>
+                                    <path d="m256 512c-68.351562 0-132.628906-26.644531-180.96875-75.03125-6.253906-6.25-6.253906-16.382812 0-22.632812 6.269531-6.273438 16.402344-6.230469 22.632812 0 42.304688 42.347656 98.515626 65.664062 158.335938 65.664062 123.519531 0 224-100.480469 224-224s-100.480469-224-224-224c-105.855469 0-200.257812 71.148438-224.449219 169.171875-2.132812 8.597656-10.75 13.824219-19.371093 11.714844-8.574219-2.132813-13.800782-10.796875-11.710938-19.371094 27.691406-112.148437 135.148438-193.515625 255.53125-193.515625 141.164062 0 256 114.835938 256 256s-114.835938 256-256 256zm0 0"/>
+                                  </svg>
+                                </span>
+                            </button>
+                        </div>
+                        <div class="vue-pincode__checkbox">
+                            <div class="custom-control custom-checkbox">
+                                <input id="checkbox-1" type="checkbox" name="checkbox-1" v-model="terms" unchecked-value="not_accepted" class="custom-control-input" value="true" @change="validterms()">
+                                <label for="checkbox-1" class="custom-control-label">
+                                    I accept the terms and use
+                                </label> <a href="/terms-of-service" title="Lire les conditions d'utilisation avant de valider le mot de passe" class="txt-bold" target="_blank">Conditions d'Utilisation</a>
+                            </div>
+                        </div>
+                        <div><p class="txt-error">${ errorSend }</p></div>
+                        <button class="btn-big btn-primary btn-rounded" @click="submit()" :class="step > 4 && step < 6 ? '' : step > 3 && step < 6 ? 'opacity-50' : 'hidden'" :disabled="buttonSubmitDisabled">Valider</button>
                     </div>
-                    <span id="ftf-chk1-label" class="first-time-flow__checkbox-label"> I have read and agree to the <a href="/terms.html" target="_blank" rel="noopener noreferrer">
-                        <span class="first-time-flow__link-text">Conditions d'Utilisation</span>
-                    </a>
-                    </span>
                 </div>
-                <input type="submit">
-                <button class="button btn--rounded btn-primary first-time-flow__button" disabled="" role="button" tabindex="0">Créer</button>
-            </form>
+
+                <div class="paraphrase" :class="step > 5 && step <= 7 ? '' : 'hidden'">
+                    <h2>Secret Recovery Phrase</h2>
+                    <p>À l'étape suivante, vous verrez une phrase de récupération, que vous pouvez utiliser pour récupérer vos comptes cryptos principaux. Conservez-la en lieu sûr. Votre phrase de récupération est le seul moyen de retrouver l'accès à votre compte en cas d'oubli du mot de passe, de perte ou de vol de votre appareil, ou si vous souhaitez changer de portefeuille.</p>
+                    <div class="vue-pincode__checkbox">
+                        <div class="custom-control custom-checkbox">
+                            <input id="checkbox-2" type="checkbox" name="checkbox-2" v-model="understood" unchecked-value="not_accepted" class="custom-control-input" value="true" @change="validunderstood()">
+                            <label for="checkbox-2" class="custom-control-label">
+                                Je comprends que si je perds ma phrase de récupération, je ne pourrai plus accéder à mon portefeuille crypto.
+                            </label> <a href="/terms-of-service" title="Lire les conditions d'utilisation avant de valider le mot de passe" class="txt-bold" target="_blank">Conditions d'Utilisation</a>
+                        </div>
+                    </div>
+                    <div><p class="txt-error">${ errorStep2 }</p></div>
+                    <button class="btn-big btn-primary btn-rounded" @click="submitStep2()" :disabled="buttonSubmitStep2Disabled">Valider</button>
+                </div>
+
+                <div class="paraphrase" :class="step > 7 ? '' : 'hidden'">
+                    <h2>Votre phrase de récupération</h2>
+                    <p>Notez ou copiez ces mots dans l'ordre exact indiqué ci-dessous, et conservez-les en lieu sûr. Votre phrase de récupération est le seul moyen de retrouver l'accès à votre compte en cas d'oubli du mot de passe, de perte ou de vol de votre appareil, ou si vous souhaitez changer de portefeuille.</p>
+                    <p>ATTENTION : Ne partagez jamais votre phrase de récupération.</p>
+                    <p>N'importe qui détenant cette phrase peut voler vos actifs sans aucun recours possible.</p>
+                    <div id="my-seed" v-on:mouseover="mouseOver()" v-on:mouseout="mouseOut()" class="row" :class="seedOver == true ? '' : 'blur-50'"></div>
+                    <div id="copy"></div>
+
+                    <button class="btn-big btn-primary btn-rounded" @click="copierpress()">Copier</button>
+                    <div class="vue-pincode__checkbox">
+                        <div class="custom-control custom-checkbox">
+                            <input id="checkbox-3" type="checkbox" name="checkbox-3" v-model="saveseed" unchecked-value="not_accepted" class="custom-control-input" value="true" @change="validsaveseed()">
+                            <label for="checkbox-3" class="custom-control-label">
+                                J'ai sauvegardé ma phrase en lieu sûr.
+                            </label> <a href="/terms-of-service" title="Lire les conditions d'utilisation avant de valider le mot de passe" class="txt-bold" target="_blank">Conditions d'Utilisation</a>
+                        </div>
+                    </div>
+                    <div><p class="txt-error">${ errorStep3 }</p></div>
+                    <button class="btn-big btn-primary btn-rounded" @click="submitStep3()" :disabled="buttonSubmitStep3Disabled">Valider</button>
+                </div>
+            </div>
             {{end}}
         </section>
     </main>

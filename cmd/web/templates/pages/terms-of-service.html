@@ -5,12 +5,8 @@
 <div class="container-fluid">
     {{ template "header" . }}
     <main>
-      <section>
-        <header>
-          <h1>Blockchain Altcoin - Terms of service</h1>
-        </header>
-        <a href="/" title="go back to homepage">&lt; Back</a>
-      </section>
+        {{$title := "Blockchain-Altcoin - Terms of service<"}}
+        {{ template "title" $title}}
       <section>
           <h2>1. Introduction</h2>
           <p>1.1. These Terms of Service apply to your (collectively, “you” or “your”) access to and use of our Website(s) (including https://www.blockchain-altcoin.com/ and its subdomains) and the Services provided by HDR Global Trading Limited (the “Company”), a company incorporated in the Republic of Seychelles with a company number of 148707 and the Group (collectively, “HDR”, “blockchain-altcoin”, “we”, “our” or “us”).</p>

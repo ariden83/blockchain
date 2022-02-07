@@ -1,17 +1,13 @@
 {{ define "login-fr" }}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 {{ template "head" . }}
 <body>
 <div class="container-fluid">
   {{ template "header" . }}
     <main>
-      <section>
-        <header>
-          <h1>Login</h1>
-        </header>
-        <a href="/" title="go back to homepage">&lt; Back</a>
-      </section>
+      {{$title := "Login"}}
+      {{ template "title" $title}}
       <section class="todoapp">
         {{if .Success}}
         <p>Importez un compte avec une phrase mnémotechnique</p>

@@ -12,6 +12,7 @@ func (e *Explorer) loadRoutes() {
 	e.router.HandleFunc("/404", notFoundPage).Methods(http.MethodGet)
 	e.router.HandleFunc("/privacy-policy", e.privacyPolicyPage).Methods(http.MethodGet)
 	e.router.HandleFunc("/terms-of-service", e.termsOfServicePage).Methods(http.MethodGet)
+	e.router.HandleFunc("/sitemap", e.sitemapPage).Methods(http.MethodGet)
 }
 func (e *Explorer) loadNonConnectedRoutes() {
 	s := e.router.PathPrefix("/").Subrouter().StrictSlash(true)

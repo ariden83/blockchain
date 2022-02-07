@@ -5,12 +5,8 @@
 <div class="container-fluid">
     {{ template "header" . }}
     <main>
-      <section>
-        <header>
-          <h1>Inscription</h1>
-        </header>
-        <a href="/" title="go back to homepage">&lt; Back</a>
-      </section>
+        {{$title := "Your wallet"}}
+        {{ template "title" $title}}
     <section>
       <div class="col-xs-6">
           <p>Phrase de sauvegarde secrète</p>

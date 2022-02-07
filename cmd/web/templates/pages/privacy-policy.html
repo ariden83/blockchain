@@ -5,12 +5,8 @@
 <div class="container-fluid">
   {{ template "header" . }}
     <main>
-      <section>
-        <header>
-          <h1>Blockchain Altcoin Privacy Policy</h1>
-        </header>
-        <a href="/" title="go back to homepage">&lt; Back</a>
-      </section>
+      {{$title := "Blockchain-Altcoin - Privacy Policy"}}
+      {{ template "title" $title}}
       <section>
         <p>By using the blockchain-altcoin.com site, you agree to the terms of this Privacy Policy. Whenever you submit information via this site, you consent to the collection, use, and disclosure of that information in accordance with this Privacy Policy</p>
         <h2>Privacy</h2>

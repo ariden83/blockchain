@@ -6,11 +6,8 @@
     {{ template "header" . }}
 
     <main>
-        <section>
-            <header>
-                <h1>About us</h1>
-            </header>
-        </section>
+        {{$title := "About us"}}
+        {{ template "title" $title}}
         <section>
 
         </section>

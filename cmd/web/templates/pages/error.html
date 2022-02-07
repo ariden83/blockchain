@@ -5,11 +5,8 @@
 <div class="container-fluid">
     {{ template "header" . }}
     <main>
-        <section>
-            <header>
-                <h1>Error</h1>
-            </header>
-        </section>
+        {{$title := "you have encountered an error"}}
+        {{ template "title" $title}}
         <section>
         </section>
     </main>

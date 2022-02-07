@@ -1,16 +1,13 @@
 {{ define "inscription-fr" }}
 <!DOCTYPE html>
-<html lang="en">{{
+<html lang="fr">{{
 template "head" .
 }}<body>
 <div class="container-fluid">
     {{ template "header" . }}
     <main>
-        <section>
-            <header>
-                <h1>Créer un mot de passe</h1>
-            </header>
-        </section>
+        {{$title := "Créer un mot de passe"}}
+        {{ template "title" $title}}
         <section class="todoapp">
             {{if .Success}}
             <p>Nouveau mot de passe créé</p>

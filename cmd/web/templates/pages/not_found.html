@@ -5,11 +5,8 @@
 <div class="container-fluid">
   {{ template "header" . }}
   <main>
-    <section>
-      <header>
-        <h1>Page Not Found</h1>
-      </header>
-    </section>
+    {{$title := "Page not found"}}
+    {{ template "title" $title}}
     <section>
     </section>
   </main>

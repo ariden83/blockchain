@@ -6,11 +6,9 @@
   {{ template "header" . }}
 
   <main>
+    {{$title := "Blockchain-Altcoin - Your wallet"}}
+    {{ template "title" $title}}
     <section>
-      <header>
-        <h1>Details</h1>
-      </header>
-
       <ul>
         <li><b>Address:</b> {{ .Address }}</li>
 

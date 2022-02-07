@@ -5,11 +5,8 @@
 <div class="container-fluid">
     {{ template "header" . }}
     <main>
-        <section>
-            <header>
-                <h1>Contact us</h1>
-            </header>
-        </section>
+        {{$title := "Contact us"}}
+        {{ template "title" $title}}
         <section>
             {{if .Success}}
             <p>Your message has been sent!</p>
