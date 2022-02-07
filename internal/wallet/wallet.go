@@ -193,10 +193,17 @@ func (w *Wallets) GetSeed(mnemonic, password []byte) (*SeedNoPrivKey, error) {
 		err  error
 		seed *Seed
 	)
+
+	mnemonicHash, err := hash(mnemonic)
+	if err != nil {
+		w.log.Error("fail to serialize mnemonic", zap.Error(err))
+		return nil, pkgError.ErrInternalDependencyError
+	}
+
 	if w.db != nil {
 		var valCopy []byte
 		if err := w.db.View(func(txn *badger.Txn) error {
-			item, err := txn.Get(mnemonic)
+			item, err := txn.Get(mnemonicHash)
 			if err != nil {
 				return err
 			}
@@ -219,11 +226,6 @@ func (w *Wallets) GetSeed(mnemonic, password []byte) (*SeedNoPrivKey, error) {
 		}
 
 	} else {
-		mnemonicHash, err := hash(mnemonic)
-		if err != nil {
-			w.log.Error("fail to deserialize mnemonic", zap.Error(err))
-			return nil, pkgError.ErrInternalDependencyError
-		}
 		for _, s := range w.Seeds {
 			if checkHash(s.Mnemonic, mnemonicHash) {
 				seed = &s
