@@ -12,6 +12,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/LuisAcerv/btchdwallet/crypt"
+	"golang.org/x/crypto/sha3"
 	"github.com/brianium/mnemonic"
 	"github.com/dgraph-io/badger"
 	"github.com/wemeetagain/go-hdwallet"
@@ -151,12 +152,7 @@ func (w *Wallets) Create(password []byte) (*Seed, error) {
 	t := time.Now().UnixNano() / int64(time.Millisecond)
 
 	mnemonicStr := mnemonic.Sentence()
-	mnemonicHash, err := hash([]byte(mnemonicStr))
-	if err != nil {
-		w.log.Error("fail to hash mnemonic", zap.Error(err))
-		return nil, pkgError.ErrInternalDependencyError
-	}
-
+	mnemonicHash := hash([]byte(mnemonicStr))
 	newSeed := Seed{
 		Address:   address,
 		PubKey:    masterPub.String(),
@@ -194,11 +190,7 @@ func (w *Wallets) GetSeed(mnemonic, password []byte) (*SeedNoPrivKey, error) {
 		seed *Seed
 	)
 
-	mnemonicHash, err := hash(mnemonic)
-	if err != nil {
-		w.log.Error("fail to serialize mnemonic", zap.Error(err))
-		return nil, pkgError.ErrInternalDependencyError
-	}
+	mnemonicHash := hash(mnemonic)
 
 	if w.db != nil {
 		var valCopy []byte
@@ -227,7 +219,7 @@ func (w *Wallets) GetSeed(mnemonic, password []byte) (*SeedNoPrivKey, error) {
 
 	} else {
 		for _, s := range w.Seeds {
-			if checkHash(s.Mnemonic, mnemonicHash) {
+			if res := bytes.Compare(s.Mnemonic, mnemonicHash); res == 0 {
 				seed = &s
 			}
 		}
@@ -268,19 +260,20 @@ func deserialize(data []byte) (*Seed, error) {
 
 func encryptPassword(password []byte) ([]byte, error) {
 	// Generate "hash" to store from user password
-	hash, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
+	hash, err := bcrypt.GenerateFromPassword(password, bcrypt.MinCost)
 	if err != nil {
 		return []byte{}, errors.New("fail to encrypt password")
 	}
 	return hash, nil
 }
 
-func hash(str []byte) ([]byte, error) {
-	bytes, err := bcrypt.GenerateFromPassword(str, 14)
-	return bytes, err
-}
+const localKey = "blockchain"
 
-func checkHash(str, hash []byte) bool {
-	err := bcrypt.CompareHashAndPassword(hash, str)
-	return err == nil
+func hash(mnemonic []byte) []byte {
+	fixedSlice := sha3.Sum512(append(mnemonic, []byte(localKey)...))
+	byteSlice := make([]byte, 64)
+	for i := 0; i < len(fixedSlice); i++ {
+		byteSlice[i] = fixedSlice[i]
+	}
+	return byteSlice
 }
