@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"errors"
+	"fmt"
 	"go.uber.org/zap"
 	"os"
 	"sync"
@@ -12,10 +13,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/LuisAcerv/btchdwallet/crypt"
-	"golang.org/x/crypto/sha3"
 	"github.com/brianium/mnemonic"
 	"github.com/dgraph-io/badger"
 	"github.com/wemeetagain/go-hdwallet"
+	"golang.org/x/crypto/sha3"
 
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/utils"
@@ -113,6 +114,7 @@ func (w *Wallets) UpdateSeeds(seed []Seed) {
 
 func (w *Wallets) Save(seed Seed) error {
 	if w.db == nil {
+		w.Seeds = append(w.Seeds, seed)
 		return nil
 	}
 	serializeBLock, err := utils.Serialize(&seed)
@@ -150,6 +152,7 @@ func (w *Wallets) Create(password []byte) (*Seed, error) {
 	address := masterPub.Address()
 
 	t := time.Now().UnixNano() / int64(time.Millisecond)
+	fmt.Println(fmt.Sprintf("************************************ %+v", t))
 
 	mnemonicStr := mnemonic.Sentence()
 	mnemonicHash := hash([]byte(mnemonicStr))
@@ -167,9 +170,10 @@ func (w *Wallets) Create(password []byte) (*Seed, error) {
 	w.TempSeeds = append(w.TempSeeds, newSeed)
 
 	return &Seed{
-		Mnemonic: []byte(mnemonicStr),
-		Address:  newSeed.Address,
-		PubKey:   newSeed.PubKey,
+		Mnemonic:  []byte(mnemonicStr),
+		Address:   newSeed.Address,
+		PubKey:    newSeed.PubKey,
+		Timestamp: newSeed.Timestamp,
 	}, nil
 }
 
@@ -191,7 +195,6 @@ func (w *Wallets) GetSeed(mnemonic, password []byte) (*SeedNoPrivKey, error) {
 	)
 
 	mnemonicHash := hash(mnemonic)
-
 	if w.db != nil {
 		var valCopy []byte
 		if err := w.db.View(func(txn *badger.Txn) error {
@@ -218,7 +221,9 @@ func (w *Wallets) GetSeed(mnemonic, password []byte) (*SeedNoPrivKey, error) {
 		}
 
 	} else {
+		fmt.Println(fmt.Sprintf(">>>>>>>>>>>>>>GetSeed %+v", w.Seeds))
 		for _, s := range w.Seeds {
+			fmt.Println(fmt.Sprintf(">>>>>>>>>>>>>>>>>>>>>>>>>> %+v %+v", s.Mnemonic, mnemonicHash))
 			if res := bytes.Compare(s.Mnemonic, mnemonicHash); res == 0 {
 				seed = &s
 			}
@@ -259,7 +264,6 @@ func deserialize(data []byte) (*Seed, error) {
 }
 
 func encryptPassword(password []byte) ([]byte, error) {
-	// Generate "hash" to store from user password
 	hash, err := bcrypt.GenerateFromPassword(password, bcrypt.MinCost)
 	if err != nil {
 		return []byte{}, errors.New("fail to encrypt password")

@@ -2,7 +2,6 @@ package wallet
 
 import (
 	"log"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,22 +9,21 @@ import (
 
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/logger"
-
 )
 
 func Test_Hash(t *testing.T) {
 	t.Run("test hash comparaison", func(t *testing.T) {
 		mnemonic := []byte("couple robot escape silent main once smoke check good basket mimic similar")
-		mnemonicHash :=  hash(mnemonic)
+		mnemonicHash := hash(mnemonic)
 		for i := 1; i < 10; i++ {
-			mnemonicCurrent :=  hash(mnemonic)
+			mnemonicCurrent := hash(mnemonic)
 			// require.NoError(t, err)
 			assert.Equal(t, mnemonicCurrent, mnemonicHash)
 		}
 	})
 }
 
-func Teast_Create(t *testing.T) {
+func Test_Create(t *testing.T) {
 	cfg, err := config.New()
 	if err != nil {
 		log.Fatalf("fail to init persistence %s", err)
@@ -46,8 +44,10 @@ func Teast_Create(t *testing.T) {
 	require.NotEmpty(t, seedCreate.PubKey)
 	require.NotEmpty(t, seedCreate.Address)
 
+	isValidate := w.Validate([]byte(seedCreate.PubKey))
+	require.True(t, isValidate)
+
 	seed, err := w.GetSeed(seedCreate.Mnemonic, password)
-	fmt.Println(fmt.Sprintf("************************* %+v", err))
 	require.NoError(t, err)
 	require.NotNil(t, seed)
 	require.Equal(t, seed.PubKey, seedCreate.PubKey)
