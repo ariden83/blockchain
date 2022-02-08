@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/gob"
 	"errors"
-	"fmt"
 	"go.uber.org/zap"
 	"os"
 	"sync"
@@ -152,7 +151,6 @@ func (w *Wallets) Create(password []byte) (*Seed, error) {
 	address := masterPub.Address()
 
 	t := time.Now().UnixNano() / int64(time.Millisecond)
-	fmt.Println(fmt.Sprintf("************************************ %+v", t))
 
 	mnemonicStr := mnemonic.Sentence()
 	mnemonicHash := hash([]byte(mnemonicStr))
@@ -221,9 +219,7 @@ func (w *Wallets) GetSeed(mnemonic, password []byte) (*SeedNoPrivKey, error) {
 		}
 
 	} else {
-		fmt.Println(fmt.Sprintf(">>>>>>>>>>>>>>GetSeed %+v", w.Seeds))
 		for _, s := range w.Seeds {
-			fmt.Println(fmt.Sprintf(">>>>>>>>>>>>>>>>>>>>>>>>>> %+v %+v", s.Mnemonic, mnemonicHash))
 			if res := bytes.Compare(s.Mnemonic, mnemonicHash); res == 0 {
 				seed = &s
 			}
