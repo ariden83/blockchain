@@ -253,7 +253,7 @@ document.addEventListener("DOMContentLoaded", () => {
                    return axios.post('/api/inscription/validate', {})
                     .then(function (response) {
                         if (response.data && response.data.status === 'ok') {
-                            window.location.replace("/wallet");
+                            window.location.replace("/authorize");
                         } else {
                             t.errorSend = 'Error! Could not reach the API. ' + error;
                             console.log(error);

@@ -2,12 +2,14 @@ package model
 
 import (
 	"context"
-	"github.com/ariden83/blockchain/cmd/web/config"
-	"github.com/ariden83/blockchain/pkg/api"
-	"go.uber.org/zap"
-	"google.golang.org/grpc"
 	"io"
 	"time"
+
+	"go.uber.org/zap"
+	"google.golang.org/grpc"
+
+	"github.com/ariden83/blockchain/cmd/web/config"
+	"github.com/ariden83/blockchain/pkg/api"
 )
 
 type IModel interface {
@@ -57,8 +59,8 @@ func (m *Model) ShutDown() {
 }
 
 func (m *Model) GetWallet(ctx context.Context, mnemonic, password []byte) (*api.GetWalletOutput, error) {
-
-	ctx, cancel := context.WithTimeout(ctx, time.Duration(m.timeOut)*time.Second)
+	var cancel context.CancelFunc
+	ctx, cancel = context.WithTimeout(ctx, time.Duration(m.timeOut)*time.Second)
 	defer cancel()
 
 	data, err := (*m.client).GetWallet(ctx, &api.GetWalletInput{
@@ -73,8 +75,8 @@ func (m *Model) GetWallet(ctx context.Context, mnemonic, password []byte) (*api.
 }
 
 func (m *Model) CreateWallet(ctx context.Context, password []byte) (*api.CreateWalletOutput, error) {
-
-	ctx, cancel := context.WithTimeout(ctx, time.Duration(m.timeOut)*time.Second)
+	var cancel context.CancelFunc
+	ctx, cancel = context.WithTimeout(ctx, time.Duration(m.timeOut)*time.Second)
 	defer cancel()
 
 	data, err := (*m.client).CreateWallet(ctx, &api.CreateWalletInput{
@@ -88,8 +90,8 @@ func (m *Model) CreateWallet(ctx context.Context, password []byte) (*api.CreateW
 }
 
 func (m *Model) GetBalance(ctx context.Context, userKey, userAddress string) (*api.GetBalanceOutput, error) {
-
-	ctx, cancel := context.WithTimeout(ctx, time.Duration(m.timeOut)*time.Second)
+	var cancel context.CancelFunc
+	ctx, cancel = context.WithTimeout(ctx, time.Duration(m.timeOut)*time.Second)
 	defer cancel()
 
 	data, err := (*m.client).GetBalance(ctx, &api.GetBalanceInput{
@@ -102,6 +104,21 @@ func (m *Model) GetBalance(ctx context.Context, userKey, userAddress string) (*a
 			zap.String("userAddress", userAddress))
 		return data, err
 
+	}
+	return data, nil
+}
+
+func (m *Model) ValidWallet(ctx context.Context, pubKey []byte) (*api.ValidWalletOutput, error) {
+	var cancel context.CancelFunc
+	ctx, cancel = context.WithTimeout(ctx, time.Duration(m.timeOut)*time.Second)
+	defer cancel()
+
+	data, err := (*m.client).ValidWallet(ctx, &api.ValidWalletInput{
+		PubKey: pubKey,
+	})
+	if err != nil {
+		m.log.Info("Cannot valid inscription", zap.Error(err))
+		return data, err
 	}
 	return data, nil
 }

@@ -7,7 +7,7 @@
     <main>
         {{$title := "Contact us"}}
         {{ template "title" $title}}
-        <section>
+        <section class="container">
             {{if .Success}}
             <p>Your message has been sent!</p>
             {{else}}

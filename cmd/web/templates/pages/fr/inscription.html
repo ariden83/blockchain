@@ -8,7 +8,7 @@ template "head" .
     <main>
         {{$title := "Créer un mot de passe"}}
         {{ template "title" $title}}
-        <section class="todoapp">
+        <section class="todoapp container">
             {{if .Success}}
             <p>Nouveau mot de passe créé</p>
             {{else}}

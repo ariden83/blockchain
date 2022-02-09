@@ -184,7 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }))
                 .then(response => {
                     if (response.data && response.data.status === 'ok') {
-                        window.location.replace("/wallet");
+                        window.location.replace("/authorize");
                     } else {
                         t.errorSend = 'Error! Could not reach the API. ' + error;
                         setTimeout(() => t.resetErrorMessageForAPI(), 3500);

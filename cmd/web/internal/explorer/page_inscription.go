@@ -1,14 +1,14 @@
 package explorer
 
 import (
-	"github.com/ariden83/blockchain/cmd/web/internal/decoder"
-	pkgErr "github.com/ariden83/blockchain/pkg/errors"
 	"go.uber.org/zap"
 	"net/http"
 
 	"github.com/go-session/session"
 
+	"github.com/ariden83/blockchain/cmd/web/internal/decoder"
 	"github.com/ariden83/blockchain/cmd/web/internal/ip"
+	pkgErr "github.com/ariden83/blockchain/pkg/errors"
 )
 
 type inscriptionData struct {
@@ -28,7 +28,7 @@ func (e *Explorer) inscriptionPage(rw http.ResponseWriter, r *http.Request) {
 		FrontData: e.frontData(rw, r).
 			JS([]string{
 				"https://www.google.com/recaptcha/api.js?render=" + e.cfg.ReCaptcha.SiteKey,
-				"/static/inscription/inscription.js?v0.0.12",
+				"/static/inscription/inscription.js?v0.0.13",
 				"/static/cipher.js?v0.0.3",
 			}).
 			Css([]string{
@@ -195,6 +195,31 @@ func (e *Explorer) inscriptionValidateAPI(rw http.ResponseWriter, r *http.Reques
 		http.Redirect(rw, r, defaultPageLogged, http.StatusFound)
 		return
 	}
+
+	logCTX := e.logCTX("inscriptionValidateAPI")
+
+	store, err := session.Start(r.Context(), rw, r)
+	if err != nil {
+		logCTX.Error("fail to start session", zap.Error(err))
+		e.JSONfail(pkgErr.ErrInternalError, rw)
+		return
+	}
+
+	pubKey, ok := store.Get(sessionLabelUserID)
+	if !ok {
+		e.JSONfail(pkgErr.ErrInternalError, rw)
+		return
+	}
+
+	output, err := e.model.ValidWallet(r.Context(), []byte(pubKey.(string)))
+	if err != nil {
+		e.JSONfail(err, rw)
+		return
+	} else if !output.Valid {
+		e.JSONfail(pkgErr.ErrInternalError, rw)
+		return
+	}
+
 	e.JSON(rw, postInscriptionAPIBodyRes{
 		Status: "ok",
 	})
