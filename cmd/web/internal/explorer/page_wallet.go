@@ -16,8 +16,10 @@ type UnspTxOutput struct {
 type walletsData struct {
 	*FrontData
 	Address       string
-	Balance       uint
-	UnspTxOutputs []*UnspTxOutput
+	Balance       string
+	TotalReceived string
+	TotalSent     string
+	UnSpTxOutputs []*UnspTxOutput
 }
 
 func (e *Explorer) walletPage(rw http.ResponseWriter, r *http.Request) {
@@ -36,9 +38,6 @@ func (e *Explorer) walletPage(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	outputs := []*UnspTxOutput{}
-	balance := uint(0)
-
 	wallet, err := e.model.GetBalance(r.Context(), token.GetUserID(), token.GetUserID())
 	if err != nil {
 		logCTX.Error("fail to get balance", zap.Error(err))
@@ -48,10 +47,11 @@ func (e *Explorer) walletPage(rw http.ResponseWriter, r *http.Request) {
 
 	data := walletsData{
 		Address:       wallet.Address,
-		Balance:       balance,
-		UnspTxOutputs: outputs,
+		Balance:       wallet.Balance,
+		TotalReceived: wallet.TotalReceived,
+		TotalSent:     wallet.TotalSent,
 		FrontData: &FrontData{
-			PageTitle:    e.metadata.Title + " - " + "Wallets page",
+			PageTitle:    e.metadata.Title + " - " + "Wallet page",
 			Authentified: true,
 			Menus:        getMenus(),
 			Javascripts:  []string{},

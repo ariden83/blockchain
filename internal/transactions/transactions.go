@@ -75,6 +75,7 @@ func (t *Transactions) CoinBaseTx(toPubKey, data string) *blockchain.Transaction
 
 }
 
+// new transaction
 func (t *Transactions) New(from, to string, amount *big.Int) (*blockchain.Transaction, error) {
 	var inputs []blockchain.TxInput
 	var outputs []blockchain.TxOutput
@@ -104,8 +105,8 @@ func (t *Transactions) New(from, to string, amount *big.Int) (*blockchain.Transa
 		}
 	}
 
+	// on récupère la valeur des frais pour le mineur et on les applique
 	amountLessFees := t.setTransactionFees(amount)
-
 	outputs = append(outputs, blockchain.TxOutput{amountLessFees, to})
 	outputs = t.payTransactionFees(outputs)
 
@@ -150,6 +151,7 @@ Transactions: ([]*blockchain.Transaction) (len=1 cap=1) {
 	})
 }
 */
+
 func (t *Transactions) FindUnspentTransactions(pubKey string) []blockchain.Transaction {
 	var unspentTxs []blockchain.Transaction
 
@@ -228,6 +230,56 @@ func (t *Transactions) FindUTXO(pubKey string) []blockchain.TxOutput {
 
 	return UTXOs
 }
+
+/*
+type transaction struct {
+
+}
+
+func (t *Transactions) FindAllUserTransaction(pubKey string) []blockchain.TxOutput {
+	listTransaction := []transaction{}
+
+	iter := iterator.BlockChainIterator{
+		CurrentHash: t.persistence.LastHash(),
+		Persistence: t.persistence,
+	}
+
+	for {
+		block, err := iter.Next()
+		if err != nil {
+			t.log.Fatal("fail to iterate next block", zap.Error(err))
+		}
+		for _, tx := range block.Transactions {
+
+			var isSending bool
+			for _, in := range tx.Inputs {
+				// si le sig enregistré correspond à notre pubkey
+				if in.CanUnlock(pubKey) {
+					isSending = true
+				}
+			}
+
+			if !isSending {
+				continue
+			}
+
+			for _, out := range tx.Outputs {
+				if !out.CanBeUnlocked(pubKey) && isSending {
+					listTransaction = append(listTransaction, transaction{
+						out.
+					})
+					tokensSend = tokensSend.Add(tokensSend, out.Value)
+				}
+			}
+		}
+		if len(block.PrevHash) == 0 {
+			break
+		}
+	}
+
+	return tokensSend
+}
+*/
 
 func (t *Transactions) FindUserBalance(pubKey string) *big.Int {
 	var balance *big.Int = new(big.Int)

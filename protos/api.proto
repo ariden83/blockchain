@@ -117,5 +117,4 @@ message GetBalanceOutput{
     string balance = 2;
     string totalReceived = 3;
     string totalSent = 4;
-    string unconfirmedBalance = 5;
 }

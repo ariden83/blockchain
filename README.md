@@ -22,6 +22,10 @@ New blockchain. See website of project [blockchain-altcoin.com](https://www.bloc
 * blockchain go project by Nomad [code source](https://github.com/librity/nc_nomadcoin)
 * badger - database [tutorial](https://dgraph.io/docs/badger/get-started/)
 * cipher GCM [tutorial](https://pilabor.com/blog/2021/05/js-gcm-encrypt-dotnet-decrypt/)
+* Clés privées, clés publiques et adresses dans Bitcoin [tutorial](https://cryptoast.fr/cles-privees-cles-publiques-et-adresses-dans-bitcoin/)
+* Comment marchent les transactions bitcoin [tutorial](https://www.pensezblockchain.ca/les-transactions-bitcoin-partie-1)
+* Qu'est-ce que P2PKH? [tutorial](https://academy.bit2me.com/fr/qu%27est-ce-que-p2pkh/)
+* Créez une transaction Bitcoin brute et signez-la avec Golang [tutorial](https://ichi.pro/fr/creez-une-transaction-bitcoin-brute-et-signez-la-avec-golang-165707908919466)
 
 ## Installation
 

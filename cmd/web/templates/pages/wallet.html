@@ -8,15 +8,16 @@
   <main>
     {{$title := "Blockchain-Altcoin - Your wallet"}}
     {{ template "title" $title}}
-    <section>
+    <section class="container">
       <ul>
         <li><b>Address:</b> {{ .Address }}</li>
-
         <li><b>Balance:</b> {{ .Balance }} $NC</li>
+        <li><b>TotalReceived:</b> {{ .TotalReceived }} $NC</li>
+        <li><b>TotalSent:</b> {{ .TotalSent }} $NC</li>
       </ul>
     </section>
 
-    <section>
+    <section class="container">
       <header>
         <h2>Unspent Outputs</h2>
       </header>
@@ -29,7 +30,7 @@
           <th>Amount</th>
         </tr>
 
-        {{ range $index, $unspent_tx_output := .UnspTxOutputs }}
+        {{ range $index, $unspent_tx_output := .UnSpTxOutputs }}
         <tr>
           <td>{{ $index }}</td>
           {{ template "unspent_tx_output_row" $unspent_tx_output }}
