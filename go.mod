@@ -7,6 +7,8 @@ require (
 	github.com/LuisAcerv/btchdwallet v0.0.0-20200802014842-cc7fde1007e3
 	github.com/blockcypher/gobcy v2.0.1+incompatible
 	github.com/brianium/mnemonic v0.0.0-20180124190051-72af92c51f88
+	github.com/btcsuite/btcd v0.22.0-beta
+	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dgraph-io/badger v1.6.2
 	github.com/go-oauth2/oauth2/v4 v4.4.2
@@ -29,7 +31,6 @@ require (
 	github.com/libp2p/go-libp2p-quic-transport v0.11.2
 	github.com/libp2p/go-libp2p-swarm v0.5.3
 	github.com/libp2p/go-libp2p-tls v0.2.0
-	github.com/mohoff/CryptoWrapper v0.0.0-20151013135414-85277f4ff8ad
 	github.com/multiformats/go-multiaddr v0.4.1
 	github.com/nicksnyder/go-i18n/v2 v2.1.2
 	github.com/prometheus/client_golang v1.11.0
@@ -51,8 +52,7 @@ require (
 	github.com/AndreasBriese/bbloom v0.0.0-20190825152654-46b345b51c96 // indirect
 	github.com/benbjohnson/clock v1.1.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/btcsuite/btcd v0.22.0-beta // indirect
-	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce // indirect
+	github.com/btcsuite/btclog v0.0.0-20170628155309-84c8d2346e9f // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/cheekybits/genny v1.0.0 // indirect
 	github.com/davidlazar/go-crypto v0.0.0-20200604182044-b73af7476f6c // indirect

@@ -1,16 +1,19 @@
 package transactions
 
 import (
-	"encoding/hex"
 	"errors"
 	"fmt"
+	pkgError "github.com/ariden83/blockchain/pkg/errors"
+	"math/big"
+	"time"
+
+	"encoding/hex"
+	"go.uber.org/zap"
+
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/iterator"
 	"github.com/ariden83/blockchain/internal/persistence"
-	"go.uber.org/zap"
-	"math/big"
-	"time"
 )
 
 var ErrNotEnoughFunds = errors.New("Not enough funds")
@@ -75,13 +78,33 @@ func (t *Transactions) CoinBaseTx(toPubKey, data string) *blockchain.Transaction
 
 }
 
+/*
+func (t *Transactions) privKeyToPublicKey(privKey string) (string, error){
+	wif, err := btcutil.DecodeWIF(privKey)
+	if err != nil {
+		return "", err
+	}
+
+	// use TestNet3Params for interacting with bitcoin testnet
+	// if we want to interact with main net should use MainNetParams
+	addrPubKey, err := btcutil.NewAddressPubKey(wif.PrivKey.PubKey().SerializeUncompressed(), &chaincfg.MainNetParams)
+	if err != nil {
+		return "", err
+	}
+	return addrPubKey.EncodeAddress(), nil
+}*/
+
 // new transaction
+// from privkey
+// to publickey
 func (t *Transactions) New(from, to string, amount *big.Int) (*blockchain.Transaction, error) {
-	var inputs []blockchain.TxInput
-	var outputs []blockchain.TxOutput
+	var (
+		inputs  []blockchain.TxInput
+		outputs []blockchain.TxOutput
+	)
 
 	if !t.canPayTransactionFees(amount) {
-		return nil, ErrNotEnoughFunds
+		return nil, pkgError.ErrNotEnoughFunds
 	}
 
 	// Trouver des sorties utilisables
@@ -89,7 +112,7 @@ func (t *Transactions) New(from, to string, amount *big.Int) (*blockchain.Transa
 
 	// Vérifiez si nous avons assez d'argent pour envoyer le montant que nous demandons
 	if acc.Cmp(amount) < 0 {
-		return nil, ErrNotEnoughFunds
+		return nil, pkgError.ErrNotEnoughFunds
 	}
 
 	// Si nous le faisons, créez des inputs qui indiquent les outputs que nous dépensons
@@ -125,32 +148,6 @@ func (t *Transactions) New(from, to string, amount *big.Int) (*blockchain.Transa
 
 	return &tx, nil
 }
-
-// un TxOutput est représentatif d'une action entre deux adresses,
-// TxInput est simplement une référence à un TxOutput précédent.
-// nous sommes en mesure de déterminer le solde d'un compte.
-// nous pouvons vérifier toutes les sorties qu'un compte lui a liées, puis vérifier toutes les entrées.
-// Les sorties qui n'ont pas d'entrée pointant vers elles seront dépensables.
-/**
-Transactions: ([]*blockchain.Transaction) (len=1 cap=1) {
-	(*blockchain.Transaction)(0xc00556c230)({
-		ID: ([]uint8) <nil>,
-		Inputs: ([]blockchain.TxInput) (len=1 cap=1) {
-			(blockchain.TxInput) {
-				ID: ([]uint8) {},
-				Out: (int) -1,
-				Sig: (string) (len=111) "xpub661MyMwAqRbcFTZYiEcSv4Qj2Qr2NzQ7rjYc3iv9c6VSTxoYsqA9AA6nNbp8e9nVR9hRARXz5CApP6j5BxUnohyj89oSg3zZdDuKmGhdSFF"
-			}
-		},
-		Outputs: ([]blockchain.TxOutput) (len=1 cap=1) {
-			(blockchain.TxOutput) {
-				Value: (int) 100,
-				PubKey: (string) (len=34) "1P1aBegXRiTinJhhEYHHiMALfG26Wu9sG3"
-			}
-		}
-	})
-}
-*/
 
 func (t *Transactions) FindUnspentTransactions(pubKey string) []blockchain.Transaction {
 	var unspentTxs []blockchain.Transaction

@@ -24,12 +24,15 @@ New blockchain. See website of project [blockchain-altcoin.com](https://www.bloc
 * cipher GCM [tutorial](https://pilabor.com/blog/2021/05/js-gcm-encrypt-dotnet-decrypt/)
 * Clés privées, clés publiques et adresses dans Bitcoin [tutorial](https://cryptoast.fr/cles-privees-cles-publiques-et-adresses-dans-bitcoin/)
 * Comment marchent les transactions bitcoin [tutorial](https://www.pensezblockchain.ca/les-transactions-bitcoin-partie-1)
-* Qu'est-ce que P2PKH? [tutorial](https://academy.bit2me.com/fr/qu%27est-ce-que-p2pkh/)
-* Créez une transaction Bitcoin brute et signez-la avec Golang [tutorial](https://ichi.pro/fr/creez-une-transaction-bitcoin-brute-et-signez-la-avec-golang-165707908919466)
+* Qu'est-ce que P2PKH [tutorial](https://academy.bit2me.com/fr/qu%27est-ce-que-p2pkh/)
+* Comment fonctionne P2PKH [tutorial](https://learnmeabitcoin-com.translate.goog/technical/p2pkh?_x_tr_sl=auto&_x_tr_tl=fr&_x_tr_hl=fr&_x_tr_pto=wapp)
+* Créez une transaction Bitcoin brute et signez-la avec Golang [code source](https://ichi.pro/fr/creez-une-transaction-bitcoin-brute-et-signez-la-avec-golang-165707908919466)
+* btcd is an alternative full node bitcoin implementation written in Go (golang) [code source](https://github.com/btcsuite/btcd)
+* Implementing RSA Encryption and Signing in Golang [tutorial](https://www.sohamkamani.com/golang/rsa-encryption/) [code source](https://gist.github.com/sohamkamani/08377222d5e3e6bc130827f83b0c073e)
 
 ## Installation
 
-- COde verification with [code source](https://github.com/securego/gosec)
+- Code verification with [code source](https://github.com/securego/gosec)
 
 ## Command
 

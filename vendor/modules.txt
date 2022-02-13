@@ -27,9 +27,18 @@ github.com/brianium/mnemonic/entropy
 # github.com/btcsuite/btcd v0.22.0-beta
 ## explicit; go 1.14
 github.com/btcsuite/btcd/btcec
+github.com/btcsuite/btcd/chaincfg
+github.com/btcsuite/btcd/chaincfg/chainhash
+github.com/btcsuite/btcd/txscript
+github.com/btcsuite/btcd/wire
+# github.com/btcsuite/btclog v0.0.0-20170628155309-84c8d2346e9f
+## explicit
+github.com/btcsuite/btclog
 # github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce
 ## explicit; go 1.14
+github.com/btcsuite/btcutil
 github.com/btcsuite/btcutil/base58
+github.com/btcsuite/btcutil/bech32
 # github.com/cespare/xxhash/v2 v2.1.2
 ## explicit; go 1.11
 github.com/cespare/xxhash/v2
@@ -443,9 +452,6 @@ github.com/minio/blake2b-simd
 # github.com/minio/sha256-simd v1.0.0
 ## explicit; go 1.13
 github.com/minio/sha256-simd
-# github.com/mohoff/CryptoWrapper v0.0.0-20151013135414-85277f4ff8ad
-## explicit
-github.com/mohoff/CryptoWrapper
 # github.com/mr-tron/base58 v1.2.0
 ## explicit; go 1.12
 github.com/mr-tron/base58/base58

@@ -106,19 +106,19 @@ func handleCreateWallet(w http.ResponseWriter, r *http.Request) {
 	mnemonic, _ := mnemonic.New([]byte(seed), mnemonic.English)
 
 	// Create a master private key
-	masterprv := hdwallet.MasterKey([]byte(mnemonic.Sentence()))
+	masterPrv := hdwallet.MasterKey([]byte(mnemonic.Sentence()))
 
 	// Convert a private key to public key
-	masterpub := masterprv.Pub()
+	masterPub := masterPrv.Pub()
 
 	// Get your address
-	address := masterpub.Address()
+	address := masterPub.Address()
 
 	t := time.Now()
 	newSeed := Seed{
 		Address:   address,
-		PubKey:    masterpub.String(),
-		PrivKey:   masterprv.String(),
+		PubKey:    masterPub.String(),
+		PrivKey:   masterPrv.String(),
 		Mnemonic:  mnemonic.Sentence(),
 		Timestamp: t.String(),
 	}
@@ -151,17 +151,17 @@ func handleGetWallet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get private key from mnemonic
-	masterprv := hdwallet.MasterKey([]byte(p.Mnemonic))
+	masterPrv := hdwallet.MasterKey([]byte(p.Mnemonic))
 
 	// Convert a private key to public key
-	masterpub := masterprv.Pub()
+	masterPub := masterPrv.Pub()
 
 	// Get your address
-	address := masterpub.Address()
+	address := masterPub.Address()
 	respondWithJSON(w, r, http.StatusCreated, Seed{
 		Address: address,
-		PubKey:  masterpub.String(),
-		PrivKey: masterprv.String(),
+		PubKey:  masterPub.String(),
+		PrivKey: masterPrv.String(),
 	})
 }
 

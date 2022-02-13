@@ -88,4 +88,5 @@ var (
 	ErrSeedNotFound            = New("seed not found", WithStatus(http.StatusNotFound))
 	ErrInvalidCaptcha          = New("invalid captcha", WithStatus(http.StatusUnauthorized))
 	ErrAlreadyConnected        = New("alreadyConnected", WithStatus(http.StatusFound))
+	ErrNotEnoughFunds          = New("not enough funds", WithStatus(http.StatusUnauthorized))
 )
