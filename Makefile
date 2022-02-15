@@ -86,6 +86,13 @@ local-relay:
 	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./tutorial/relay/.
 	-cli_level=INFO ./bin/main
 
+local-rsa-tutorial:
+	@echo "> Launch local seed ..."
+	go fmt ./...
+	export GO111MODULE=on;
+	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/tutorial ./tutorial/rsa-encryption/.
+	-cli_level=INFO ./bin/tutorial
+
 local:
 	@echo "> Launch local ..."
 	go fmt ./...

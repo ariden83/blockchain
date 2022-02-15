@@ -64,7 +64,7 @@ type ReCaptcha struct {
 }
 
 type Locales struct {
-	Path string
+	Path string `config:"locales_path"`
 	Lang []string
 }
 
