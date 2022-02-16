@@ -123,6 +123,8 @@ func (e *Explorer) inscriptionAPI(rw http.ResponseWriter, r *http.Request) {
 
 	req := &postInscriptionAPIBodyReq{}
 	logCTX := e.logCTX("inscriptionAPI")
+	logCTX.Info("call inscription api")
+
 	if err := e.decodeBody(rw, logCTX, r.Body, req); err != nil {
 		logCTX.Error("fail to decode body", zap.Error(err))
 		e.JSONfail(pkgErr.ErrMissingFields, rw)
