@@ -18,6 +18,7 @@ type inscriptionData struct {
 }
 
 func (e *Explorer) inscriptionPage(rw http.ResponseWriter, r *http.Request) {
+	e.log.Info("call inscription page")
 	_, authorized := e.authorized(rw, r)
 	if authorized {
 		http.Redirect(rw, r, "/wallet", http.StatusFound)
