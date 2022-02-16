@@ -18,7 +18,6 @@ type inscriptionData struct {
 }
 
 func (e *Explorer) inscriptionPage(rw http.ResponseWriter, r *http.Request) {
-	e.log.Info("call inscription page")
 	_, authorized := e.authorized(rw, r)
 	if authorized {
 		http.Redirect(rw, r, "/wallet", http.StatusFound)
@@ -124,7 +123,6 @@ func (e *Explorer) inscriptionAPI(rw http.ResponseWriter, r *http.Request) {
 
 	req := &postInscriptionAPIBodyReq{}
 	logCTX := e.logCTX("inscriptionAPI")
-	logCTX.Info("call inscription api")
 
 	if err := e.decodeBody(rw, logCTX, r.Body, req); err != nil {
 		logCTX.Error("fail to decode body", zap.Error(err))
