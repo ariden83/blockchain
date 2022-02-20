@@ -101,7 +101,7 @@ func (e *EndPoint) Enabled() bool {
 
 // Listen start the server.
 func (e *EndPoint) Listen() error {
-	address := fmt.Sprintf(":%d", e.cfg.Port)
+	address := fmt.Sprintf("0.0.0.0:%d", e.cfg.Port)
 
 	optsMiddleWare := []grpc_recovery.Option{
 		grpc_recovery.WithRecoveryHandler(func(p interface{}) (err error) {

@@ -101,7 +101,7 @@ func (e *EndPoint) Listen() error {
 	mux := e.makeMuxRouter()
 
 	e.server = &http.Server{
-		Addr:           ":" + strconv.Itoa(e.cfg.Port),
+		Addr:           "0.0.0.0:" + strconv.Itoa(e.cfg.Port),
 		Handler:        mux,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
