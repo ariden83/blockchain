@@ -154,7 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         cipher = c;
                         return grecaptcha.execute('6LfmdSAeAAAAAPf5oNQ1UV0wf6QhnH9dQFDSop7V', {action: 'submit'});
                     })
-                    .then(token => axios.post('/api/inscription', {
+                    .then(token => axios.post('/p/inscription', {
                         password: cipher,
                         recaptcha: token,
                     }))
@@ -250,7 +250,7 @@ document.addEventListener("DOMContentLoaded", () => {
             submitStep3() {
                 var t = this;
                 if (this.step == 9) {
-                   return axios.post('/api/inscription/validate', {})
+                   return axios.post('/p/inscription/validate', {})
                     .then(function (response) {
                         if (response.data && response.data.status === 'ok') {
                             window.location.replace("/authorize");

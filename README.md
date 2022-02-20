@@ -1,4 +1,9 @@
 # blockchain
+
+[![ariden83](https://codecov.io/gh/ariden83/blockchain/branch/master/graph/badge.svg)](https://codecov.io/gh/ariden83/blockchain)
+[![Build Status](https://travis-ci.org/ariden83/blockchain.svg?branch=master)](https://travis-ci.org/ariden83/blockchain)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fariden83%2Fblockchain.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fariden83%2Fblockchain?ref=badge_shield)
+
 New blockchain. See website of project [blockchain-altcoin.com](https://www.blockchain-altcoin.com/)
 
 ## Resources

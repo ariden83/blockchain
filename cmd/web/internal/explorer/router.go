@@ -28,19 +28,21 @@ func (e *Explorer) loadConnectedRoutes() {
 	s.Use(e.validateToken)
 }
 
+/*
 func (e *Explorer) loadAPIRoutes() {
 	s := e.router.PathPrefix("/api").Subrouter().StrictSlash(true)
 	s.Use(jsonHeader)
-}
+} */
+
 func (e *Explorer) loadAPINonConnectedRoutes() {
-	s := e.router.PathPrefix("/api").Subrouter().StrictSlash(true)
+	s := e.router.PathPrefix("/p").Subrouter().StrictSlash(true)
 	s.HandleFunc("/login", e.loginAPI).Methods(http.MethodPost)
 	s.HandleFunc("/inscription", e.inscriptionAPI).Methods(http.MethodPost)
 	s.HandleFunc("/inscription/validate", e.inscriptionValidateAPI).Methods(http.MethodPost)
 	s.Use(jsonHeader)
 }
 func (e *Explorer) loadAPIConnectedRoutes() {
-	s := e.router.PathPrefix("/api").Subrouter().StrictSlash(true)
+	s := e.router.PathPrefix("/p").Subrouter().StrictSlash(true)
 	s.HandleFunc("/token", e.tokenAPI).Methods(http.MethodPost)
 	s.Use(e.validateToken)
 	s.Use(jsonHeader)

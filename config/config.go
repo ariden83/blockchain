@@ -164,7 +164,7 @@ func getDefaultConfig() *Config {
 		},
 		GRPC: GRPC{
 			Enabled: true,
-			Port:    8100,
+			Port:    8155,
 		},
 		P2P: P2P{
 			Port:               8097,

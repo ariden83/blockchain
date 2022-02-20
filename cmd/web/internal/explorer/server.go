@@ -122,7 +122,7 @@ func (e *Explorer) Start(stop chan error) {
 	e.loadConnectedRoutes()
 	e.loadNonConnectedRoutes()
 
-	e.loadAPIRoutes()
+	// e.loadAPIRoutes()
 	e.loadAPIConnectedRoutes()
 	e.loadAPINonConnectedRoutes()
 

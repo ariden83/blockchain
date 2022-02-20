@@ -127,7 +127,7 @@ func getDefaultConfig() *Config {
 		},
 		BlockchainAPI: BlockchainAPI{
 			MaxSizeCall: 1024 * 1024 * 12,
-			URL:         "0.0.0.0:8100",
+			URL:         "0.0.0.0:8155",
 			TimeOut:     10,
 		},
 		Metadata: Metadata{

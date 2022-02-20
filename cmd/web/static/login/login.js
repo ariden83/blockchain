@@ -177,7 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     cipherMn = c;
                     return grecaptcha.execute('6LfmdSAeAAAAAPf5oNQ1UV0wf6QhnH9dQFDSop7V', {action: 'submit'});
                 })
-                .then(token => axios.post('/api/login', {
+                .then(token => axios.post('/p/login', {
                     password: cipher,
                     mnemonic: cipherMn,
                     recaptcha: token,
