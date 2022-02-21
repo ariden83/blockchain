@@ -28,6 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 errorStep3: "",
                 seedOver: false,
                 seed: "",
+                qrcode: "",
             };
         },
         computed: {
@@ -165,6 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             return t.decrypt(response.data.seed)
                             .then(seed => {
                                 t.seed = seed;
+                                t.setQRCode();
                             });
                         } else {
                             t.errorSend = 'Error! Could not reach the API. ' + error;
@@ -178,6 +180,11 @@ document.addEventListener("DOMContentLoaded", () => {
                         t.step = 1;
                         setTimeout(() => t.resetErrorMessageForAPI(), 3500);
                     });
+            },
+            setQRCode() {
+                let qrcode = new QRious({size: 300});
+                qrcode.value = this.seed;
+                this.qrcode = qrcode.toDataURL();
             },
             resetErrorMessageForAPI() {
                 this.errorSend = '';

@@ -5,7 +5,6 @@ import (
 )
 
 func (e *Explorer) loadRoutes() {
-	e.router.HandleFunc("/", e.homePage).Methods(http.MethodGet)
 	e.router.HandleFunc("/contact", e.contactPage).Methods(http.MethodGet, http.MethodPost)
 	e.router.HandleFunc("/about", e.aboutPage).Methods(http.MethodGet)
 	e.router.HandleFunc("/faq", e.faqPage).Methods(http.MethodGet)
@@ -16,6 +15,7 @@ func (e *Explorer) loadRoutes() {
 }
 func (e *Explorer) loadNonConnectedRoutes() {
 	s := e.router.PathPrefix("/").Subrouter().StrictSlash(true)
+	e.router.HandleFunc("/", e.homePage).Methods(http.MethodGet)
 	s.HandleFunc("/login", e.loginPage).Methods(http.MethodGet)
 	s.HandleFunc("/inscription", e.inscriptionPage).Methods(http.MethodGet)
 	s.HandleFunc("/authorize", e.authorizePage).Methods(http.MethodGet)
