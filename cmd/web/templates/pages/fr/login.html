@@ -17,22 +17,24 @@
         </noscript>
 
           <div id="app" class="{{ .Paraphrase }}">
-            <div class="container-inscription" :key="paraphrase">
+
 
               <p>Importez un compte avec une phrase mnémotechnique.</p>
               <p>Saisissez votre phrase secrète de 12 ou 24 mots pour restaurer votre coffre-fort.</p>
-              <div class="todoapp">
+              <div class="input-seed">
                 <input id="changetypage" type="password" class="new-todo import-account__secret-phrase" :disabled="buttonDisabled" autofocus autocomplete="off" placeholder="Séparez chaque mot avec un espace" v-model="newTodo" v-on:change="addTodo" ></input>
-              </div>
 
-              <div class="vue-pincode__checkbox">
-                <div class="custom-control custom-checkbox">
-                  <input id="checkbox-2" type="checkbox" name="checkbox-1" class="custom-control-input" value="true" @change="showmnenomic()">
-                  <label for="checkbox-2" class="custom-control-label">
-                    Show Secret Recovery Phrase
-                  </label>
+                <div class="vue-pincode__checkbox">
+                  <div class="custom-control custom-checkbox">
+                    <input id="checkbox-2" type="checkbox" name="checkbox-1" class="custom-control-input" value="true" @change="showmnenomic()">
+                    <label for="checkbox-2" class="custom-control-label">
+                      Afficher
+                    </label>
+                  </div>
                 </div>
               </div>
+
+            <div class="container-inscription" :key="paraphrase">
 
               <div class="vue-pincode" :class="pincodeSuccess ? 'vue-pincode--success' : ''">
                 <div class="step1">

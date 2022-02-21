@@ -1,8 +1,13 @@
 package explorer
 
 import (
-	"fmt"
+	"errors"
 	"net/http"
+	"net/url"
+
+	"go.uber.org/zap"
+
+	"github.com/mailjet/mailjet-apiv3-go/v3"
 )
 
 type contactDetails struct {
@@ -15,6 +20,8 @@ type contactDetails struct {
 type contactShowData struct {
 	*FrontData
 	Success bool
+	Error   error
+	Form    contactDetails
 }
 
 func (e *Explorer) contactPage(rw http.ResponseWriter, r *http.Request) {
@@ -22,11 +29,17 @@ func (e *Explorer) contactPage(rw http.ResponseWriter, r *http.Request) {
 
 	data := contactShowData{
 		Success: false,
-	}
-	data.FrontData = &FrontData{
-		PageTitle:    e.metadata.Title + "- contact-us",
-		Authentified: authorized,
-		Menus:        getMenus(),
+		Form: contactDetails{
+			Name:    r.FormValue("name"),
+			Email:   r.FormValue("email"),
+			Subject: r.FormValue("subject"),
+			Message: r.FormValue("message"),
+		},
+		FrontData: &FrontData{
+			PageTitle:    e.metadata.Title + "- contact-us",
+			Authentified: authorized,
+			Menus:        getMenus(),
+		},
 	}
 
 	if r.Method != http.MethodPost {
@@ -34,17 +47,50 @@ func (e *Explorer) contactPage(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get form data
-	formData := contactDetails{
-		Name:    r.FormValue("name"),
-		Email:   r.FormValue("email"),
-		Subject: r.FormValue("subject"),
-		Message: r.FormValue("message"),
+	mj := mailjet.NewMailjetClient(e.cfg.Mails.PublicKey, e.cfg.Mails.SecretKey)
+
+	if e.cfg.Mails.ProxyURL != "" {
+		client := e.setupProxy(e.cfg.Mails.ProxyURL)
+		mj.SetClient(client)
 	}
 
-	// do something with the submitted form data
-	fmt.Printf("%+v\n", formData)
-	data.Success = true
+	messagesInfo := []mailjet.InfoMessagesV31{
+		{
+			From: &mailjet.RecipientV31{
+				Email: r.FormValue("email"),
+				Name:  r.FormValue("name"),
+			},
+			To: &mailjet.RecipientsV31{
+				mailjet.RecipientV31{
+					Email: "adrienparrochia@gmail.com",
+					Name:  "ariden",
+				},
+			},
+			Subject:  r.FormValue("subject"),
+			TextPart: r.FormValue("message"),
+			HTMLPart: r.FormValue("message"),
+		},
+	}
+	messages := &mailjet.MessagesV31{Info: messagesInfo}
+
+	if _, err := mj.SendMailV31(messages); err != nil {
+		e.log.Error("fail to call mailjet", zap.Error(err))
+		data.Error = errors.New("internal error")
+	} else {
+		data.Success = true
+	}
 
 	templates.ExecuteTemplate(rw, "contact", data)
+}
+
+func (e *Explorer) setupProxy(proxyURLStr string) *http.Client {
+	proxyURL, err := url.Parse(proxyURLStr)
+	if err != nil {
+		e.log.Error("fail to call mailjet", zap.Error(err))
+	}
+	tr := &http.Transport{Proxy: http.ProxyURL(proxyURL)}
+	client := &http.Client{}
+	client.Transport = tr
+
+	return client
 }

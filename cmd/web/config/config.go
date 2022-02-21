@@ -68,6 +68,12 @@ type Locales struct {
 	Lang []string
 }
 
+type Mails struct {
+	PublicKey string `config:"mails_publickey"`
+	SecretKey string `config:"mails_secretkey"`
+	ProxyURL  string `config:"mails_proxyurl"`
+}
+
 type Config struct {
 	Name          string `config:"name" yaml:"name"`
 	Version       string `config:"version"`
@@ -87,6 +93,7 @@ type Config struct {
 	Metadata      Metadata
 	ReCaptcha     ReCaptcha
 	Locales       Locales
+	Mails         Mails
 }
 
 func getDefaultConfig() *Config {
@@ -121,6 +128,7 @@ func getDefaultConfig() *Config {
 				Enable:       false,
 			},
 		},
+		Mails: Mails{},
 		Metrics: Metrics{
 			Port: 8101,
 			Host: "0.0.0.0",

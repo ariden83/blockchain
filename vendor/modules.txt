@@ -419,6 +419,11 @@ github.com/lucas-clemente/quic-go/internal/wire
 github.com/lucas-clemente/quic-go/logging
 github.com/lucas-clemente/quic-go/qlog
 github.com/lucas-clemente/quic-go/quicvarint
+# github.com/mailjet/mailjet-apiv3-go/v3 v3.1.1
+## explicit; go 1.13
+github.com/mailjet/mailjet-apiv3-go/v3
+github.com/mailjet/mailjet-apiv3-go/v3/fixtures
+github.com/mailjet/mailjet-apiv3-go/v3/resources
 # github.com/marten-seemann/qtls-go1-15 v0.1.5
 ## explicit; go 1.15
 github.com/marten-seemann/qtls-go1-15

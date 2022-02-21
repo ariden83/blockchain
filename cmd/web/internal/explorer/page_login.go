@@ -35,7 +35,7 @@ func (e *Explorer) loginPage(rw http.ResponseWriter, r *http.Request) {
 				"/static/cipher.js?v0.0.8",
 			}).
 			Css([]string{
-				"/static/login/login.css?0.0.0",
+				"/static/login/login.css?0.0.2",
 			}).
 			Title("login"),
 		Success:    false,

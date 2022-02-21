@@ -13,14 +13,15 @@
             {{else}}
             <form action="/contact" method="POST">
                 <label>Name:</label><br />
-                <input type="text" name="name"><br />
+                <input type="text" name="name" value="{{.Form.Name}}"/><br />
                 <label>Email:</label><br />
-                <input type="text" name="email"><br />
+                <input type="text" name="email" value="{{.Form.Email}}" /><br />
                 <label>Subject:</label><br />
-                <input type="text" name="subject"><br />
+                <input type="text" name="subject" value="{{.Form.Subject}}" /><br />
                 <label>Message:</label><br />
-                <textarea name="message"></textarea><br /><br />
-                <input type="submit">
+                <textarea name="message">{{.Form.Message}}</textarea><br /><br />
+                <p class="error">{{.Error}}</p>
+                <input type="submit" />
             </form>
             {{end}}
         </section>

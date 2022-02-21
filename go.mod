@@ -31,6 +31,7 @@ require (
 	github.com/libp2p/go-libp2p-quic-transport v0.11.2
 	github.com/libp2p/go-libp2p-swarm v0.5.3
 	github.com/libp2p/go-libp2p-tls v0.2.0
+	github.com/mailjet/mailjet-apiv3-go/v3 v3.1.1
 	github.com/multiformats/go-multiaddr v0.4.1
 	github.com/nicksnyder/go-i18n/v2 v2.1.2
 	github.com/prometheus/client_golang v1.11.0
