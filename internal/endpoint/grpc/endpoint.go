@@ -2,6 +2,22 @@ package grpc
 
 import (
 	"fmt"
+	"net"
+	"strconv"
+
+	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"github.com/grpc-ecosystem/go-grpc-prometheus"
+	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
+	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
+	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
+
+	protoAPI "github.com/ariden83/blockchain/pkg/api"
+
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/metrics"
@@ -9,19 +25,6 @@ import (
 	"github.com/ariden83/blockchain/internal/transactions"
 	"github.com/ariden83/blockchain/internal/wallet"
 	"github.com/grpc-ecosystem/go-grpc-middleware"
-	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
-	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
-	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
-	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
-	"github.com/grpc-ecosystem/go-grpc-prometheus"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-
-	protoAPI "github.com/ariden83/blockchain/pkg/api"
-	"go.uber.org/zap"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
-	"net"
 )
 
 type EndPoint struct {
@@ -101,7 +104,7 @@ func (e *EndPoint) Enabled() bool {
 
 // Listen start the server.
 func (e *EndPoint) Listen() error {
-	address := fmt.Sprintf("0.0.0.0:%d", e.cfg.Port)
+	address := e.cfg.Host + ":" + strconv.Itoa(e.cfg.Port)
 
 	optsMiddleWare := []grpc_recovery.Option{
 		grpc_recovery.WithRecoveryHandler(func(p interface{}) (err error) {

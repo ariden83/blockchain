@@ -61,11 +61,13 @@ type Miner struct {
 type API struct {
 	Enabled bool `config:"api_enabled"`
 	Port    int  `config:"api_port"`
+	Host string  `config:"api_host" yaml:"api_host"`
 }
 
 type GRPC struct {
 	Enabled bool `config:"grpc_enabled"`
 	Port    int  `config:"grpc_port" yaml:"grpc_port"`
+	Host string  `config:"grpc_host" yaml:"grpc_host"`
 }
 
 type P2P struct {
@@ -161,10 +163,12 @@ func getDefaultConfig() *Config {
 		API: API{
 			Enabled: true,
 			Port:    8098,
+			Host: "0.0.0.0",
 		},
 		GRPC: GRPC{
 			Enabled: true,
 			Port:    8155,
+			Host: "0.0.0.0",
 		},
 		P2P: P2P{
 			Port:               8097,
