@@ -34,6 +34,9 @@ New blockchain. See website of project [blockchain-altcoin.com](https://www.bloc
 * Créez une transaction Bitcoin brute et signez-la avec Golang [code source](https://ichi.pro/fr/creez-une-transaction-bitcoin-brute-et-signez-la-avec-golang-165707908919466)
 * btcd is an alternative full node bitcoin implementation written in Go (golang) [code source](https://github.com/btcsuite/btcd)
 * Implementing RSA Encryption and Signing in Golang [tutorial](https://www.sohamkamani.com/golang/rsa-encryption/) [code source](https://gist.github.com/sohamkamani/08377222d5e3e6bc130827f83b0c073e)
+* Decred is a blockchain-based cryptocurrency [code source](https://github.com/decred/dcrd)
+* Recommended practices for secure signature generation [tutorial](https://github.com/bitcoincashorg/bitcoincash.org/blob/master/spec/2019-05-15-schnorr.md#recommended-practices-for-secure-signature-generation)
+
 
 ## Installation
 

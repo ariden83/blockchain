@@ -93,6 +93,12 @@ local-rsa-tutorial:
 	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/tutorial ./tutorial/rsa-encryption/.
 	-cli_level=INFO ./bin/tutorial
 
+local-sign-script:
+	@echo "> Launch local sign script ..."
+	go fmt ./...
+	export GO111MODULE=on;
+	go test ./tutorial/sign-script-example/...
+
 local:
 	@echo "> Launch local ..."
 	go fmt ./...
