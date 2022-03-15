@@ -37,7 +37,6 @@ New blockchain. See website of project [blockchain-altcoin.com](https://www.bloc
 * Decred is a blockchain-based cryptocurrency [code source](https://github.com/decred/dcrd)
 * Recommended practices for secure signature generation [tutorial](https://github.com/bitcoincashorg/bitcoincash.org/blob/master/spec/2019-05-15-schnorr.md#recommended-practices-for-secure-signature-generation)
 
-
 ## Installation
 
 - Code verification with [code source](https://github.com/securego/gosec)
