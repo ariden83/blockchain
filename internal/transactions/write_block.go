@@ -8,8 +8,8 @@ import (
 )
 
 type WriteBlockInput struct {
-	PubKey     string
-	PrivateKey string
+	PubKey     []byte
+	PrivateKey []byte
 }
 
 func (t *Transactions) WriteBlock(p WriteBlockInput) (*blockchain.Block, error) {
@@ -18,7 +18,7 @@ func (t *Transactions) WriteBlock(p WriteBlockInput) (*blockchain.Block, error) 
 		return nil, err
 	}
 	//mutex.Lock()
-	cbtx := t.CoinBaseTx(p.PubKey, "")
+	cbtx := t.CoinBaseTx(p.PubKey, p.PrivateKey)
 	cbtx.SetID()
 
 	newBlock := blockchain.AddBlock(lastHash, index, cbtx)

@@ -95,9 +95,7 @@ func (g *Genesis) Load(stop chan error) {
 }
 
 func (g *Genesis) createGenesis(stop chan error) []byte {
-
-	var genesisData string = "First Transaction from Genesis" // This is arbitrary public key for our genesis data
-	cbtx := g.transaction.CoinBaseTx(g.cfg.Address, genesisData)
+	cbtx := g.transaction.CoinBaseTx([]byte(g.cfg.Transactions.PubKey), []byte(g.cfg.Transactions.PrivateKey))
 	genesis := blockchain.Genesis(cbtx)
 	fmt.Println("Genesis proved")
 

@@ -2,18 +2,21 @@ package blockchain
 
 import (
 	"bytes"
+	"crypto/ecdsa"
 	"crypto/sha256"
 	"encoding/gob"
 	"encoding/hex"
 	"fmt"
-	"github.com/ariden83/blockchain/internal/blockchain/difficulty"
-	"github.com/davecgh/go-spew/spew"
 	"log"
 	"math/big"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/davecgh/go-spew/spew"
+
+	"github.com/ariden83/blockchain/internal/blockchain/difficulty"
 )
 
 type Validation struct {
@@ -53,17 +56,6 @@ type Transaction struct {
 	Timestamp int64
 }
 
-//TxOutput represents a transaction in the blockchain
-//For Example, I sent you 5 coins. Value would == 5, and it would have my unique PubKey
-type TxOutput struct {
-	// Value would be representative of the amount of coins in a transaction
-	Value *big.Int
-	// La Pubkey est nécessaire pour "déverrouiller" toutes les pièces dans une sortie. Cela indique que VOUS êtes celui qui l'a envoyé.
-	// Vous êtes identifiable par votre PubKey
-	// PubKey dans cette itération sera très simple, mais dans une application réelle, il s'agit d'un algorithme plus complexe
-	PubKey string
-}
-
 // Important to note that each output is Indivisible.
 // Vous ne pouvez pas "faire de changement" avec n'importe quelle sortie.
 // Si la valeur est 10, afin de donner 5 à quelqu'un, nous devons faire deux sorties de cinq pièces.
@@ -76,7 +68,20 @@ type TxInput struct {
 	Out int
 	// This would be a script that adds data to an outputs' PubKey
 	// however for this tutorial the Sig will be indentical to the PubKey.
-	Sig string
+	Sig        []byte
+	PubKey     []byte
+	SchnorrKey ecdsa.PublicKey
+}
+
+//TxOutput represents a transaction in the blockchain
+//For Example, I sent you 5 coins. Value would == 5, and it would have my unique PubKey
+type TxOutput struct {
+	// Value would be representative of the amount of coins in a transaction
+	Value *big.Int
+	// La Pubkey est nécessaire pour "déverrouiller" toutes les pièces dans une sortie. Cela indique que VOUS êtes celui qui l'a envoyé.
+	// Vous êtes identifiable par votre PubKey
+	// PubKey dans cette itération sera très simple, mais dans une application réelle, il s'agit d'un algorithme plus complexe
+	PubKey []byte
 }
 
 func (tx *Transaction) IsCoinBase() bool {
@@ -84,11 +89,15 @@ func (tx *Transaction) IsCoinBase() bool {
 	// Aka a CoinBase transaction
 	return len(tx.Inputs) == 1 && len(tx.Inputs[0].ID) == 0 && tx.Inputs[0].Out == -1
 }
-func (in *TxInput) CanUnlock(data string) bool {
-	return in.Sig == data
+
+func (in *TxInput) CanUnlock(data []byte) bool {
+	res := bytes.Compare(in.Sig, data)
+	return res == 0
 }
-func (out *TxOutput) CanBeUnlocked(data string) bool {
-	return out.PubKey == data
+
+func (out *TxOutput) CanBeUnlocked(data []byte) bool {
+	res := bytes.Compare(out.PubKey, data)
+	return res == 0
 }
 
 func (tx *Transaction) SetID() {
@@ -130,7 +139,7 @@ func Genesis(coinBase *Transaction) *Block {
 	return &genesisBlock
 }
 
-// calculateHash SHA256 hasing
+// calculateHash SHA256 hashing
 func calculateHash(block Block) []byte {
 	record := block.Index.String() + strconv.FormatInt(block.Timestamp, 16) + string(block.PrevHash) + block.Nonce
 	h := sha256.New()
@@ -197,6 +206,7 @@ func AddBlock(lastHash []byte, index *big.Int, coinBase *Transaction) Block {
 	}
 	difficulty.Current.Update(i)
 	newBlock.Difficulty = difficulty.Current.Int()
+
 	return newBlock
 }
 

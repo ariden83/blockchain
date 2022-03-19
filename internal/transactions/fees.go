@@ -20,5 +20,5 @@ func (t *Transactions) setTransactionFees(amount *big.Int) *big.Int {
 }
 
 func (t *Transactions) payTransactionFees(outputs []blockchain.TxOutput) []blockchain.TxOutput {
-	return append(outputs, blockchain.TxOutput{t.Reward, t.serverPublicKey})
+	return append(outputs, blockchain.TxOutput{Value: t.Reward, PubKey: []byte(t.serverPublicKey)})
 }

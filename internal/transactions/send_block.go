@@ -14,9 +14,10 @@ import (
 )
 
 type SendBlockInput struct {
-	From   string   `json:"from"`
-	To     string   `json:"to"`
-	Amount *big.Int `json:"amount"`
+	PubKey  []byte   `json:"pubKey"`
+	PrivKey []byte   `json:"privkey"`
+	To      []byte   `json:"to"`
+	Amount  *big.Int `json:"amount"`
 }
 
 func (t *Transactions) SendBlock(input SendBlockInput) error {
@@ -25,7 +26,7 @@ func (t *Transactions) SendBlock(input SendBlockInput) error {
 		return err
 	}
 
-	tx, err := t.New(input.From, input.To, input.Amount)
+	tx, err := t.New([]byte(input.PubKey), input.PrivKey, input.To, input.Amount)
 	if err == ErrNotEnoughFunds {
 		t.log.Info("Transaction failed, not enough funds",
 			zap.Any("param", input),

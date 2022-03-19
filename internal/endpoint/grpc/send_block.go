@@ -37,9 +37,10 @@ func (e *EndPoint) SendBlock(_ context.Context, req *api.SendBlockInput) (*api.S
 	}
 
 	e.transaction.SendBlock(transactions.SendBlockInput{
-		From:   req.GetFrom(),
-		To:     req.GetTo(),
-		Amount: amount,
+		PubKey:  []byte(req.GetFrom()),
+		PrivKey: []byte(req.GetTo()),
+		To:      []byte(req.GetTo()),
+		Amount:  amount,
 	})
 
 	return &api.SendBlockOutput{}, nil
