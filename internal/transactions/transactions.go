@@ -1,7 +1,6 @@
 package transactions
 
 import (
-	"crypto/ecdsa"
 	"errors"
 	"math/big"
 	"sync"
@@ -77,14 +76,16 @@ func WithLogs(logs *zap.Logger) func(*Transactions) {
 	}
 }
 
-func (t *Transactions) getSchnorrKeys(pubKey, privKey []byte) (*ecdsa.PublicKey, []byte, error) {
-	privKeySchnorr, pubKeySchnorr := bchec.PrivKeyFromBytes(bchec.S256(), privKey)
-	sig, err := signschnorr.SignSchnorr(privKeySchnorr, pubKey)
+func (t *Transactions) getSchnorrKeys(pubKey, privKey []byte) ([]byte, []byte, error) {
+	priv, pubKeySchnorr := bchec.PrivKeyFromBytes(bchec.S256(), privKey)
+
+	sig, err := signschnorr.SignSchnorr(priv, pubKey)
 	if err != nil {
 		t.log.Error("fail to sign schnorr", zap.Error(err))
 		return nil, nil, err
 	}
-	return pubKeySchnorr.ToECDSA(), sig.Serialize(), nil
+
+	return pubKeySchnorr.SerializeCompressed(), sig.Serialize(), nil
 }
 
 // CoinBaseTx is the function that will run when someone on a node succesfully "mines" a block. The reward inside as it were.
@@ -106,7 +107,7 @@ func (t *Transactions) CoinBaseTx(pubKey, privKey []byte) *blockchain.Transactio
 		// however for this tutorial the Sig will be indentical to the PubKey.
 		Sig:        sig,
 		PubKey:     pubKey,
-		SchnorrKey: *pubKeySchnorr,
+		SchnorrKey: pubKeySchnorr,
 	}
 	// txOut will represent the amount of tokens(reward) given to the person(toAddress) that executed CoinbaseTx
 
@@ -121,7 +122,11 @@ func (t *Transactions) CoinBaseTx(pubKey, privKey []byte) *blockchain.Transactio
 	} // You can see it follows {value, PubKey}
 
 	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
-	tx := blockchain.Transaction{nil, []blockchain.TxInput{txIn}, []blockchain.TxOutput{txOut}, timestamp}
+	tx := blockchain.Transaction{
+		Inputs:    []blockchain.TxInput{txIn},
+		Outputs:   []blockchain.TxOutput{txOut},
+		Timestamp: timestamp,
+	}
 
 	return &tx
 }
@@ -181,7 +186,7 @@ func (t *Transactions) New(pubKey, privKey, to []byte, amount *big.Int) (*blockc
 				Out:        out,
 				Sig:        sig,
 				PubKey:     pubKey,
-				SchnorrKey: *pubKeySchnorr,
+				SchnorrKey: pubKeySchnorr,
 			}
 			inputs = append(inputs, input)
 		}

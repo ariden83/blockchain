@@ -79,7 +79,7 @@ func (g *Genesis) Load(stop chan error) {
 
 		block, err := utils.DeserializeBlock(val)
 		if err != nil {
-			stop <- fmt.Errorf("fail to deserialize hash serializesd")
+			stop <- fmt.Errorf("fail to deserialize hash serializes: %w", err)
 			return
 		}
 
@@ -103,7 +103,7 @@ func (g *Genesis) createGenesis(stop chan error) []byte {
 
 	serializeBLock, err := utils.Serialize(genesis)
 	if err != nil {
-		stop <- fmt.Errorf("fail to serialize genesis")
+		stop <- fmt.Errorf("fail to serialize genesis: %w", err)
 		return []byte{}
 	}
 

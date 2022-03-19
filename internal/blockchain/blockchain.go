@@ -2,11 +2,11 @@ package blockchain
 
 import (
 	"bytes"
-	"crypto/ecdsa"
 	"crypto/sha256"
 	"encoding/gob"
 	"encoding/hex"
 	"fmt"
+	"github.com/gcash/bchd/bchec"
 	"log"
 	"math/big"
 	"strconv"
@@ -70,7 +70,7 @@ type TxInput struct {
 	// however for this tutorial the Sig will be indentical to the PubKey.
 	Sig        []byte
 	PubKey     []byte
-	SchnorrKey ecdsa.PublicKey
+	SchnorrKey bchec.PublicKey
 }
 
 //TxOutput represents a transaction in the blockchain

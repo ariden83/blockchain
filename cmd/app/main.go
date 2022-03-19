@@ -1,6 +1,8 @@
 package main
 
 import (
+	grpcEndpoint "github.com/ariden83/blockchain/internal/endpoint/grpc"
+	httpEndpoint "github.com/ariden83/blockchain/internal/endpoint/http"
 	"log"
 	"os"
 	"os/signal"
@@ -9,8 +11,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/ariden83/blockchain/config"
-	grpcEndpoint "github.com/ariden83/blockchain/internal/endpoint/grpc"
-	httpEndpoint "github.com/ariden83/blockchain/internal/endpoint/http"
 	metricsEndpoint "github.com/ariden83/blockchain/internal/endpoint/metrics"
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/genesis"
@@ -101,7 +101,6 @@ func main() {
 	gen.Load(stop)
 
 	s.Start(stop)
-
 	/**
 	 * And wait for shutdown via signal or error.
 	 */
@@ -113,7 +112,7 @@ func main() {
 	}()
 
 	err = <-stop
-	logs.Error("end service", zap.Error(err))
+	logs.Error(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> end service", zap.Error(err))
 
 	stopCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

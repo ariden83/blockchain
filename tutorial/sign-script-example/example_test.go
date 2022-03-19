@@ -58,6 +58,16 @@ func Test_Example_(t *testing.T) {
 		sign, err = signSchnorr(privKey, hash)
 		assert.NoError(t, err)
 		fmt.Println(fmt.Sprintf("**************************** SignSchnorr %+v", sign))
+
+	})
+
+	t.Run("example compress and decompress pubkey", func(t *testing.T) {
+		compressKey := pubkey.SerializeCompressed()
+
+		pk, err := bchec.ParsePubKey(compressKey, bchec.S256())
+		assert.NoError(t, err)
+
+		pubkey = pk
 	})
 
 	t.Run("example SignSchnorr verify", func(t *testing.T) {
