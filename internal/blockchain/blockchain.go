@@ -106,7 +106,7 @@ func (tx *Transaction) SetID() {
 }
 
 var (
-	mutex      *sync.Mutex = &sync.Mutex{}
+	mutex      = &sync.Mutex{}
 	BlockChain []Block
 )
 
@@ -167,8 +167,8 @@ func IsBlockValid(newBlock, oldBlock Block) bool {
 // AddBlock create a new block using previous block's hash
 func AddBlock(lastHash []byte, index *big.Int, coinBase *Transaction) Block {
 	var (
-		t        int64    = time.Now().UnixNano() / int64(time.Millisecond)
-		newIndex *big.Int = big.NewInt(0)
+		t        = time.Now().UnixNano() / int64(time.Millisecond)
+		newIndex = big.NewInt(0)
 		newBlock Block
 		i        uint
 	)

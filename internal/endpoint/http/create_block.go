@@ -2,20 +2,22 @@ package http
 
 import (
 	"fmt"
+	"io"
+
+	"go.uber.org/zap"
+	"math/big"
+	"net/http"
+
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/p2p/address"
 	"github.com/ariden83/blockchain/internal/p2p/validation"
 	"github.com/ariden83/blockchain/internal/utils"
-	"go.uber.org/zap"
-	"io"
-	"math/big"
-	"net/http"
 )
 
 // Message takes incoming JSON payload for writing heart rate
 type CreateBlockInput struct {
-	Address string `json:"address"`
-	PubKey  string `json:"key"`
+	PubKey     string `json:"key"`
+	PrivateKey string `json:"private"`
 }
 
 // handleCreateBlock takes JSON payload as an input for heart rate (BPM)
@@ -27,13 +29,13 @@ func (e *EndPoint) handleCreateBlock(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Address == "" {
-		io.WriteString(rw, "No address set")
+	if req.PubKey == "" {
+		io.WriteString(rw, "No pub key set")
 		return
 	}
 
-	if req.PubKey == "" {
-		io.WriteString(rw, "No pub key set")
+	if req.PrivateKey == "" {
+		io.WriteString(rw, "No private key set")
 		return
 	}
 

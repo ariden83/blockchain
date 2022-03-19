@@ -2,6 +2,14 @@ package http
 
 import (
 	"context"
+	"net/http"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
+
+	"go.uber.org/zap"
+
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/metrics"
@@ -10,12 +18,6 @@ import (
 	"github.com/ariden83/blockchain/internal/wallet"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"go.uber.org/zap"
-	"net/http"
-	"strconv"
-	"strings"
-	"sync"
-	"time"
 )
 
 var mutex = &sync.Mutex{}

@@ -51,7 +51,13 @@ func main() {
 	}
 	defer per.Close()
 
-	trans := transactions.Init(cfg.Transactions, per, logs)
+	evt := event.New()
+
+	trans := transactions.New(
+		transactions.WithPersistence(per),
+		transactions.WithLogs(logs),
+		transactions.WithEvents(evt),
+		transactions.WithConfig(cfg.Transactions))
 
 	wallets, err := wallet.Init(cfg.Wallet, logs)
 	if err != nil {
@@ -60,8 +66,6 @@ func main() {
 	defer wallets.Close()
 
 	mtc := metrics.New(cfg.Metrics)
-
-	evt := event.New()
 
 	s := Server{}
 

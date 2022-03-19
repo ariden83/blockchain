@@ -42,7 +42,12 @@ func main() {
 	stop := make(chan error, 1)
 
 	per := &persistance.Persistence{}
-	trans := transactions.Init(cfg.Transactions, per, logs)
+	trans := transactions.New(
+		transactions.WithPersistence(per),
+		transactions.WithLogs(logs),
+		transactions.WithEvents(evt),
+		transactions.WithConfig(cfg.Transactions))
+
 	mtc := metrics.New(cfg.Metrics)
 
 	server := httpEndpoint.New(httpEndpoint.WithPersistence(per),

@@ -6,7 +6,7 @@ service Api {
     rpc getPong (Ping) returns (Pong) {}
     // rpc GetBlockChain(BlockChainReq) returns (stream BlockChainRes) {}
     rpc GetBalance(GetBalanceInput) returns (GetBalanceOutput) {}
-    rpc CreateBlock(Ping) returns (Pong) {}
+    rpc CreateBlock(CreateBlockInput) returns (CreateBlockOutput) {}
     rpc SendBlock(Ping) returns (Pong) {}
     rpc GetWallets(Ping) returns (Pong) {}
     rpc GetBlockChain(Ping) returns (Pong) {}
@@ -104,6 +104,15 @@ message CreateWalletOutput {
     string address = 2;
     string pubKey = 3;
 }
+
+message CreateBlockInput {
+    // Mandatory field
+    Context context = 1;
+    string pubKey = 2;
+    string privateKey = 3;
+}
+
+message CreateBlockOutput {}
 
 message GetBalanceInput{
     // Mandatory field

@@ -3,17 +3,19 @@ package transactions
 import (
 	"errors"
 	"fmt"
-	pkgError "github.com/ariden83/blockchain/pkg/errors"
+	"github.com/ariden83/blockchain/config"
 	"math/big"
+	"sync"
 	"time"
 
 	"encoding/hex"
 	"go.uber.org/zap"
 
-	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/blockchain"
+	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/iterator"
 	"github.com/ariden83/blockchain/internal/persistence"
+	pkgError "github.com/ariden83/blockchain/pkg/errors"
 )
 
 var ErrNotEnoughFunds = errors.New("Not enough funds")
@@ -22,6 +24,7 @@ type Transactions struct {
 	Reward          *big.Int
 	serverPublicKey string
 	persistence     persistence.IPersistence
+	event           *event.Event
 	log             *zap.Logger
 }
 
@@ -33,12 +36,39 @@ type ITransaction interface {
 	FindUserTokensReceived(pubKey string) *big.Int
 }
 
-func Init(conf config.Transactions, per persistence.IPersistence, log *zap.Logger) *Transactions {
-	return &Transactions{
-		Reward:          conf.Reward,
-		persistence:     per,
-		serverPublicKey: conf.PubKey,
-		log:             log.With(zap.String("service", "transactions")),
+var mutex = &sync.Mutex{}
+
+func New(options ...func(*Transactions)) *Transactions {
+	t := &Transactions{}
+
+	for _, o := range options {
+		o(t)
+	}
+
+	return t
+}
+
+func WithConfig(cfg config.Transactions) func(*Transactions) {
+	return func(e *Transactions) {
+		e.Reward = cfg.Reward
+	}
+}
+
+func WithPersistence(p persistence.IPersistence) func(*Transactions) {
+	return func(e *Transactions) {
+		e.persistence = p
+	}
+}
+
+func WithEvents(evt *event.Event) func(*Transactions) {
+	return func(e *Transactions) {
+		e.event = evt
+	}
+}
+
+func WithLogs(logs *zap.Logger) func(*Transactions) {
+	return func(e *Transactions) {
+		e.log = logs.With(zap.String("service", "transactions"))
 	}
 }
 
