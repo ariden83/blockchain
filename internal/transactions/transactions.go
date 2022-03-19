@@ -3,13 +3,14 @@ package transactions
 import (
 	"errors"
 	"fmt"
-	"github.com/ariden83/blockchain/config"
 	"math/big"
 	"sync"
 	"time"
 
 	"encoding/hex"
 	"go.uber.org/zap"
+
+	"github.com/ariden83/blockchain/config"
 
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/event"
@@ -34,6 +35,9 @@ type ITransaction interface {
 	FindUserBalance(string) *big.Int
 	FindUserTokensSend(string) *big.Int
 	FindUserTokensReceived(pubKey string) *big.Int
+	WriteBlock(p WriteBlockInput) (*blockchain.Block, error)
+	GetLastBlock() ([]byte, *big.Int, error)
+	SendBlock(input SendBlockInput) error
 }
 
 var mutex = &sync.Mutex{}

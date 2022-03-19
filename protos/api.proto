@@ -7,7 +7,7 @@ service Api {
     // rpc GetBlockChain(BlockChainReq) returns (stream BlockChainRes) {}
     rpc GetBalance(GetBalanceInput) returns (GetBalanceOutput) {}
     rpc CreateBlock(CreateBlockInput) returns (CreateBlockOutput) {}
-    rpc SendBlock(Ping) returns (Pong) {}
+    rpc SendBlock(SendBlockInput) returns (SendBlockOutput) {}
     rpc GetWallets(Ping) returns (Pong) {}
     rpc GetBlockChain(Ping) returns (Pong) {}
     rpc CreateWallet(CreateWalletInput) returns (CreateWalletOutput) {}
@@ -29,11 +29,19 @@ message Context {
     string stream = 1;
 }
 
+message SendBlockInput {
+    string From = 1;
+    string To = 2;
+    string Amount = 3;
+}
+
 message TxInput {
     bytes id = 1;
     int32 out = 2;
     string sig = 3;
 }
+
+message SendBlockOutput {}
 
 message TxOutput {
     uint64 value = 1;

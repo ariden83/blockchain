@@ -82,6 +82,7 @@ var listStatus = map[int]codes.Code{
 var (
 	ErrMissingPassword         = New("missing password", WithStatus(http.StatusBadRequest))
 	ErrMissingFields           = New("missing fields", WithStatus(http.StatusPreconditionFailed))
+	ErrEmptyField              = New("empty field", WithStatus(http.StatusPreconditionFailed))
 	ErrInvalidPassword         = New("password invalid", WithStatus(http.StatusPreconditionFailed))
 	ErrInternalError           = New("internal error", WithStatus(http.StatusForbidden))
 	ErrInternalDependencyError = New("internal error", WithStatus(http.StatusFailedDependency))

@@ -1,17 +1,10 @@
 package http
 
 import (
-	"fmt"
-	"io"
-
+	"github.com/ariden83/blockchain/internal/transactions"
+	pkgErr "github.com/ariden83/blockchain/pkg/errors"
 	"go.uber.org/zap"
-	"math/big"
 	"net/http"
-
-	"github.com/ariden83/blockchain/internal/blockchain"
-	"github.com/ariden83/blockchain/internal/p2p/address"
-	"github.com/ariden83/blockchain/internal/p2p/validation"
-	"github.com/ariden83/blockchain/internal/utils"
 )
 
 // Message takes incoming JSON payload for writing heart rate
@@ -26,71 +19,27 @@ func (e *EndPoint) handleCreateBlock(rw http.ResponseWriter, r *http.Request) {
 
 	log := e.log.With(zap.String("input", "createBlock"))
 	if err := e.decodeBody(rw, log, r.Body, req); err != nil {
-		return
+		e.Handle(err)
 	}
 
 	if req.PubKey == "" {
-		io.WriteString(rw, "No pub key set")
-		return
+		err := pkgErr.ErrMissingFields
+		e.log.Error("Empty pub key", zap.Error(err))
+		e.Handle(err)
 	}
 
 	if req.PrivateKey == "" {
-		io.WriteString(rw, "No private key set")
-		return
+		err := pkgErr.ErrMissingFields
+		e.log.Error("Empty private key", zap.Error(err))
+		e.Handle(err)
 	}
 
-	newBlock := e.WriteBlock(*req)
+	newBlock, err := e.transaction.WriteBlock(
+		transactions.WriteBlockInput{
+			PubKey:     req.PubKey,
+			PrivateKey: req.PrivateKey,
+		})
+	e.Handle(err)
+
 	e.JSON(rw, http.StatusCreated, newBlock)
-
-}
-
-func (e *EndPoint) getLastBlock() ([]byte, *big.Int) {
-	lastHash, err := e.persistence.GetLastHash()
-	e.Handle(err)
-
-	if lastHash == nil {
-		e.Handle(fmt.Errorf("no hash found"))
-	}
-
-	serializeBloc, err := e.persistence.GetCurrentHashSerialize(lastHash)
-	e.Handle(err)
-	block, err := utils.DeserializeBlock(serializeBloc)
-	e.Handle(err)
-
-	return lastHash, block.Index
-}
-
-func (e *EndPoint) WriteBlock(p CreateBlockInput) blockchain.Block {
-	lastHash, index := e.getLastBlock()
-
-	//mutex.Lock()
-	cbtx := e.transaction.CoinBaseTx(p.PubKey, "")
-	cbtx.SetID()
-
-	newBlock := blockchain.AddBlock(lastHash, index, cbtx)
-	//mutex.Unlock()
-
-	if blockchain.IsBlockValid(newBlock, blockchain.BlockChain[len(blockchain.BlockChain)-1]) {
-
-		mutex.Lock()
-		e.event.PushBlock(validation.New(newBlock, address.GetCurrentAddress()))
-		mutex.Unlock()
-
-		/*mutex.Lock()
-		blockchain.BlockChain = append(blockchain.BlockChain, newBlock)
-		mutex.Unlock()
-
-		ser, err := utils.Serialize(&newBlock)
-		e.Handle(err)
-
-		e.event.Push(event.BlockChain, "")
-
-		err = e.persistence.Update(newBlock.Hash, ser)
-		e.Handle(err)
-		spew.Dump(blockchain.BlockChain)*/
-	} else {
-		e.Handle(fmt.Errorf("new block created is invalid"))
-	}
-
-	return newBlock
 }
