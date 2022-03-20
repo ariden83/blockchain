@@ -10,13 +10,13 @@ import (
 )
 
 func (e *EndPoint) CreateBlock(_ context.Context, req *api.CreateBlockInput) (*api.CreateBlockOutput, error) {
-	if req.GetPrivateKey() == "" {
+	if req.GetFrom() == "" {
 		err := pkgErr.ErrMissingFields
 		e.log.Error("Empty private key", zap.Error(err))
 		return nil, pkgErr.GRPC(err)
 	}
 
-	_, err := e.transaction.WriteBlock([]byte(req.GetPrivateKey()))
+	_, err := e.transaction.WriteBlock([]byte(req.GetFrom()))
 	if err != nil {
 		return nil, pkgErr.GRPC(err)
 	}

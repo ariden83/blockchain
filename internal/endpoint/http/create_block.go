@@ -10,7 +10,7 @@ import (
 
 // Message takes incoming JSON payload for writing heart rate
 type CreateBlockInput struct {
-	PrivateKey string `json:"private"`
+	From string `json:"from"`
 }
 
 // handleCreateBlock takes JSON payload as an input for heart rate (BPM)
@@ -22,13 +22,13 @@ func (e *EndPoint) handleCreateBlock(rw http.ResponseWriter, r *http.Request) {
 		e.Handle(err)
 	}
 
-	if req.PrivateKey == "" {
+	if req.From == "" {
 		err := pkgErr.ErrMissingFields
 		e.log.Error("Empty private key", zap.Error(err))
 		e.Handle(err)
 	}
 
-	newBlock, err := e.transaction.WriteBlock([]byte(req.PrivateKey))
+	newBlock, err := e.transaction.WriteBlock([]byte(req.From))
 	e.Handle(err)
 
 	e.JSON(rw, http.StatusCreated, newBlock)

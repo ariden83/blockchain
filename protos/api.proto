@@ -116,8 +116,7 @@ message CreateWalletOutput {
 message CreateBlockInput {
     // Mandatory field
     Context context = 1;
-    string pubKey = 2;
-    string privateKey = 3;
+    string from = 3;
 }
 
 message CreateBlockOutput {}
