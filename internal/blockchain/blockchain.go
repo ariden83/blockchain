@@ -6,7 +6,6 @@ import (
 	"encoding/gob"
 	"encoding/hex"
 	"fmt"
-	"github.com/gcash/bchd/bchec"
 	"log"
 	"math/big"
 	"strconv"
@@ -70,7 +69,7 @@ type TxInput struct {
 	// however for this tutorial the Sig will be indentical to the PubKey.
 	Sig        []byte
 	PubKey     []byte
-	SchnorrKey bchec.PublicKey
+	SchnorrKey []byte
 }
 
 //TxOutput represents a transaction in the blockchain
