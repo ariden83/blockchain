@@ -2,10 +2,11 @@ package grpc
 
 import (
 	"context"
-	pkgErr "github.com/ariden83/blockchain/pkg/errors"
+
 	"go.uber.org/zap"
 
 	"github.com/ariden83/blockchain/pkg/api"
+	pkgErr "github.com/ariden83/blockchain/pkg/errors"
 )
 
 func (e *EndPoint) CreateBlock(_ context.Context, req *api.CreateBlockInput) (*api.CreateBlockOutput, error) {

@@ -1,9 +1,11 @@
 package http
 
 import (
-	pkgErr "github.com/ariden83/blockchain/pkg/errors"
-	"go.uber.org/zap"
 	"net/http"
+
+	"go.uber.org/zap"
+
+	pkgErr "github.com/ariden83/blockchain/pkg/errors"
 )
 
 // Message takes incoming JSON payload for writing heart rate

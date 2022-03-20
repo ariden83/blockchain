@@ -26,21 +26,20 @@ func (e *EndPoint) SendBlock(_ context.Context, req *api.SendBlockInput) (*api.S
 
 	if req.GetFrom() == "" {
 		err := pkgErr.ErrMissingFields
-		e.log.Error("Fail to create block", zap.Error(err))
+		e.log.Error("missing from param", zap.Error(err))
 		return nil, pkgErr.GRPC(err)
 	}
 
 	if req.GetTo() == "" {
 		err := pkgErr.ErrMissingFields
-		e.log.Error("Fail to create block", zap.Error(err))
+		e.log.Error("missing to param", zap.Error(err))
 		return nil, pkgErr.GRPC(err)
 	}
 
 	e.transaction.SendBlock(transactions.SendBlockInput{
-		PubKey:  []byte(req.GetFrom()),
-		PrivKey: []byte(req.GetTo()),
-		To:      []byte(req.GetTo()),
-		Amount:  amount,
+		From:   []byte(req.GetFrom()),
+		To:     []byte(req.GetTo()),
+		Amount: amount,
 	})
 
 	return &api.SendBlockOutput{}, nil

@@ -31,7 +31,7 @@ type Transactions struct {
 }
 
 type ITransaction interface {
-	New([]byte, []byte, []byte, *big.Int) (*blockchain.Transaction, error)
+	New([]byte, []byte, *big.Int) (*blockchain.Transaction, error)
 	CoinBaseTx([]byte) *blockchain.Transaction
 	FindUserBalance([]byte) *big.Int
 	FindUserTokensSend([]byte) *big.Int
@@ -157,7 +157,7 @@ func (t *Transactions) privKeyToPublicKey(privKey string) (string, error){
 // new transaction
 // from privkey
 // to publickey
-func (t *Transactions) New(pubKey, privKey, to []byte, amount *big.Int) (*blockchain.Transaction, error) {
+func (t *Transactions) New(from, to []byte, amount *big.Int) (*blockchain.Transaction, error) {
 	var (
 		inputs  []blockchain.TxInput
 		outputs []blockchain.TxOutput
@@ -165,6 +165,11 @@ func (t *Transactions) New(pubKey, privKey, to []byte, amount *big.Int) (*blockc
 
 	if !t.canPayTransactionFees(amount) {
 		return nil, pkgError.ErrNotEnoughFunds
+	}
+
+	pubKey, err := wallet.GetPubKey(from)
+	if err != nil {
+		return nil, pkgError.ErrInternalError
 	}
 
 	// Trouver des sorties utilisables
@@ -175,7 +180,7 @@ func (t *Transactions) New(pubKey, privKey, to []byte, amount *big.Int) (*blockc
 		return nil, pkgError.ErrNotEnoughFunds
 	}
 
-	pubKeySchnorr, sig, err := t.getSchnorrKeys(pubKey, privKey)
+	pubKeySchnorr, sig, err := t.getSchnorrKeys(pubKey, from)
 	if err != nil {
 		return nil, pkgError.ErrInternalError
 	}
