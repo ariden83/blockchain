@@ -1,7 +1,6 @@
 package http
 
 import (
-	"github.com/ariden83/blockchain/internal/transactions"
 	pkgErr "github.com/ariden83/blockchain/pkg/errors"
 	"go.uber.org/zap"
 	"net/http"
@@ -9,7 +8,6 @@ import (
 
 // Message takes incoming JSON payload for writing heart rate
 type CreateBlockInput struct {
-	PubKey     string `json:"key"`
 	PrivateKey string `json:"private"`
 }
 
@@ -22,23 +20,13 @@ func (e *EndPoint) handleCreateBlock(rw http.ResponseWriter, r *http.Request) {
 		e.Handle(err)
 	}
 
-	if req.PubKey == "" {
-		err := pkgErr.ErrMissingFields
-		e.log.Error("Empty pub key", zap.Error(err))
-		e.Handle(err)
-	}
-
 	if req.PrivateKey == "" {
 		err := pkgErr.ErrMissingFields
 		e.log.Error("Empty private key", zap.Error(err))
 		e.Handle(err)
 	}
 
-	newBlock, err := e.transaction.WriteBlock(
-		transactions.WriteBlockInput{
-			PubKey:     []byte(req.PubKey),
-			PrivateKey: []byte(req.PrivateKey),
-		})
+	newBlock, err := e.transaction.WriteBlock([]byte(req.PrivateKey))
 	e.Handle(err)
 
 	e.JSON(rw, http.StatusCreated, newBlock)

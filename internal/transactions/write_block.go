@@ -7,18 +7,13 @@ import (
 	"github.com/ariden83/blockchain/internal/p2p/validation"
 )
 
-type WriteBlockInput struct {
-	PubKey     []byte
-	PrivateKey []byte
-}
-
-func (t *Transactions) WriteBlock(p WriteBlockInput) (*blockchain.Block, error) {
+func (t *Transactions) WriteBlock(privateKey []byte) (*blockchain.Block, error) {
 	lastHash, index, err := t.GetLastBlock()
 	if err != nil {
 		return nil, err
 	}
 	//mutex.Lock()
-	cbtx := t.CoinBaseTx(p.PubKey, p.PrivateKey)
+	cbtx := t.CoinBaseTx(privateKey)
 	cbtx.SetID()
 
 	newBlock := blockchain.AddBlock(lastHash, index, cbtx)

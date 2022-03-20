@@ -16,6 +16,7 @@ import (
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/iterator"
 	"github.com/ariden83/blockchain/internal/persistence"
+	"github.com/ariden83/blockchain/internal/wallet"
 	pkgError "github.com/ariden83/blockchain/pkg/errors"
 )
 
@@ -31,11 +32,11 @@ type Transactions struct {
 
 type ITransaction interface {
 	New([]byte, []byte, []byte, *big.Int) (*blockchain.Transaction, error)
-	CoinBaseTx([]byte, []byte) *blockchain.Transaction
+	CoinBaseTx([]byte) *blockchain.Transaction
 	FindUserBalance([]byte) *big.Int
 	FindUserTokensSend([]byte) *big.Int
 	FindUserTokensReceived([]byte) *big.Int
-	WriteBlock(p WriteBlockInput) (*blockchain.Block, error)
+	WriteBlock([]byte) (*blockchain.Block, error)
 	GetLastBlock() ([]byte, *big.Int, error)
 	SendBlock(input SendBlockInput) error
 }
@@ -89,7 +90,13 @@ func (t *Transactions) getSchnorrKeys(pubKey, privKey []byte) ([]byte, []byte, e
 }
 
 // CoinBaseTx is the function that will run when someone on a node succesfully "mines" a block. The reward inside as it were.
-func (t *Transactions) CoinBaseTx(pubKey, privKey []byte) *blockchain.Transaction {
+func (t *Transactions) CoinBaseTx(privKey []byte) *blockchain.Transaction {
+	pubKey, err := wallet.GetPubKey(privKey)
+	if err != nil {
+		t.log.Error("fail to get pub key from private key", zap.Error(err))
+		return nil
+	}
+
 	pubKeySchnorr, sig, err := t.getSchnorrKeys(pubKey, privKey)
 	if err != nil {
 		return nil

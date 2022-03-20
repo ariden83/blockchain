@@ -95,7 +95,7 @@ func (g *Genesis) Load(stop chan error) {
 }
 
 func (g *Genesis) createGenesis(stop chan error) []byte {
-	cbtx := g.transaction.CoinBaseTx([]byte(g.cfg.Transactions.PubKey), []byte(g.cfg.Transactions.PrivateKey))
+	cbtx := g.transaction.CoinBaseTx([]byte(g.cfg.Transactions.PrivateKey))
 	genesis := blockchain.Genesis(cbtx)
 	fmt.Println("Genesis proved")
 

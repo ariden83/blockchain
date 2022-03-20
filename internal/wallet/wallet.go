@@ -252,6 +252,14 @@ func (w *Wallets) Close() error {
 	return nil
 }
 
+func GetPubKey(privKey []byte) ([]byte, error) {
+	masterPrv, err := hdwallet.StringWallet(string(privKey))
+	if err != nil {
+		return []byte{}, err
+	}
+	return []byte(masterPrv.Pub().String()), nil
+}
+
 func deserialize(data []byte) (*Seed, error) {
 	var seed Seed
 	decoder := gob.NewDecoder(bytes.NewReader(data))
