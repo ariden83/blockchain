@@ -1,13 +1,17 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
+	"runtime"
+	"syscall"
 	"time"
 
-	"context"
-	"fmt"
+	"go.uber.org/zap"
+
 	"github.com/ariden83/blockchain/config"
 	grpcEndpoint "github.com/ariden83/blockchain/internal/endpoint/grpc"
 	httpEndpoint "github.com/ariden83/blockchain/internal/endpoint/http"
@@ -20,9 +24,6 @@ import (
 	"github.com/ariden83/blockchain/internal/persistence"
 	"github.com/ariden83/blockchain/internal/transactions"
 	"github.com/ariden83/blockchain/internal/wallet"
-	"go.uber.org/zap"
-	"runtime"
-	"syscall"
 )
 
 func main() {
@@ -101,7 +102,6 @@ func main() {
 	gen.Load(stop)
 
 	s.Start(stop)
-
 	/**
 	 * And wait for shutdown via signal or error.
 	 */
@@ -113,7 +113,6 @@ func main() {
 	}()
 
 	err = <-stop
-	logs.Error("end service", zap.Error(err))
 
 	stopCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

@@ -2,17 +2,17 @@ package transactions
 
 import (
 	"errors"
-	"fmt"
 	"math/big"
 	"sync"
 	"time"
 
 	"encoding/hex"
+	"github.com/gcash/bchd/bchec"
 	"go.uber.org/zap"
 
 	"github.com/ariden83/blockchain/config"
-
 	"github.com/ariden83/blockchain/internal/blockchain"
+	signschnorr "github.com/ariden83/blockchain/internal/blockchain/signSchnorr"
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/iterator"
 	"github.com/ariden83/blockchain/internal/persistence"
@@ -30,11 +30,11 @@ type Transactions struct {
 }
 
 type ITransaction interface {
-	New(string, string, *big.Int) (*blockchain.Transaction, error)
-	CoinBaseTx(string, string) *blockchain.Transaction
-	FindUserBalance(string) *big.Int
-	FindUserTokensSend(string) *big.Int
-	FindUserTokensReceived(pubKey string) *big.Int
+	New([]byte, []byte, []byte, *big.Int) (*blockchain.Transaction, error)
+	CoinBaseTx([]byte, []byte) *blockchain.Transaction
+	FindUserBalance([]byte) *big.Int
+	FindUserTokensSend([]byte) *big.Int
+	FindUserTokensReceived([]byte) *big.Int
 	WriteBlock(p WriteBlockInput) (*blockchain.Block, error)
 	GetLastBlock() ([]byte, *big.Int, error)
 	SendBlock(input SendBlockInput) error
@@ -76,11 +76,25 @@ func WithLogs(logs *zap.Logger) func(*Transactions) {
 	}
 }
 
-// CoinBaseTx is the function that will run when someone on a node succesfully "mines" a block. The reward inside as it were.
-func (t *Transactions) CoinBaseTx(toPubKey, data string) *blockchain.Transaction {
-	if data == "" {
-		data = fmt.Sprintf("Coins to %s", toPubKey)
+func (t *Transactions) getSchnorrKeys(pubKey, privKey []byte) ([]byte, []byte, error) {
+	priv, pubKeySchnorr := bchec.PrivKeyFromBytes(bchec.S256(), privKey)
+
+	sig, err := signschnorr.SignSchnorr(priv, pubKey)
+	if err != nil {
+		t.log.Error("fail to sign schnorr", zap.Error(err))
+		return nil, nil, err
 	}
+
+	return pubKeySchnorr.SerializeCompressed(), sig.Serialize(), nil
+}
+
+// CoinBaseTx is the function that will run when someone on a node succesfully "mines" a block. The reward inside as it were.
+func (t *Transactions) CoinBaseTx(pubKey, privKey []byte) *blockchain.Transaction {
+	pubKeySchnorr, sig, err := t.getSchnorrKeys(pubKey, privKey)
+	if err != nil {
+		return nil
+	}
+
 	// Since this is the "first" transaction of the block, it has no previous output to reference.
 	// This means that we initialize it with no ID, and it's OutputIndex is -1
 	txIn := blockchain.TxInput{
@@ -91,7 +105,9 @@ func (t *Transactions) CoinBaseTx(toPubKey, data string) *blockchain.Transaction
 		Out: -1,
 		// This would be a script that adds data to an outputs' PubKey
 		// however for this tutorial the Sig will be indentical to the PubKey.
-		Sig: data,
+		Sig:        sig,
+		PubKey:     pubKey,
+		SchnorrKey: pubKeySchnorr,
 	}
 	// txOut will represent the amount of tokens(reward) given to the person(toAddress) that executed CoinbaseTx
 
@@ -102,14 +118,17 @@ func (t *Transactions) CoinBaseTx(toPubKey, data string) *blockchain.Transaction
 		// La Pubkey est nécessaire pour "déverrouiller" toutes les pièces dans une sortie. Cela indique que VOUS êtes celui qui l'a envoyé.
 		// Vous êtes identifiable par votre PubKey
 		// PubKey dans cette itération sera très simple, mais dans une application réelle, il s'agit d'un algorithme plus complexe
-		PubKey: toPubKey,
+		PubKey: pubKey,
 	} // You can see it follows {value, PubKey}
 
 	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
-	tx := blockchain.Transaction{nil, []blockchain.TxInput{txIn}, []blockchain.TxOutput{txOut}, timestamp}
+	tx := blockchain.Transaction{
+		Inputs:    []blockchain.TxInput{txIn},
+		Outputs:   []blockchain.TxOutput{txOut},
+		Timestamp: timestamp,
+	}
 
 	return &tx
-
 }
 
 /*
@@ -131,7 +150,7 @@ func (t *Transactions) privKeyToPublicKey(privKey string) (string, error){
 // new transaction
 // from privkey
 // to publickey
-func (t *Transactions) New(from, to string, amount *big.Int) (*blockchain.Transaction, error) {
+func (t *Transactions) New(pubKey, privKey, to []byte, amount *big.Int) (*blockchain.Transaction, error) {
 	var (
 		inputs  []blockchain.TxInput
 		outputs []blockchain.TxOutput
@@ -142,11 +161,16 @@ func (t *Transactions) New(from, to string, amount *big.Int) (*blockchain.Transa
 	}
 
 	// Trouver des sorties utilisables
-	acc, validOutputs := t.FindSpendableOutputs(from, amount)
+	acc, validOutputs := t.FindSpendableOutputs(pubKey, amount)
 
 	// Vérifiez si nous avons assez d'argent pour envoyer le montant que nous demandons
 	if acc.Cmp(amount) < 0 {
 		return nil, pkgError.ErrNotEnoughFunds
+	}
+
+	pubKeySchnorr, sig, err := t.getSchnorrKeys(pubKey, privKey)
+	if err != nil {
+		return nil, pkgError.ErrInternalError
 	}
 
 	// Si nous le faisons, créez des inputs qui indiquent les outputs que nous dépensons
@@ -157,20 +181,26 @@ func (t *Transactions) New(from, to string, amount *big.Int) (*blockchain.Transa
 		}
 
 		for _, out := range outs {
-			input := blockchain.TxInput{decodeTxID, out, from}
+			input := blockchain.TxInput{
+				ID:         decodeTxID,
+				Out:        out,
+				Sig:        sig,
+				PubKey:     pubKey,
+				SchnorrKey: pubKeySchnorr,
+			}
 			inputs = append(inputs, input)
 		}
 	}
 
 	// on récupère la valeur des frais pour le mineur et on les applique
 	amountLessFees := t.setTransactionFees(amount)
-	outputs = append(outputs, blockchain.TxOutput{amountLessFees, to})
+	outputs = append(outputs, blockchain.TxOutput{Value: amountLessFees, PubKey: to})
 	outputs = t.payTransactionFees(outputs)
 
 	// S'il reste de l'argent, faites de nouvelles sorties à partir de la différence.
 	if acc.Cmp(amount) > 0 {
 		newAmount := acc.Sub(acc, amount)
-		outputs = append(outputs, blockchain.TxOutput{newAmount, from})
+		outputs = append(outputs, blockchain.TxOutput{Value: newAmount, PubKey: pubKey})
 	}
 
 	// Initialiser une nouvelle transaction avec toutes les nouvelles entrées et sorties que nous avons effectuées
@@ -183,7 +213,7 @@ func (t *Transactions) New(from, to string, amount *big.Int) (*blockchain.Transa
 	return &tx, nil
 }
 
-func (t *Transactions) FindUnspentTransactions(pubKey string) []blockchain.Transaction {
+func (t *Transactions) FindUnspentTransactions(pubKey []byte) []blockchain.Transaction {
 	var unspentTxs []blockchain.Transaction
 
 	spentTXOs := make(map[string][]int)
@@ -248,7 +278,7 @@ func (t *Transactions) FindUnspentTransactions(pubKey string) []blockchain.Trans
 // nous pouvons rechercher les sorties non dépensées.
 // Parcourez toutes les transactions non dépensées et voyez si nous pouvons déverrouiller les sorties.
 // Ajoutez-les tous à un tableau et retournez ce tableau de TxOutputs
-func (t *Transactions) FindUTXO(pubKey string) []blockchain.TxOutput {
+func (t *Transactions) FindUTXO(pubKey []byte) []blockchain.TxOutput {
 	var UTXOs []blockchain.TxOutput
 	unspentTransactions := t.FindUnspentTransactions(pubKey)
 	for _, tx := range unspentTransactions {
@@ -312,7 +342,7 @@ func (t *Transactions) FindAllUserTransaction(pubKey string) []blockchain.TxOutp
 }
 */
 
-func (t *Transactions) FindUserBalance(pubKey string) *big.Int {
+func (t *Transactions) FindUserBalance(pubKey []byte) *big.Int {
 	var balance *big.Int = new(big.Int)
 	UTXOs := t.FindUTXO(pubKey)
 
@@ -322,7 +352,7 @@ func (t *Transactions) FindUserBalance(pubKey string) *big.Int {
 	return balance
 }
 
-func (t *Transactions) FindUserTokensSend(pubKey string) *big.Int {
+func (t *Transactions) FindUserTokensSend(pubKey []byte) *big.Int {
 	var tokensSend *big.Int = new(big.Int)
 
 	iter := iterator.BlockChainIterator{
@@ -363,7 +393,7 @@ func (t *Transactions) FindUserTokensSend(pubKey string) *big.Int {
 	return tokensSend
 }
 
-func (t *Transactions) FindUserTokensReceived(pubKey string) *big.Int {
+func (t *Transactions) FindUserTokensReceived(pubKey []byte) *big.Int {
 	var tokensReceived *big.Int = new(big.Int)
 
 	iter := iterator.BlockChainIterator{
@@ -402,7 +432,7 @@ func (t *Transactions) FindUserTokensReceived(pubKey string) *big.Int {
 
 // Ce qui suit sera une fonction qui prend l'adresse d'un compte et le montant que nous aimerions dépenser.
 // Il renvoie un tuple qui contient le montant que nous pouvons dépenser et une carte des sorties agrégées qui peuvent y arriver.
-func (t *Transactions) FindSpendableOutputs(pubKey string, amount *big.Int) (*big.Int, map[string][]int) {
+func (t *Transactions) FindSpendableOutputs(pubKey []byte, amount *big.Int) (*big.Int, map[string][]int) {
 	unspentOuts := make(map[string][]int)
 	unspentTxs := t.FindUnspentTransactions(pubKey)
 	var accumulated *big.Int = new(big.Int)

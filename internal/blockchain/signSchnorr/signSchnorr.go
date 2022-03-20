@@ -61,14 +61,6 @@ func SignSchnorr(privateKey *bchec.PrivateKey, hash []byte) (*Signature, error) 
 	}, nil
 }
 
-func ParseSchnorrSig(sign *Signature, hash []byte, pubkey *bchec.PublicKey) bool {
-	sig, err := bchec.ParseSchnorrSignature(sign.Serialize())
-	if err != nil {
-		return false
-	}
-	return sig.Verify(hash, pubkey)
-}
-
 // nonceRFC6979 generates an ECDSA nonce (`k`) deterministically according to RFC 6979.
 // It takes a 32-byte hash as an input and returns 32-byte nonce to be used in ECDSA algorithm.
 func nonceRFC6979(privkey *big.Int, hash []byte, additionalData []byte) *big.Int {

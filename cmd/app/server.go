@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+
 	grpcEndpoint "github.com/ariden83/blockchain/internal/endpoint/grpc"
 	httpEndpoint "github.com/ariden83/blockchain/internal/endpoint/http"
 	metricsEndpoint "github.com/ariden83/blockchain/internal/endpoint/metrics"

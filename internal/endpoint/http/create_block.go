@@ -36,8 +36,8 @@ func (e *EndPoint) handleCreateBlock(rw http.ResponseWriter, r *http.Request) {
 
 	newBlock, err := e.transaction.WriteBlock(
 		transactions.WriteBlockInput{
-			PubKey:     req.PubKey,
-			PrivateKey: req.PrivateKey,
+			PubKey:     []byte(req.PubKey),
+			PrivateKey: []byte(req.PrivateKey),
 		})
 	e.Handle(err)
 

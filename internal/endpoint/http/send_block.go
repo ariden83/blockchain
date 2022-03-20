@@ -12,9 +12,10 @@ import (
 
 // Message takes incoming JSON payload for writing heart rate
 type SendBlockInput struct {
-	From   string   `json:"from"`
-	To     string   `json:"to"`
-	Amount *big.Int `json:"amount"`
+	PubKey  string   `json:"pubKey"`
+	PrivKey string   `json:"privkey"`
+	To      string   `json:"to"`
+	Amount  *big.Int `json:"amount"`
 }
 
 func (e *EndPoint) handleSendBlock(rw http.ResponseWriter, r *http.Request) {
@@ -25,9 +26,9 @@ func (e *EndPoint) handleSendBlock(rw http.ResponseWriter, r *http.Request) {
 		e.Handle(err)
 	}
 
-	if req.From == "" {
+	if req.PubKey == "" {
 		err := pkgErr.ErrMissingFields
-		e.log.Error("Fail to create block", zap.Error(err))
+		e.log.Error("Empty pub key", zap.Error(err))
 		e.Handle(err)
 	}
 
@@ -38,8 +39,9 @@ func (e *EndPoint) handleSendBlock(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	e.transaction.SendBlock(transactions.SendBlockInput{
-		From:   req.From,
-		To:     req.To,
-		Amount: req.Amount,
+		PubKey:  []byte(req.PubKey),
+		PrivKey: []byte(req.PrivKey),
+		To:      []byte(req.To),
+		Amount:  req.Amount,
 	})
 }

@@ -24,8 +24,8 @@ func (e *EndPoint) CreateBlock(_ context.Context, req *api.CreateBlockInput) (*a
 
 	_, err := e.transaction.WriteBlock(
 		transactions.WriteBlockInput{
-			PubKey:     req.GetPubKey(),
-			PrivateKey: req.GetPrivateKey(),
+			PubKey:     []byte(req.GetPubKey()),
+			PrivateKey: []byte(req.GetPrivateKey()),
 		})
 	if err != nil {
 		return nil, pkgErr.GRPC(err)
