@@ -1,6 +1,9 @@
 package wallet
 
 import (
+	"github.com/LuisAcerv/btchdwallet/crypt"
+	"github.com/brianium/mnemonic"
+	"github.com/wemeetagain/go-hdwallet"
 	"log"
 	"testing"
 
@@ -21,6 +24,37 @@ func Test_Hash(t *testing.T) {
 			assert.Equal(t, mnemonicCurrent, mnemonicHash)
 		}
 	})
+}
+
+func Test_hdwallet_pubkey_always_same(t *testing.T) {
+	seed := crypt.CreateHash()
+	mnemonic, err := mnemonic.New([]byte(seed), mnemonic.English)
+	assert.NoError(t, err)
+
+	masterPrv := hdwallet.MasterKey([]byte(mnemonic.Sentence()))
+	masterPub := masterPrv.Pub()
+
+	for i := 1; i < 100; i++ {
+		masterPrvTest := hdwallet.MasterKey([]byte(mnemonic.Sentence()))
+		assert.Equal(t, masterPrv.String(), masterPrvTest.String())
+		assert.Equal(t, masterPub.String(), masterPrvTest.Pub().String())
+	}
+}
+
+func Test_hdwallet_privkey_string_privkey(t *testing.T) {
+	seed := crypt.CreateHash()
+	mnemonic, err := mnemonic.New([]byte(seed), mnemonic.English)
+	assert.NoError(t, err)
+
+	masterPrv := hdwallet.MasterKey([]byte(mnemonic.Sentence()))
+	masterStrPub := masterPrv.Pub().String()
+	strPrivKey := masterPrv.String()
+
+	for i := 1; i < 100; i++ {
+		masterPrvTest, err := hdwallet.StringWallet(strPrivKey)
+		assert.NoError(t, err)
+		assert.Equal(t, masterStrPub, masterPrvTest.Pub().String())
+	}
 }
 
 func Test_Create(t *testing.T) {
