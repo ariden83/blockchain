@@ -2,21 +2,21 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"os/signal"
+
+	"go.uber.org/zap"
+
+	"github.com/ariden83/blockchain/cmd/light/internal/persistance"
 	"github.com/ariden83/blockchain/config"
 	httpEndpoint "github.com/ariden83/blockchain/internal/endpoint/http"
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/logger"
 	"github.com/ariden83/blockchain/internal/metrics"
 	"github.com/ariden83/blockchain/internal/p2p"
-	"github.com/ariden83/blockchain/internal/wallet"
-
 	"github.com/ariden83/blockchain/internal/transactions"
-
-	"github.com/ariden83/blockchain/cmd/light/internal/persistance"
-	"go.uber.org/zap"
-	"log"
-	"os"
-	"os/signal"
+	"github.com/ariden83/blockchain/internal/wallet"
 )
 
 func main() {
