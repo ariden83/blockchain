@@ -3,7 +3,6 @@ package signschnorr
 import (
 	"crypto/sha256"
 
-	"fmt"
 	"math/big"
 	"os"
 	"testing"
@@ -49,8 +48,6 @@ func Test_Example_(t *testing.T) {
 		//sign, err = privKey.SignSchnorr(hash)
 		sign, err = signSchnorr(privKey, hash)
 		assert.NoError(t, err)
-		fmt.Println(fmt.Sprintf("**************************** SignSchnorr %+v", sign))
-
 	})
 
 	t.Run("example compress and decompress pubkey", func(t *testing.T) {
