@@ -80,18 +80,25 @@ local-seed:
 	-cli_level=INFO ./bin/main
 
 local-relay:
-	@echo "> Launch local seed ..."
+	@echo "> Launch local relay ..."
 	go fmt ./...
 	export GO111MODULE=on;
 	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/main ./tutorial/relay/.
 	-cli_level=INFO ./bin/main
 
 local-rsa-tutorial:
-	@echo "> Launch local seed ..."
+	@echo "> Launch local rsa tutorial ..."
 	go fmt ./...
 	export GO111MODULE=on;
 	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/tutorial ./tutorial/rsa-encryption/.
 	-cli_level=INFO ./bin/tutorial
+
+local-wscat-tutorial:
+	@echo "> Launch wscat tutorial ..."
+	go fmt ./...
+	export GO111MODULE=on;
+	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags "-X main.Version=$$GIT_TAG_NAME" -o bin/wscat-tutorial ./tutorial/wscat/.
+	-cli_level=INFO ./bin/wscat-tutorial
 
 local-sign-script:
 	@echo "> Launch local sign script ..."
