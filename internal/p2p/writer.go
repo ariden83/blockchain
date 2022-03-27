@@ -191,6 +191,7 @@ func (e *EndPoint) sendBlockChainFull(rw *bufio.ReadWriter) []byte {
 	return bytes
 }
 
+// @todo envoyer en stream
 func (e *EndPoint) sendWallets(rw *bufio.ReadWriter) []byte {
 	bytes, err := json.Marshal(e.wallets.GetSeeds())
 	if err != nil {

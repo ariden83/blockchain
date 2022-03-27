@@ -7,13 +7,13 @@ import (
 )
 
 func (e *EndPoint) ValidWallet(_ context.Context, req *api.ValidWalletInput) (*api.ValidWalletOutput, error) {
-	if req.GetPubKey() == nil {
+	if req.GetPrivKey() == nil {
 		err := pkgErr.ErrMissingFields
 		e.log.Error(err.Error())
 		return nil, pkgErr.GRPC(err)
 	}
 
-	valid := e.wallets.Validate(req.GetPubKey())
+	valid := e.wallets.Validate(req.GetPrivKey())
 	if !valid {
 		err := pkgErr.ErrSeedNotFound
 		e.log.Error(err.Error())

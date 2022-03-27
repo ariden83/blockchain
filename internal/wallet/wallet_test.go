@@ -1,14 +1,14 @@
 package wallet
 
 import (
-	"github.com/LuisAcerv/btchdwallet/crypt"
-	"github.com/brianium/mnemonic"
-	"github.com/wemeetagain/go-hdwallet"
 	"log"
 	"testing"
 
+	"github.com/LuisAcerv/btchdwallet/crypt"
+	"github.com/brianium/mnemonic"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/wemeetagain/go-hdwallet"
 
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/logger"
@@ -70,7 +70,7 @@ func Test_Create(t *testing.T) {
 	w := Wallets{
 		log: logs,
 	}
-	password := []byte("my-password")
+	password := []byte("123456")
 	seedCreate, err := w.Create(password)
 	require.NoError(t, err)
 	require.NotNil(t, seedCreate)
@@ -78,7 +78,7 @@ func Test_Create(t *testing.T) {
 	require.NotEmpty(t, seedCreate.PubKey)
 	require.NotEmpty(t, seedCreate.Address)
 
-	isValidate := w.Validate([]byte(seedCreate.PubKey))
+	isValidate := w.Validate(seedCreate.PrivKey)
 	require.True(t, isValidate)
 
 	seed, err := w.GetSeed(seedCreate.Mnemonic, password)

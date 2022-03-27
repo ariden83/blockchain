@@ -77,6 +77,7 @@ var listStatus = map[int]codes.Code{
 	http.StatusFailedDependency:   codes.Internal,
 	http.StatusNotFound:           codes.NotFound,
 	http.StatusUnauthorized:       codes.PermissionDenied,
+	http.StatusResetContent:       codes.FailedPrecondition,
 }
 
 var (
@@ -87,7 +88,9 @@ var (
 	ErrInternalError           = New("internal error", WithStatus(http.StatusForbidden))
 	ErrInternalDependencyError = New("internal error", WithStatus(http.StatusFailedDependency))
 	ErrSeedNotFound            = New("seed not found", WithStatus(http.StatusNotFound))
+	ErrRecreatePassword        = New("recreate seed password", WithStatus(http.StatusResetContent))
 	ErrInvalidCaptcha          = New("invalid captcha", WithStatus(http.StatusUnauthorized))
 	ErrAlreadyConnected        = New("alreadyConnected", WithStatus(http.StatusFound))
 	ErrNotEnoughFunds          = New("not enough funds", WithStatus(http.StatusUnauthorized))
+	ErrorSeedPasswordInvalid   = New("invalid password", WithStatus(http.StatusResetContent))
 )

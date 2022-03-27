@@ -4,6 +4,7 @@ import (
 	"errors"
 	"math/big"
 
+	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/utils"
 )
 
@@ -22,8 +23,8 @@ func (t *Transactions) GetLastBlock() ([]byte, *big.Int, error) {
 		return lastHash, nil, err
 	}
 
-	block, err := utils.DeserializeBlock(serializeBloc)
-	if err != nil {
+	block := &blockchain.Block{}
+	if err := utils.Deserialize(serializeBloc, block); err != nil {
 		return lastHash, nil, err
 	}
 

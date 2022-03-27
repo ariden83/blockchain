@@ -283,14 +283,14 @@ func (e *EndPoint) readNewBlock(msg event.Message) {
 }
 
 func (e *EndPoint) readWallets(chain []byte) {
-	seedsReceived := []wallet.Seed{}
+	seedsReceived := []wallet.SeedNoPrivKey{}
 
 	if err := json.Unmarshal(chain, &seedsReceived); err != nil {
 		e.log.Error("fail to unmarshal blockChain received", zap.Error(err))
 		return
 	}
 
-	if len(seedsReceived) <= len(*e.wallets.GetSeeds()) {
+	if len(seedsReceived) <= len(e.wallets.GetSeeds()) {
 		e.log.Info("seeds received smaller than current")
 		return
 	}

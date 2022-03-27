@@ -108,11 +108,13 @@ func main() {
 	go func() {
 		sig := make(chan os.Signal, 1)
 		signal.Notify(sig, syscall.SIGKILL, syscall.SIGINT)
-		<-sig
-		stop <- fmt.Errorf("received Interrupt signal")
+		err := <-sig
+		stop <- fmt.Errorf("received Interrupt signal %v", err)
 	}()
 
 	err = <-stop
+
+	logs.Info("kill service", zap.Error(err))
 
 	stopCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

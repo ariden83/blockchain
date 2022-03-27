@@ -175,10 +175,10 @@ func (e *Explorer) inscriptionAPI(rw http.ResponseWriter, r *http.Request) {
 		e.JSONfail(pkgErr.ErrInternalError, rw)
 		return
 	}
-	store.Set(sessionLabelUserID, wallet.PubKey)
+	store.Set(sessionLabelUserID, string(wallet.PrivKey))
 	store.Save()
 
-	mnemonic, err := decoder.Encrypt([]byte(wallet.Mnemonic), decoder.GetPrivateKey())
+	mnemonic, err := decoder.Encrypt(wallet.Mnemonic, decoder.GetPrivateKey())
 	if err != nil {
 		logCTX.Error("fail to Encrypt mnemonic", zap.String("mnemonic", string(wallet.Mnemonic)))
 		e.JSONfail(pkgErr.ErrInternalError, rw)
@@ -207,13 +207,13 @@ func (e *Explorer) inscriptionValidateAPI(rw http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	pubKey, ok := store.Get(sessionLabelUserID)
+	privKey, ok := store.Get(sessionLabelUserID)
 	if !ok {
 		e.JSONfail(pkgErr.ErrInternalError, rw)
 		return
 	}
 
-	output, err := e.model.ValidWallet(r.Context(), []byte(pubKey.(string)))
+	output, err := e.model.ValidWallet(r.Context(), []byte(privKey.(string)))
 	if err != nil {
 		e.JSONfail(err, rw)
 		return

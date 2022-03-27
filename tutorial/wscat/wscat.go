@@ -15,7 +15,7 @@ var (
 	extraHeaders = map[string]string{
 		"action": "auth",
 		"key":    "PKALQ7J68RKIHCHUZT47",
-		"secret": "*",
+		"secret": "2KevuZB2AjUZ1di6OX9R7IQK5HhS3jV1qODsRKTx",
 	}
 	oneOnly = false
 )

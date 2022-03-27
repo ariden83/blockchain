@@ -276,6 +276,7 @@ func (e *Explorer) loginAPI(rw http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logCTX.Warn("fail to get user ip", zap.Error(err))
 	}
+
 	if e.reCaptcha != nil {
 		if valid := e.reCaptcha.Verify(req.Recaptcha, ip); !valid {
 			logCTX.Warn("fail to verify captcha", zap.String("captcha", req.Recaptcha))
@@ -296,7 +297,7 @@ func (e *Explorer) loginAPI(rw http.ResponseWriter, r *http.Request) {
 		e.JSONfail(pkgErr.ErrInternalError, rw)
 		return
 	}
-	store.Set(sessionLabelUserID, wallet.PubKey)
+	store.Set(sessionLabelUserID, string(wallet.PrivKey))
 	store.Save()
 
 	e.JSON(rw, postLoginAPIBodyRes{"ok"})

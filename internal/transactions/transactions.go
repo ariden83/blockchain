@@ -365,7 +365,7 @@ func (t *Transactions) FindUserBalance(pubKey []byte) *big.Int {
 }
 
 func (t *Transactions) FindUserTokensSend(pubKey []byte) *big.Int {
-	var tokensSend *big.Int = new(big.Int)
+	tokensSend := new(big.Int)
 
 	iter := iterator.BlockChainIterator{
 		CurrentHash: t.persistence.LastHash(),

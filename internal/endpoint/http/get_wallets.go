@@ -5,6 +5,6 @@ import (
 )
 
 func (e *EndPoint) handleGetWallets(w http.ResponseWriter, r *http.Request) {
-	allSeeds := e.wallets.GetAllPublicSeeds()
+	allSeeds := e.wallets.GetSeeds()
 	e.JSON(w, http.StatusBadRequest, allSeeds)
 }

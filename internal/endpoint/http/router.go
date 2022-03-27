@@ -7,7 +7,7 @@ import (
 
 func (e *EndPoint) makeMuxRouter() http.Handler {
 	muxRouter := mux.NewRouter()
-	muxRouter.HandleFunc("/ping", e.handleGetPOng).Methods("GET")
+	muxRouter.HandleFunc("/ping", e.handleGetPong).Methods("GET")
 	muxRouter.HandleFunc("/blockchain", e.handleGetBlockChain).Methods("GET")
 	muxRouter.HandleFunc("/balance", e.handleGetBalance).Methods("POST")
 	muxRouter.HandleFunc("/block", e.handleCreateBlock).Methods("POST")

@@ -3,17 +3,16 @@ package utils
 import (
 	"bytes"
 	"encoding/gob"
-	"github.com/ariden83/blockchain/internal/blockchain"
 )
 
-func DeserializeBlock(data []byte) (*blockchain.Block, error) {
-	var block blockchain.Block
+type DeserializedOutput interface{}
 
+func Deserialize(data []byte, i DeserializedOutput) error {
 	decoder := gob.NewDecoder(bytes.NewReader(data))
 
-	err := decoder.Decode(&block)
+	err := decoder.Decode(i)
 
-	return &block, err
+	return err
 }
 
 type SerializeInput interface{}

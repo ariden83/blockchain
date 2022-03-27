@@ -27,5 +27,6 @@ func (e *EndPoint) CreateWallet(_ context.Context, input *api.CreateWalletInput)
 		Mnemonic: seed.Mnemonic,
 		Address:  seed.Address,
 		PubKey:   seed.PubKey,
+		PrivKey:  seed.PrivKey,
 	}, nil
 }

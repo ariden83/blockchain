@@ -86,15 +86,16 @@ message GetWalletInput {
 }
 
 message GetWalletOutput {
-    string address = 1;
+    bytes address = 1;
     string timestamp = 2;
-    string pubKey = 3;
+    bytes pubKey = 3;
+    bytes privKey = 4;
 }
 
 message ValidWalletInput {
     // Mandatory field
     Context context = 1;
-    bytes pubKey = 2;
+    bytes privKey = 2;
 }
 
 message ValidWalletOutput {
@@ -109,8 +110,9 @@ message CreateWalletInput {
 
 message CreateWalletOutput {
     bytes mnemonic = 1;
-    string address = 2;
-    string pubKey = 3;
+    bytes address = 2;
+    bytes pubKey = 3;
+    bytes privKey = 4;
 }
 
 message CreateBlockInput {

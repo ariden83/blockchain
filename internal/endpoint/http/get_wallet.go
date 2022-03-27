@@ -12,9 +12,9 @@ type GetWalletInput struct {
 }
 
 type GetWalletOutput struct {
-	Address  string `json:"address"`
-	PubKey   string `json:"public_key"`
-	Mnemonic []byte `json:"mnemonic"`
+	Address string `json:"address"`
+	PubKey  string `json:"public_key"`
+	PrivKey string `json:"private_key"`
 }
 
 func (e *EndPoint) handleGetWallet(rw http.ResponseWriter, r *http.Request) {
@@ -38,7 +38,8 @@ func (e *EndPoint) handleGetWallet(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	e.JSON(rw, http.StatusCreated, GetWalletOutput{
-		Address: seed.Address,
-		PubKey:  seed.PubKey,
+		Address: string(seed.Address),
+		PubKey:  string(seed.PubKey),
+		PrivKey: string(seed.PrivKey),
 	})
 }

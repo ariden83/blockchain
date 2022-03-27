@@ -12,21 +12,6 @@ type BlockChainIterator struct {
 	// Database    *badger.DB
 }
 
-func (b *BlockChainIterator) Next() (*blockchain.Block, error) {
-	val, err := b.Persistence.GetCurrentHashSerialize(b.CurrentHash)
-	if err != nil {
-		return nil, err
-	}
-
-	block, err := utils.DeserializeBlock(val)
-	if err != nil {
-		return nil, err
-	}
-
-	b.CurrentHash = block.PrevHash
-	return block, nil
-}
-
 // Iterator takes our BlockChain struct and returns it as a BlockCHainIterator struct
 func New(p persistence.IPersistence) *BlockChainIterator {
 	iterator := BlockChainIterator{
@@ -35,4 +20,19 @@ func New(p persistence.IPersistence) *BlockChainIterator {
 	}
 
 	return &iterator
+}
+
+func (b *BlockChainIterator) Next() (*blockchain.Block, error) {
+	val, err := b.Persistence.GetCurrentHashSerialize(b.CurrentHash)
+	if err != nil {
+		return nil, err
+	}
+
+	block := &blockchain.Block{}
+	if err := utils.Deserialize(val, block); err != nil {
+		return nil, err
+	}
+
+	b.CurrentHash = block.PrevHash
+	return block, nil
 }

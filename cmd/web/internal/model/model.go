@@ -108,13 +108,13 @@ func (m *Model) GetBalance(ctx context.Context, userKey, userAddress string) (*a
 	return data, nil
 }
 
-func (m *Model) ValidWallet(ctx context.Context, pubKey []byte) (*api.ValidWalletOutput, error) {
+func (m *Model) ValidWallet(ctx context.Context, privKey []byte) (*api.ValidWalletOutput, error) {
 	var cancel context.CancelFunc
 	ctx, cancel = context.WithTimeout(ctx, time.Duration(m.timeOut)*time.Second)
 	defer cancel()
 
 	data, err := (*m.client).ValidWallet(ctx, &api.ValidWalletInput{
-		PubKey: pubKey,
+		PrivKey: privKey,
 	})
 	if err != nil {
 		m.log.Info("Cannot valid inscription", zap.Error(err))
