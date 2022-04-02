@@ -126,8 +126,7 @@ message CreateBlockOutput {}
 message GetBalanceInput{
     // Mandatory field
     Context context = 1;
-    string address = 2;
-    string pubKey = 3;
+    bytes privKey = 2;
 }
 
 message GetBalanceOutput{

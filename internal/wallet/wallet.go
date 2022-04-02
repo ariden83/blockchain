@@ -36,6 +36,7 @@ type IWallets interface {
 	GetSeeds() []SeedNoPrivKey
 	UpdateSeeds([]SeedNoPrivKey)
 	Validate([]byte) bool
+	GetUserAddress([]byte) string
 }
 
 func Init(cfg config.Wallet, log *zap.Logger) (*Wallets, error) {

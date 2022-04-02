@@ -30,7 +30,14 @@ func (e *Explorer) walletPage(rw http.ResponseWriter, r *http.Request) {
 		e.fail(pkgErr.ErrInternalError, rw)
 		return
 	}
-	accessToken, _ := store.Get(sessionLabelAccessToken)
+
+	accessToken, ok := store.Get(sessionLabelAccessToken)
+	if !ok {
+		logCTX.Error("fail to get token")
+		e.fail(pkgErr.ErrInternalError, rw)
+		return
+	}
+
 	token, err := e.authServer.Manager.LoadAccessToken(r.Context(), accessToken.(string))
 	if err != nil {
 		logCTX.Error("fail to load access token", zap.Error(err))
@@ -38,25 +45,28 @@ func (e *Explorer) walletPage(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	wallet, err := e.model.GetBalance(r.Context(), token.GetUserID(), token.GetUserID())
+	wallet, err := e.model.GetBalance(r.Context(), token.GetUserID())
 	if err != nil {
 		logCTX.Error("fail to get balance", zap.Error(err))
 		e.fail(pkgErr.ErrInternalError, rw)
 		return
 	}
 
-	data := walletsData{
+	frontData := walletsData{
+		FrontData: e.frontData(rw, r).
+			JS([]string{
+				"/static/wallet/vue-simple-progress.min.js?v0.0.2",
+				"/static/wallet/wallet.js?v0.0.1",
+			}).
+			Css([]string{
+				"/static/wallet/wallet.css?0.0.1",
+			}).
+			Title("wallet page"),
 		Address:       wallet.Address,
 		Balance:       wallet.Balance,
 		TotalReceived: wallet.TotalReceived,
 		TotalSent:     wallet.TotalSent,
-		FrontData: &FrontData{
-			PageTitle:    e.metadata.Title + " - " + "Wallet page",
-			Authentified: true,
-			Menus:        getMenus(),
-			Javascripts:  []string{},
-		},
 	}
 
-	templates.ExecuteTemplate(rw, "wallet", data)
+	e.ExecuteTemplate(rw, r, "wallet", frontData)
 }

@@ -1,11 +1,11 @@
-{{ define "wallet" }}<!DOCTYPE html>
+{{ define "wallet-en" }}<!DOCTYPE html>
 <html lang="en">
 {{ template "head" . }}
 <body>
 <div class="container-fluid">
   {{ template "header" . }}
 
-  <main>
+  <main id="app">
     {{$title := "Blockchain-Altcoin - Your wallet"}}
     {{ template "title" $title}}
     <section class="container">
@@ -38,6 +38,8 @@
         {{ end }}
 
       </table>
+
+      <progress-bar></progress-bar>
     </section>
   </main>
 

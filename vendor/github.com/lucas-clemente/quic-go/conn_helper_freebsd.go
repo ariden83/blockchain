@@ -1,10 +1,13 @@
+//go:build freebsd
 // +build freebsd
 
 package quic
 
 import "golang.org/x/sys/unix"
 
-const msgTypeIPTOS = unix.IP_RECVTOS
+const (
+	msgTypeIPTOS = unix.IP_RECVTOS
+)
 
 const (
 	ipv4RECVPKTINFO = 0x7
@@ -15,3 +18,5 @@ const (
 	msgTypeIPv4PKTINFO = 0x7
 	msgTypeIPv6PKTINFO = 0x2e
 )
+
+const batchSize = 8
