@@ -1,8 +1,10 @@
 package grpc
 
 import (
-	"github.com/ariden83/blockchain/pkg/api"
 	"go.uber.org/zap"
+
+	"github.com/ariden83/blockchain/pkg/api"
+	pkgErr "github.com/ariden83/blockchain/pkg/errors"
 )
 
 func (e *EndPoint) GetTraces(_ *api.TraceInput, stream api.Api_GetTracesServer) error {
@@ -22,7 +24,7 @@ func (e *EndPoint) GetTraces(_ *api.TraceInput, stream api.Api_GetTracesServer) 
 				State: result.State.String(),
 			}); err != nil {
 				e.log.Error("error on sending trace to stream", zap.Error(err), zap.String("id", result.ID))
-				return err
+				return pkgErr.ErrInternalError
 			}
 
 		} else {
