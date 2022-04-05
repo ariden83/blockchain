@@ -36,7 +36,43 @@
         {{ end }}
 
       </table>
-      <vue-simple-progress size="small" :val="20" text="20%"></vue-simple-progress>
+
+      <div :class="currentRetry < maxRetry ? '' : 'hidden'" @click="callStartCreateToken()" v-bind:class="{
+                clickable: isReactive
+              }">
+        <div class="progress__wrapper" :style="styleData['progress__wrapper']">
+        <span v-for="(step, index) in steps"
+              :key="'step_' + step"
+              class="progress__block"
+              :style="styleData['progress__block']"><div
+              class="progress__bubble"
+              :style="{
+            ...styleData['progress__bubble'],
+            ...getColors('progress__bubble', index),
+          }">
+        ${ index + 1 }
+        </div>
+            <span :style="{
+                ...styleData['progress__label'],
+                ...getColors('progress__label', index),
+              }"
+              v-if="showLabel" class="progress__label">${ step }</span>
+            <div v-if="
+                (showBridge || showBridgeOnSmallDevices) && index != steps.length - 1
+              "
+                    v-bind:class="{
+                'hide-on-large': !showBridge,
+                'display-on-small': showBridgeOnSmallDevices,
+              }"
+                    :style="{
+                ...styleData['progress__bridge'],
+                ...getColors('progress__bridge', index),
+              }"
+              class="progress__bridge" ></div>
+          </span>
+        </div>
+        <div><p class="txt-error">${ errorToken }</p></div>
+      </div>
     </section>
   </main>
 

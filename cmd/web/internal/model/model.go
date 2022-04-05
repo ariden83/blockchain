@@ -119,3 +119,18 @@ func (m *Model) ValidWallet(ctx context.Context, privKey []byte) (*api.ValidWall
 	}
 	return data, nil
 }
+
+func (m *Model) CreateBlock(ctx context.Context, privKey string) (*api.CreateBlockOutput, error) {
+	var cancel context.CancelFunc
+	ctx, cancel = context.WithTimeout(ctx, time.Duration(m.timeOut)*time.Second)
+	defer cancel()
+
+	data, err := (*m.client).CreateBlock(ctx, &api.CreateBlockInput{
+		PrivKey: []byte(privKey),
+	})
+	if err != nil {
+		m.log.Info("Cannot create block", zap.Error(err))
+		return data, err
+	}
+	return data, nil
+}

@@ -114,7 +114,7 @@ type callFiles struct {
 	Token string
 }
 
-func (e *EndPoint) callFiles(rw *bufio.ReadWriter) []byte {
+func (e *EndPoint) callFiles(_ *bufio.ReadWriter) []byte {
 	bytes, err := json.Marshal(callFiles{
 		Token: e.cfg.Token,
 	})
@@ -126,7 +126,7 @@ func (e *EndPoint) callFiles(rw *bufio.ReadWriter) []byte {
 	return bytes
 }
 
-func (e *EndPoint) sendAddress(rw *bufio.ReadWriter) []byte {
+func (e *EndPoint) sendAddress(_ *bufio.ReadWriter) []byte {
 
 	bytes, err := json.Marshal(address.GetNewAddress())
 	if err != nil {
@@ -137,7 +137,7 @@ func (e *EndPoint) sendAddress(rw *bufio.ReadWriter) []byte {
 	return bytes
 }
 
-func (e *EndPoint) resendBlock(rw *bufio.ReadWriter) []byte {
+func (e *EndPoint) resendBlock(_ *bufio.ReadWriter) []byte {
 	bytes, err := json.Marshal(blockchain.BlockChain)
 	if err != nil {
 		e.log.Error("fail to marshal blockChain", zap.Error(err))
@@ -147,7 +147,7 @@ func (e *EndPoint) resendBlock(rw *bufio.ReadWriter) []byte {
 	return bytes
 }
 
-func (e *EndPoint) sendBlock(rw *bufio.ReadWriter, block validation.Validator) []byte {
+func (e *EndPoint) sendBlock(_ *bufio.ReadWriter, block validation.Validator) []byte {
 	bytes, err := json.Marshal(block)
 	if err != nil {
 		e.log.Error("fail to marshal block message to send", zap.Error(err))
@@ -156,7 +156,7 @@ func (e *EndPoint) sendBlock(rw *bufio.ReadWriter, block validation.Validator) [
 	return bytes
 }
 
-func (e *EndPoint) sendBlockChain(rw *bufio.ReadWriter) []byte {
+func (e *EndPoint) sendBlockChain(_ *bufio.ReadWriter) []byte {
 	spew.Dump(blockchain.BlockChain)
 	bytes, err := json.Marshal(blockchain.BlockChain)
 	if err != nil {
@@ -167,7 +167,7 @@ func (e *EndPoint) sendBlockChain(rw *bufio.ReadWriter) []byte {
 	return bytes
 }
 
-func (e *EndPoint) sendBlockChainFull(rw *bufio.ReadWriter) []byte {
+func (e *EndPoint) sendBlockChainFull(_ *bufio.ReadWriter) []byte {
 
 	blocks := []blockchain.Block{}
 	iterator := iterator.New(e.persistence)
@@ -192,8 +192,14 @@ func (e *EndPoint) sendBlockChainFull(rw *bufio.ReadWriter) []byte {
 }
 
 // @todo envoyer en stream
-func (e *EndPoint) sendWallets(rw *bufio.ReadWriter) []byte {
-	bytes, err := json.Marshal(e.wallets.GetSeeds())
+func (e *EndPoint) sendWallets(_ *bufio.ReadWriter) []byte {
+	listSeeds, err := e.wallets.GetSeeds()
+	if err != nil {
+		e.log.Error("fail to marshal wallets", zap.Error(err))
+		return []byte{}
+	}
+
+	bytes, err := json.Marshal(listSeeds)
 	if err != nil {
 		e.log.Error("fail to marshal wallets", zap.Error(err))
 		return []byte{}
@@ -202,6 +208,6 @@ func (e *EndPoint) sendWallets(rw *bufio.ReadWriter) []byte {
 	return bytes
 }
 
-func (e *EndPoint) sendPool(rw *bufio.ReadWriter) []byte {
+func (e *EndPoint) sendPool(_ *bufio.ReadWriter) []byte {
 	return []byte{}
 }

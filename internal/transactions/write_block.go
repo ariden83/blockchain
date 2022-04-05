@@ -1,10 +1,11 @@
 package transactions
 
 import (
-	"errors"
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/p2p/address"
 	"github.com/ariden83/blockchain/internal/p2p/validation"
+	"github.com/ariden83/blockchain/internal/transactions/trace"
+	pkgError "github.com/ariden83/blockchain/pkg/errors"
 )
 
 func (t *Transactions) WriteBlock(privateKey []byte) (*blockchain.Block, error) {
@@ -12,11 +13,15 @@ func (t *Transactions) WriteBlock(privateKey []byte) (*blockchain.Block, error) 
 	if err != nil {
 		return nil, err
 	}
+
+	t.trace.Push(blockchain.NextID(index).String(), trace.Minage)
+
 	//mutex.Lock()
 	cbtx := t.CoinBaseTx(privateKey)
 	cbtx.SetID()
 
 	newBlock := blockchain.AddBlock(lastHash, index, cbtx)
+	t.trace.Push(index.String(), trace.Create)
 	//mutex.Unlock()
 
 	if blockchain.IsBlockValid(newBlock, blockchain.BlockChain[len(blockchain.BlockChain)-1]) {
@@ -38,7 +43,7 @@ func (t *Transactions) WriteBlock(privateKey []byte) (*blockchain.Block, error) 
 		e.Handle(err)
 		spew.Dump(blockchain.BlockChain)*/
 	} else {
-		return nil, errors.New("new block created is invalid")
+		return nil, pkgError.ErrCreatedBlockIsInvalid
 	}
 
 	return &newBlock, nil

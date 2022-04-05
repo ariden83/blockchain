@@ -172,18 +172,21 @@ func IsBlockValid(newBlock, oldBlock Block) bool {
 	return true
 }
 
+func NextID(index *big.Int) *big.Int {
+	newIndex := big.NewInt(0)
+	return newIndex.Add(index, big.NewInt(1))
+}
+
 // AddBlock create a new block using previous block's hash
 func AddBlock(lastHash []byte, index *big.Int, coinBase *Transaction) Block {
 	var (
 		t        = time.Now().UnixNano() / int64(time.Millisecond)
-		newIndex = big.NewInt(0)
 		newBlock Block
 		i        uint
 	)
-	newIndex = newIndex.Add(index, big.NewInt(1))
 
 	newBlock = Block{
-		Index:        newIndex,
+		Index:        NextID(index),
 		Timestamp:    t,
 		PrevHash:     lastHash,
 		Difficulty:   difficulty.Current.Int(),

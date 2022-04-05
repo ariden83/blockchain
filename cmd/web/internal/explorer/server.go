@@ -18,6 +18,7 @@ import (
 	"github.com/go-oauth2/oauth2/v4/store"
 	"github.com/go-session/session"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/urfave/negroni"
@@ -44,6 +45,7 @@ type Explorer struct {
 	authServer    *server.Server
 	reCaptcha     *recaptcha.Captcha
 	locales       *locales.Locales
+	ws            *websocket.Upgrader
 }
 
 type Healthz struct {
@@ -112,6 +114,18 @@ func WithRecaptcha(cfg config.ReCaptcha, log *zap.Logger) func(*Explorer) {
 	}
 	return func(e *Explorer) {
 		e.reCaptcha = c
+	}
+}
+
+func WithWebSockets() func(*Explorer) {
+	return func(e *Explorer) {
+		e.ws = &websocket.Upgrader{
+			ReadBufferSize:  1024,
+			WriteBufferSize: 1024,
+			CheckOrigin: func(r *http.Request) bool {
+				return true
+			},
+		}
 	}
 }
 

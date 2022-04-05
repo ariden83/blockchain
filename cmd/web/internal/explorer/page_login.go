@@ -160,6 +160,7 @@ const (
 	sessionLabelUserID       string = "LoggedInUserID"
 	sessionLabelAccessToken  string = "LoggedAccessToken"
 	sessionLabelRefreshToken string = "LoggedRefreshToken"
+	sessionCurrentBlock      string = "currentBlock"
 )
 
 const (

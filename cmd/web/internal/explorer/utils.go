@@ -3,6 +3,7 @@ package explorer
 import (
 	"encoding/json"
 	pkgErr "github.com/ariden83/blockchain/pkg/errors"
+	"github.com/go-session/session"
 	"go.uber.org/zap"
 	"io"
 	"net/http"
@@ -111,6 +112,27 @@ func (e *Explorer) decodeBody(rw http.ResponseWriter, logCTX *zap.Logger, body i
 		return err
 	}
 	return nil
+}
+
+func (e *Explorer) getUserID(rw http.ResponseWriter, r *http.Request) (session.Store, string, error) {
+	store, err := session.Start(r.Context(), rw, r)
+	if err != nil {
+		e.logCTX("getUserID").Error("fail to start session", zap.Error(err))
+		return store, "", err
+	}
+
+	accessToken, ok := store.Get(sessionLabelAccessToken)
+	if !ok {
+		e.logCTX("getUserID").Error("fail to get token")
+		return store, "", err
+	}
+
+	token, err := e.authServer.Manager.LoadAccessToken(r.Context(), accessToken.(string))
+	if err != nil {
+		e.logCTX("getUserID").Error("fail to load access token", zap.Error(err))
+		return store, "", err
+	}
+	return store, token.GetUserID(), nil
 }
 
 func dumpRequest(writer io.Writer, header string, r *http.Request) error {

@@ -28,8 +28,12 @@ func (e *EndPoint) handleCreateBlock(rw http.ResponseWriter, r *http.Request) {
 		e.Handle(err)
 	}
 
-	newBlock, err := e.transaction.WriteBlock([]byte(req.From))
-	e.Handle(err)
+	go func() {
+		_, err := e.transaction.WriteBlock([]byte(req.From))
+		if err != nil {
+			e.log.Error("invalid block", zap.Error(err))
+		}
+	}()
 
-	e.JSON(rw, http.StatusCreated, newBlock)
+	e.JSON(rw, http.StatusProcessing, "new block en cours de création")
 }

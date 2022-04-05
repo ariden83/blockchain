@@ -33,7 +33,7 @@ type IWallets interface {
 	Close() error
 	DBExists() bool
 	GetSeed([]byte, []byte) (*Seed, error)
-	GetSeeds() []SeedNoPrivKey
+	GetSeeds() ([]SeedNoPrivKey, error)
 	UpdateSeeds([]SeedNoPrivKey)
 	Validate([]byte) bool
 	GetUserAddress([]byte) string
@@ -56,7 +56,7 @@ func Init(cfg config.Wallet, log *zap.Logger) (*Wallets, error) {
 	return &wallets, err
 }
 
-func (w *Wallets) GetSeeds() []SeedNoPrivKey {
+func (w *Wallets) GetSeeds() ([]SeedNoPrivKey, error) {
 	var allSeeds []SeedNoPrivKey
 
 	if w.db == nil {
@@ -66,7 +66,7 @@ func (w *Wallets) GetSeeds() []SeedNoPrivKey {
 				Address:   j.Address,
 			})
 		}
-		return allSeeds
+		return allSeeds, nil
 	}
 
 	if err := w.db.View(func(txn *badger.Txn) error {
@@ -93,10 +93,10 @@ func (w *Wallets) GetSeeds() []SeedNoPrivKey {
 
 		return nil
 	}); err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return allSeeds
+	return allSeeds, nil
 }
 
 // @todo update wallet database

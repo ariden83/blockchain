@@ -93,4 +93,6 @@ var (
 	ErrAlreadyConnected        = New("alreadyConnected", WithStatus(http.StatusFound))
 	ErrNotEnoughFunds          = New("not enough funds", WithStatus(http.StatusUnauthorized))
 	ErrorSeedPasswordInvalid   = New("invalid password", WithStatus(http.StatusResetContent))
+	ErrCreatedBlockIsInvalid   = New("new block created is invalid", WithStatus(http.StatusRequestedRangeNotSatisfiable))
+	ErrNotImplemented          = New("not implemented", WithStatus(http.StatusNotImplemented))
 )

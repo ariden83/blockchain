@@ -46,9 +46,14 @@ type Metrics struct {
 	Port      int
 }
 
+type Trace struct {
+	Enabled bool `config:"memory_enabled"`
+}
+
 type Transactions struct {
 	Reward *big.Int
 	Miner
+	Trace Trace
 }
 
 // address of actual user which mine on this server
@@ -136,6 +141,9 @@ func getDefaultConfig() *Config {
 			Reward: big.NewInt(100),
 			Miner: Miner{
 				PubKey: "xpub661MyMwAqRbcFTZYiEcSv4Qj2Qr2NzQ7rjYc3iv9c6VSTxoYsqA9AA6nNbp8e9nVR9hRARXz5CApP6j5BxUnohyj89oSg3zZdDuKmGhdSFF",
+			},
+			Trace: Trace{
+				Enabled: true,
 			},
 		},
 		Database: Database{

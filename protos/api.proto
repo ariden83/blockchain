@@ -14,6 +14,7 @@ service Api {
     rpc ValidWallet(ValidWalletInput) returns (ValidWalletOutput) {}
     rpc GetWallet(GetWalletInput) returns (GetWalletOutput) {}
     rpc GetServersAddress(Ping) returns (Pong) {}
+    rpc  GetTraces (TraceInput) returns (stream TraceOutput) {}
 }
 
 message Ping {
@@ -118,10 +119,12 @@ message CreateWalletOutput {
 message CreateBlockInput {
     // Mandatory field
     Context context = 1;
-    string from = 3;
+    bytes privKey = 2;
 }
 
-message CreateBlockOutput {}
+message CreateBlockOutput {
+    string blockID = 1;
+}
 
 message GetBalanceInput{
     // Mandatory field
@@ -134,4 +137,11 @@ message GetBalanceOutput{
     string balance = 2;
     string totalReceived = 3;
     string totalSent = 4;
+}
+
+message TraceInput {}
+
+message TraceOutput {
+    string id = 1;
+    string state = 2;
 }

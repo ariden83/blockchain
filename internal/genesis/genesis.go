@@ -2,6 +2,8 @@ package genesis
 
 import (
 	"fmt"
+	"sync"
+
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/event"
@@ -10,7 +12,6 @@ import (
 	"github.com/ariden83/blockchain/internal/transactions"
 	"github.com/ariden83/blockchain/internal/utils"
 	"github.com/davecgh/go-spew/spew"
-	"sync"
 )
 
 var mutex = &sync.Mutex{}

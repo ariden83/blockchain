@@ -58,6 +58,7 @@ func main() {
 		transactions.WithPersistence(per),
 		transactions.WithLogs(logs),
 		transactions.WithEvents(evt),
+		transactions.WithTraces(cfg.Transactions.Trace),
 		transactions.WithConfig(cfg.Transactions))
 
 	wallets, err := wallet.Init(cfg.Wallet, logs)

@@ -26,7 +26,7 @@ func (t *Transactions) SendBlock(input SendBlockInput) error {
 	}
 
 	tx, err := t.New(input.From, input.To, input.Amount)
-	if err == ErrNotEnoughFunds {
+	if err == pkgError.ErrNotEnoughFunds {
 		t.log.Info("Transaction failed, not enough funds",
 			zap.Any("param", input),
 			zap.String("input", "sendBlock"))

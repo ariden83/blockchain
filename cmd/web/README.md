@@ -13,6 +13,7 @@ Wallet website. See website of project [blockchain-altcoin.com](https://www.bloc
 * Metamask [tutorial](https://metamask.io/)
 * Eth API [tutorial](https://eth.wiki/json-rpc/API#json-rpc-methods)
 * Brave [tutorial](brave://wallet/crypto/unlock)
+* Websocket [source](https://gist.github.com/owulveryck/57d8c2469fd1f8a840747b064c50ff4e)
 
 ## Command
 

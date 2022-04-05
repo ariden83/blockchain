@@ -290,7 +290,12 @@ func (e *EndPoint) readWallets(chain []byte) {
 		return
 	}
 
-	if len(seedsReceived) <= len(e.wallets.GetSeeds()) {
+	listSeeds, err := e.wallets.GetSeeds()
+	if err != nil {
+		e.log.Error("fail to get seeds", zap.Error(err))
+		return
+	}
+	if len(seedsReceived) <= len(listSeeds) {
 		e.log.Info("seeds received smaller than current")
 		return
 	}

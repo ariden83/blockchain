@@ -1,7 +1,6 @@
 package transactions
 
 import (
-	"errors"
 	"math/big"
 	"sync"
 	"time"
@@ -10,17 +9,17 @@ import (
 	"github.com/gcash/bchd/bchec"
 	"go.uber.org/zap"
 
+	signschnorr "github.com/ariden83/blockchain/internal/blockchain/signSchnorr"
+	"github.com/ariden83/blockchain/internal/transactions/trace"
+	pkgError "github.com/ariden83/blockchain/pkg/errors"
+
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/blockchain"
-	signschnorr "github.com/ariden83/blockchain/internal/blockchain/signSchnorr"
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/iterator"
 	"github.com/ariden83/blockchain/internal/persistence"
 	"github.com/ariden83/blockchain/internal/wallet"
-	pkgError "github.com/ariden83/blockchain/pkg/errors"
 )
-
-var ErrNotEnoughFunds = errors.New("Not enough funds")
 
 type Transactions struct {
 	Reward          *big.Int
@@ -28,6 +27,7 @@ type Transactions struct {
 	persistence     persistence.IPersistence
 	event           *event.Event
 	log             *zap.Logger
+	trace           *trace.Trace
 }
 
 type ITransaction interface {
@@ -39,6 +39,7 @@ type ITransaction interface {
 	WriteBlock([]byte) (*blockchain.Block, error)
 	GetLastBlock() ([]byte, *big.Int, error)
 	SendBlock(input SendBlockInput) error
+	Trace() *trace.Channel
 }
 
 var mutex = &sync.Mutex{}
@@ -74,6 +75,14 @@ func WithEvents(evt *event.Event) func(*Transactions) {
 func WithLogs(logs *zap.Logger) func(*Transactions) {
 	return func(e *Transactions) {
 		e.log = logs.With(zap.String("service", "transactions"))
+	}
+}
+
+func WithTraces(cfg config.Trace) func(*Transactions) {
+	return func(e *Transactions) {
+		if cfg.Enabled {
+			e.trace = trace.New(cfg)
+		}
 	}
 }
 
@@ -465,4 +474,11 @@ Work:
 		}
 	}
 	return accumulated, unspentOuts
+}
+
+func (t *Transactions) Trace() *trace.Channel {
+	if t.trace == nil {
+		return nil
+	}
+	return t.trace.NewReader()
 }

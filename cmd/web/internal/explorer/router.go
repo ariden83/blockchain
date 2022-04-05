@@ -44,6 +44,8 @@ func (e *Explorer) loadAPINonConnectedRoutes() {
 func (e *Explorer) loadAPIConnectedRoutes() {
 	s := e.router.PathPrefix("/p").Subrouter().StrictSlash(true)
 	s.HandleFunc("/token", e.tokenAPI).Methods(http.MethodPost)
+	s.HandleFunc("/block/create", e.createBlockAPI).Methods(http.MethodPost)
+	s.HandleFunc("/block/state", e.stateBlockAPI).Methods(http.MethodGet)
 	s.Use(e.validateToken)
 	s.Use(jsonHeader)
 }
