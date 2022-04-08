@@ -14,7 +14,7 @@ service Api {
     rpc ValidWallet(ValidWalletInput) returns (ValidWalletOutput) {}
     rpc GetWallet(GetWalletInput) returns (GetWalletOutput) {}
     rpc GetServersAddress(Ping) returns (Pong) {}
-    rpc  GetTraces (TraceInput) returns (stream TraceOutput) {}
+    rpc GetTraces (TraceInput) returns (stream TraceOutput) {}
 }
 
 message Ping {

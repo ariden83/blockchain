@@ -2,14 +2,12 @@ package http
 
 import (
 	"net/http"
+
+	protoAPI "github.com/ariden83/blockchain/pkg/api"
 )
 
-type getPongOutput struct {
-	Ping string `json:"ping"`
-}
-
 func (e *EndPoint) handleGetPong(rw http.ResponseWriter, _ *http.Request) {
-	e.JSON(rw, http.StatusOK, getPongOutput{
-		Ping: "pong",
+	e.JSON(rw, http.StatusOK, protoAPI.Pong{
+		Message: "pong",
 	})
 }

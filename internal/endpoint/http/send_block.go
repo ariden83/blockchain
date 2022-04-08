@@ -7,18 +7,12 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/ariden83/blockchain/internal/transactions"
+	"github.com/ariden83/blockchain/pkg/api"
 	pkgErr "github.com/ariden83/blockchain/pkg/errors"
 )
 
-// Message takes incoming JSON payload for writing heart rate
-type SendBlockInput struct {
-	From   string   `json:"from"`
-	To     string   `json:"to"`
-	Amount *big.Int `json:"amount"`
-}
-
 func (e *EndPoint) handleSendBlock(rw http.ResponseWriter, r *http.Request) {
-	req := &SendBlockInput{}
+	req := &api.SendBlockInput{}
 
 	log := e.log.With(zap.String("input", "sendBlock"))
 	if err := e.decodeBody(rw, log, r.Body, req); err != nil {
@@ -38,8 +32,10 @@ func (e *EndPoint) handleSendBlock(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	e.transaction.SendBlock(transactions.SendBlockInput{
-		From:   []byte(req.From),
-		To:     []byte(req.To),
-		Amount: req.Amount,
+		From:   []byte(req.GetFrom()),
+		To:     []byte(req.GetTo()),
+		Amount: new(big.Int),
 	})
+
+	e.JSON(rw, http.StatusCreated, api.SendBlockOutput{})
 }

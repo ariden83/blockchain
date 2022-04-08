@@ -1,24 +1,16 @@
 package http
 
 import (
-	pkgErr "github.com/ariden83/blockchain/pkg/errors"
-	"go.uber.org/zap"
 	"net/http"
+
+	"go.uber.org/zap"
+
+	"github.com/ariden83/blockchain/pkg/api"
+	pkgErr "github.com/ariden83/blockchain/pkg/errors"
 )
 
-type GetWalletInput struct {
-	Mnemonic string `json:"mnemonic"`
-	Password string `json:"password"`
-}
-
-type GetWalletOutput struct {
-	Address string `json:"address"`
-	PubKey  string `json:"public_key"`
-	PrivKey string `json:"private_key"`
-}
-
 func (e *EndPoint) handleGetWallet(rw http.ResponseWriter, r *http.Request) {
-	req := &GetWalletInput{}
+	req := &api.GetWalletInput{}
 
 	log := e.log.With(zap.String("input", "myWallet"))
 	if err := e.decodeBody(rw, log, r.Body, req); err != nil {
@@ -26,20 +18,20 @@ func (e *EndPoint) handleGetWallet(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Mnemonic == "" || req.Password == "" {
+	if string(req.Mnemonic) == "" || string(req.Password) == "" {
 		err := pkgErr.ErrMissingFields
-		e.log.Error(err.Error(), zap.String("mnemonic", req.Mnemonic))
+		e.log.Error(err.Error())
 		return
 	}
 
-	seed, err := e.wallets.GetSeed([]byte(req.Mnemonic), []byte(req.Password))
+	seed, err := e.wallets.GetSeed(req.GetMnemonic(), req.GetPassword())
 	if err != nil {
 		return
 	}
 
-	e.JSON(rw, http.StatusCreated, GetWalletOutput{
-		Address: string(seed.Address),
-		PubKey:  string(seed.PubKey),
-		PrivKey: string(seed.PrivKey),
+	e.JSON(rw, http.StatusCreated, api.GetWalletOutput{
+		Address: seed.Address,
+		PubKey:  seed.PubKey,
+		PrivKey: seed.PrivKey,
 	})
 }

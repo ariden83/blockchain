@@ -2,30 +2,20 @@ package http
 
 import (
 	"github.com/ariden83/blockchain/internal/event"
+	"github.com/ariden83/blockchain/pkg/api"
 	"go.uber.org/zap"
 	"net/http"
 )
 
-type CreateWalletInput struct {
-	Password string `json:"password"`
-}
-
-type CreateWalletOutput struct {
-	Address  string `json:"address"`
-	PubKey   string `json:"public_key"`
-	PrivKey  string `json:"private_key"`
-	Mnemonic []byte `json:"mnemonic"`
-}
-
 func (e *EndPoint) handleCreateWallet(w http.ResponseWriter, r *http.Request) {
-	req := &CreateWalletInput{}
+	req := &api.CreateWalletInput{}
 
 	log := e.log.With(zap.String("input", "createBlock"))
 	if err := e.decodeBody(w, log, r.Body, req); err != nil {
 		return
 	}
 
-	seed, err := e.wallets.Create([]byte(req.Password))
+	seed, err := e.wallets.Create(req.Password)
 	if err != nil {
 		e.log.Error("Fail to create wallet", zap.Error(err))
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -34,10 +24,10 @@ func (e *EndPoint) handleCreateWallet(w http.ResponseWriter, r *http.Request) {
 
 	e.event.Push(event.Message{Type: event.Wallet})
 
-	e.JSON(w, http.StatusCreated, CreateWalletOutput{
-		Address:  string(seed.Address),
-		PubKey:   string(seed.PubKey),
-		PrivKey:  string(seed.PrivKey),
+	e.JSON(w, http.StatusCreated, &api.CreateWalletOutput{
+		Address:  seed.Address,
+		PubKey:   seed.PubKey,
+		PrivKey:  seed.PrivKey,
 		Mnemonic: seed.Mnemonic,
 	})
 }

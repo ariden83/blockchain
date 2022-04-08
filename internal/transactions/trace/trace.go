@@ -1,6 +1,7 @@
 package trace
 
 import (
+	"fmt"
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/utils"
 )
@@ -48,8 +49,12 @@ type Trace struct {
 }
 
 func New(cfg config.Trace) *Trace {
+	if !cfg.Enabled {
+		return nil
+	}
 	t := &Trace{
-		channel: make(chan Message),
+		channel:     make(chan Message),
+		listChannel: map[string]Channel{},
 	}
 
 	go func() {
@@ -86,6 +91,7 @@ func (t *Trace) CloseReader(ch Channel) {
 	if ok {
 		delete(t.listChannel, ch.GetID())
 	}
+	fmt.Println(fmt.Sprintf("*************************** %v", t.listChannel))
 }
 
 func (t *Trace) Push(blockID string, state State) {

@@ -8,17 +8,17 @@ import (
 )
 
 func (e *EndPoint) GetTraces(_ *api.TraceInput, stream api.Api_GetTracesServer) error {
-
 	channel := e.transaction.Trace()
 	if channel == nil {
 		return nil
 	}
-
 	defer channel.Close()
 
 	for {
 		if result, more := <-channel.GetChan(); more {
-
+			if result.ID == "" {
+				continue
+			}
 			if err := stream.Send(&api.TraceOutput{
 				Id:    result.ID,
 				State: result.State.String(),
@@ -26,7 +26,6 @@ func (e *EndPoint) GetTraces(_ *api.TraceInput, stream api.Api_GetTracesServer) 
 				e.log.Error("error on sending trace to stream", zap.Error(err), zap.String("id", result.ID))
 				return pkgErr.ErrInternalError
 			}
-
 		} else {
 			break
 		}
