@@ -102,48 +102,63 @@ func WithXCache(cfg config.XCache) Option {
 func (e *EndPoint) Enabled() bool {
 	return e.enabled
 }
-
 func (e *EndPoint) Listen() {
+	stop := make(chan error, 1)
 	e.hasRequiredPort()
 
-	stop := make(chan error, 1)
+	go e.alertWaitFirstConnexion()
 
-	if err := e.makeBasicHost(); err != nil {
-		if strings.Contains(fmt.Sprint(err), protocolError) || strings.Contains(fmt.Sprint(err), addressAMReadyUseError) {
-			// permet de laisser a l'utilisateur de killer le script sans rester dans une boucle
-			time.Sleep(100 * time.Millisecond)
-			e.log.Error("fail to listen p2p", zap.Int("port", e.cfg.Port))
-			e.cfg.Port = e.cfg.Port + 1
-			e.Listen()
-			return
+	hasConnexion := false
+	for !hasConnexion {
+		hasBasicHost := false
+		for !hasBasicHost {
+			// try to connect to an existant host
+			if err := e.makeBasicHost(); err != nil {
+				if strings.Contains(fmt.Sprint(err), protocolError) || strings.Contains(fmt.Sprint(err), addressAMReadyUseError) {
+					time.Sleep(time.Millisecond * 10)
+					e.log.Error("fail to listen p2p", zap.Int("port", e.cfg.Port))
+					e.cfg.Port = e.cfg.Port + 1
+				} else {
+					e.log.Fatal("fail to listen p2p", zap.Error(err))
+				}
+
+			} else {
+				e.log.Info("basic host connexion created")
+				hasBasicHost = true
+			}
+
+			select {
+			case <-stop: // closes when the caller cancels the ctx
+				return
+			default:
+			}
 		}
 
-		e.log.Fatal("fail to listen p2p", zap.Error(err))
+		err := e.retryConnectToIPFS()
+		if err == nil {
+			e.log.Info("connected to ipfs")
+			hasConnexion = true
+		} else {
+			e.log.Warn("fail to connect to ipfs", zap.Error(err))
+		}
+
+		select {
+		case <-stop: // closes when the caller cancels the ctx
+			hasConnexion = true
+		default:
+			time.Sleep(time.Millisecond * 10)
+		}
 	}
-
-	go func() {
-		e.retryConnectToIPFS(stop)
-	}()
-
-	e.alertWaitFirstConnexion()
-
-	go func() {
-		time.Sleep(time.Second * 1)
-		err := <-stop
-		e.log.Error("try to restart IPFS with new port", zap.Error(err))
-		e.Listen()
-		return
-	}()
 }
 
-func (e *EndPoint) retryConnectToIPFS(restart chan error) {
+func (e *EndPoint) retryConnectToIPFS() error {
 	e.log.Info("listening for new connections", zap.Int("port", e.cfg.Port))
 	// Set a stream handler on host A. /p2p/1.0.0 is
 	// a user-defined protocol name.
 	e.host.SetStreamHandler("/p2p/1.0.0", e.handleStream)
 
 	if !e.HasTarget() {
-		return
+		return nil
 	}
 
 	if err := e.connectToIPFS(e.host); err != nil {
@@ -153,11 +168,11 @@ func (e *EndPoint) retryConnectToIPFS(restart chan error) {
 			time.Sleep(100 * time.Millisecond)
 			e.log.Error("fail to listen p2p", zap.Int("port", e.cfg.Port))
 			e.cfg.Port = e.cfg.Port + 1
-			restart <- err
-			return
+			return err
 		}
 		e.log.Fatal("fail to connect to IPFS", zap.Error(err))
 	}
+	return nil
 }
 
 func (e *EndPoint) PushMsgForFiles() {
