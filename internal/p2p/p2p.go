@@ -106,7 +106,7 @@ func (e *EndPoint) Listen() {
 	stop := make(chan error, 1)
 	e.hasRequiredPort()
 
-	go e.alertWaitFirstConnexion()
+	go e.alertWaitFirstConnexion(stop)
 
 	hasConnexion := false
 	for !hasConnexion {
@@ -389,24 +389,30 @@ func (e *EndPoint) makeBasicHost() error {
 	return nil
 }
 
-func (e *EndPoint) alertWaitFirstConnexion() {
+func (e *EndPoint) alertWaitFirstConnexion(stop chan error) {
 	if e.cfg.Target != "" {
 		return
 	}
-	go func() {
-		for {
-			if e.linked {
-				break
-			}
-			e.log.Warn("waiting for new P2P connexion ...")
-			if e.cfg.Secio {
-				e.log.Info(fmt.Sprintf("run \"go run main.go -p2p_target %s -secio\" on a different terminal", address.IAM))
-			} else {
-				e.log.Info(fmt.Sprintf("run \"go run main.go -p2p_target %s\" on a different terminal", address.IAM))
-			}
-			time.Sleep(30 * time.Second)
+
+	for {
+		if e.linked {
+			break
 		}
-	}()
+		e.log.Warn("waiting for new P2P connexion ...")
+		if e.cfg.Secio {
+			e.log.Info(fmt.Sprintf("run \"go run main.go -p2p_target %s -secio\" on a different terminal", address.IAM))
+		} else {
+			e.log.Info(fmt.Sprintf("run \"go run main.go -p2p_target %s\" on a different terminal", address.IAM))
+		}
+
+		select {
+		case <-stop: // closes when the caller cancels the ctx
+			break
+		default:
+		}
+
+		time.Sleep(30 * time.Second)
+	}
 }
 
 // Setup a stream handler.
