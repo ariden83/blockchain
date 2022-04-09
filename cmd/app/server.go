@@ -16,10 +16,10 @@ type Server struct {
 }
 
 func (s *Server) Start(stop chan error) {
-	if s.grpcServer.Enabled() {
+	if s.grpcServer != nil && s.grpcServer.Enabled() {
 		s.startGRPCServer(stop)
 	}
-	if s.httpServer.Enabled() {
+	if s.grpcServer != nil && s.httpServer.Enabled() {
 		s.startHTTPServer(stop)
 	}
 	s.startMetricsServer(stop)

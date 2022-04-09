@@ -57,10 +57,10 @@ func (e *EndPoint) readData(rw *bufio.ReadWriter) {
 				return
 			}
 			if str != "\n" {
-
 				mess := event.Message{}
 				if err := json.Unmarshal([]byte(str), &mess); err != nil {
-					e.log.Fatal("fail to unmarshal message received", zap.Error(err))
+					e.log.Error("fail to unmarshal message received", zap.String("message", str), zap.Error(err))
+					continue
 				}
 
 				if e.msgAlreadyReceived(mess.ID) {
@@ -83,7 +83,7 @@ func (e *EndPoint) readData(rw *bufio.ReadWriter) {
 				case event.Pool:
 					e.readPool(mess.Value)
 				case event.Files:
-					e.readFilesAsk(mess)
+					e.readFilesAsk()
 				case event.Address:
 					e.updateAddress(mess)
 				default:
@@ -309,7 +309,7 @@ func (e *EndPoint) readPool(_ []byte) {
 }
 
 // on renotifie wallets and blockChain
-func (e *EndPoint) readFilesAsk(m event.Message) {
+func (e *EndPoint) readFilesAsk() {
 	e.event.Push(event.Message{Type: event.BlockChainFull})
 	e.event.Push(event.Message{Type: event.Wallet})
 }

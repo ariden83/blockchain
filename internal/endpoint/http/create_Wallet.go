@@ -1,10 +1,12 @@
 package http
 
 import (
+	"net/http"
+
+	"go.uber.org/zap"
+
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/pkg/api"
-	"go.uber.org/zap"
-	"net/http"
 )
 
 func (e *EndPoint) handleCreateWallet(w http.ResponseWriter, r *http.Request) {

@@ -66,6 +66,7 @@ func New(cfg config.Trace) *Trace {
 
 func (t *Trace) setConcurrence() {
 	for data := range t.channel {
+		fmt.Println("************************************************* setConcurrence")
 		for _, c := range t.listChannel {
 			if c.toClose {
 				t.CloseReader(c)
@@ -89,6 +90,7 @@ func (t *Trace) NewReader() *Channel {
 func (t *Trace) CloseReader(ch Channel) {
 	_, ok := t.listChannel[ch.GetID()]
 	if ok {
+		fmt.Println(fmt.Sprintf("*************************** delete"))
 		delete(t.listChannel, ch.GetID())
 	}
 	fmt.Println(fmt.Sprintf("*************************** %v", t.listChannel))

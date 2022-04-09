@@ -364,7 +364,7 @@ func (t *Transactions) FindAllUserTransaction(pubKey string) []blockchain.TxOutp
 */
 
 func (t *Transactions) FindUserBalance(pubKey []byte) *big.Int {
-	var balance *big.Int = new(big.Int)
+	balance := new(big.Int)
 	UTXOs := t.FindUTXO(pubKey)
 
 	for _, out := range UTXOs {
@@ -415,7 +415,7 @@ func (t *Transactions) FindUserTokensSend(pubKey []byte) *big.Int {
 }
 
 func (t *Transactions) FindUserTokensReceived(pubKey []byte) *big.Int {
-	var tokensReceived *big.Int = new(big.Int)
+	tokensReceived := new(big.Int)
 
 	iter := iterator.BlockChainIterator{
 		CurrentHash: t.persistence.LastHash(),
@@ -456,7 +456,7 @@ func (t *Transactions) FindUserTokensReceived(pubKey []byte) *big.Int {
 func (t *Transactions) FindSpendableOutputs(pubKey []byte, amount *big.Int) (*big.Int, map[string][]int) {
 	unspentOuts := make(map[string][]int)
 	unspentTxs := t.FindUnspentTransactions(pubKey)
-	var accumulated *big.Int = new(big.Int)
+	accumulated := new(big.Int)
 
 Work:
 	for _, tx := range unspentTxs {
