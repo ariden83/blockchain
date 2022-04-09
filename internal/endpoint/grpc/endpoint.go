@@ -38,10 +38,13 @@ type EndPoint struct {
 	event       *event.Event
 	userAddress string
 	ready       bool
+	stop        chan error
 }
 
-func New(options ...func(*EndPoint)) *EndPoint {
-	ep := &EndPoint{}
+func New(stop chan error, options ...func(*EndPoint)) *EndPoint {
+	ep := &EndPoint{
+		stop: stop,
+	}
 
 	for _, o := range options {
 		o(ep)

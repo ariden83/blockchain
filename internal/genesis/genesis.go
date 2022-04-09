@@ -1,8 +1,11 @@
 package genesis
 
 import (
+	"errors"
 	"fmt"
 	"sync"
+
+	"github.com/davecgh/go-spew/spew"
 
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/blockchain"
@@ -11,7 +14,6 @@ import (
 	"github.com/ariden83/blockchain/internal/persistence"
 	"github.com/ariden83/blockchain/internal/transactions"
 	"github.com/ariden83/blockchain/internal/utils"
-	"github.com/davecgh/go-spew/spew"
 )
 
 var mutex = &sync.Mutex{}
@@ -47,23 +49,22 @@ func (g *Genesis) Load(stop chan error) {
 	// si y'a une instance, on la load
 	if g.p2p.Enabled() && g.p2p.HasTarget() {
 		// on notifie la demande de récupération des fichiers
-		g.p2p.PushMsgForFiles()
+		g.p2p.PushMsgForFiles(stop)
 		return
 	}
 
 	// sinon, on créé le premier hash
-
 	var lastHash []byte
 
 	// si les fichiers locaux n'existent pas
 	if !g.persistence.DBExists() {
-		stop <- fmt.Errorf("fail to open DB files")
+		stop <- errors.New("fail to open DB files")
 		return
 	}
 
 	lastHash, err := g.persistence.GetLastHash()
 	if err != nil {
-		stop <- fmt.Errorf("fail to get last hash")
+		stop <- errors.New("fail to get last hash")
 		return
 	}
 
@@ -74,7 +75,7 @@ func (g *Genesis) Load(stop chan error) {
 
 		val, err := g.persistence.GetCurrentHashSerialize(lastHash)
 		if err != nil {
-			stop <- fmt.Errorf("fail to get current hash")
+			stop <- errors.New("fail to get current hash")
 			return
 		}
 
@@ -92,7 +93,6 @@ func (g *Genesis) Load(stop chan error) {
 
 		spew.Dump(blockchain.BlockChain)
 	}
-
 }
 
 func (g *Genesis) createGenesis(stop chan error) []byte {
@@ -110,7 +110,7 @@ func (g *Genesis) createGenesis(stop chan error) []byte {
 
 	err = g.persistence.Update(firstHash, serializeBLock)
 	if err != nil {
-		stop <- fmt.Errorf("fail to update persistence")
+		stop <- errors.New("fail to update persistence")
 		return []byte{}
 	}
 	return firstHash

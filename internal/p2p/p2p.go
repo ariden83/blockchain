@@ -5,35 +5,35 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
-	"github.com/ariden83/blockchain/config"
-	"github.com/ariden83/blockchain/internal/wallet"
-	"github.com/libp2p/go-libp2p"
-	"github.com/libp2p/go-libp2p-core/crypto"
-	"github.com/libp2p/go-libp2p-core/routing"
-	noise "github.com/libp2p/go-libp2p-noise"
-	libp2ptls "github.com/libp2p/go-libp2p-tls"
 	"go.uber.org/zap"
 	"io"
 	mrand "math/rand"
+	"strings"
+	"time"
 
-	"github.com/ariden83/blockchain/internal/event"
-	"github.com/ariden83/blockchain/internal/p2p/address"
-	"github.com/ariden83/blockchain/internal/persistence"
-	"github.com/ariden83/blockchain/internal/xcache"
+	"github.com/libp2p/go-libp2p"
+	connmgr "github.com/libp2p/go-libp2p-connmgr"
 	net "github.com/libp2p/go-libp2p-core"
+	"github.com/libp2p/go-libp2p-core/crypto"
 	host "github.com/libp2p/go-libp2p-core/host"
 	"github.com/libp2p/go-libp2p-core/network"
 	peer "github.com/libp2p/go-libp2p-core/peer"
 	pstore "github.com/libp2p/go-libp2p-core/peerstore"
 	"github.com/libp2p/go-libp2p-core/protocol"
+	"github.com/libp2p/go-libp2p-core/routing"
+	dht "github.com/libp2p/go-libp2p-kad-dht"
+	noise "github.com/libp2p/go-libp2p-noise"
+	libp2pquic "github.com/libp2p/go-libp2p-quic-transport"
+	libp2ptls "github.com/libp2p/go-libp2p-tls"
 	ma "github.com/multiformats/go-multiaddr"
 	"github.com/satori/go.uuid"
-	"strings"
-	"time"
 
-	connmgr "github.com/libp2p/go-libp2p-connmgr"
-	dht "github.com/libp2p/go-libp2p-kad-dht"
-	libp2pquic "github.com/libp2p/go-libp2p-quic-transport"
+	"github.com/ariden83/blockchain/config"
+	"github.com/ariden83/blockchain/internal/event"
+	"github.com/ariden83/blockchain/internal/p2p/address"
+	"github.com/ariden83/blockchain/internal/persistence"
+	"github.com/ariden83/blockchain/internal/wallet"
+	"github.com/ariden83/blockchain/internal/xcache"
 )
 
 type EndPoint struct {
@@ -103,66 +103,87 @@ func (e *EndPoint) Enabled() bool {
 	return e.enabled
 }
 
-func (e *EndPoint) Listen() {
+func (e *EndPoint) Listen(stop chan error) {
 	e.hasRequiredPort()
 
-	stop := make(chan error, 1)
+	hasConnexion := false
+	for !hasConnexion {
+		hasBasicHost := false
+		for !hasBasicHost {
+			// try to connect to an existant host
+			if err := e.makeBasicHost(); err != nil {
+				if strings.Contains(fmt.Sprint(err), protocolError) || strings.Contains(fmt.Sprint(err), addressAMReadyUseError) {
+					time.Sleep(time.Millisecond * 10)
+					e.log.Error("fail to listen p2p", zap.Int("port", e.cfg.Port))
+					e.cfg.Port = e.cfg.Port + 1
+				} else {
+					e.log.Fatal("fail to listen p2p", zap.Error(err))
+				}
 
-	if err := e.makeBasicHost(); err != nil {
-		if strings.Contains(fmt.Sprint(err), protocolError) || strings.Contains(fmt.Sprint(err), addressAMReadyUseError) {
-			// permet de laisser a l'utilisateur de killer le script sans rester dans une boucle
-			time.Sleep(100 * time.Millisecond)
-			e.log.Error("fail to listen p2p", zap.Int("port", e.cfg.Port))
-			e.cfg.Port = e.cfg.Port + 1
-			e.Listen()
-			return
+			} else {
+				e.log.Info("basic host connexion created")
+				hasBasicHost = true
+			}
+
+			select {
+			case <-stop: // closes when the caller cancels the ctx
+				return
+			default:
+			}
 		}
 
-		e.log.Fatal("fail to listen p2p", zap.Error(err))
+		err := e.retryConnectToIPFS()
+		if err == nil {
+			e.log.Info("connected to ipfs")
+			hasConnexion = true
+		} else {
+			e.log.Warn("fail to connect to ipfs", zap.Error(err))
+		}
+
+		select {
+		case <-stop: // closes when the caller cancels the ctx
+			hasConnexion = true
+		default:
+			time.Sleep(time.Millisecond * 10)
+		}
 	}
 
-	go func() {
-		e.retryConnectToIPFS(stop)
-	}()
-
-	e.alertWaitFirstConnexion()
-
-	go func() {
-		time.Sleep(time.Second * 1)
-		err := <-stop
-		e.log.Error("try to restart IPFS with new port", zap.Error(err))
-		e.Listen()
-		return
-	}()
+	go e.alertWaitFirstConnexion(stop)
 }
 
-func (e *EndPoint) retryConnectToIPFS(restart chan error) {
+func (e *EndPoint) retryConnectToIPFS() error {
+	if !e.HasTarget() {
+		return nil
+	}
+
 	e.log.Info("listening for new connections", zap.Int("port", e.cfg.Port))
 	// Set a stream handler on host A. /p2p/1.0.0 is
 	// a user-defined protocol name.
 	e.host.SetStreamHandler("/p2p/1.0.0", e.handleStream)
 
-	if !e.HasTarget() {
-		return
-	}
-
 	if err := e.connectToIPFS(e.host); err != nil {
 		if strings.Contains(fmt.Sprint(err), failNegociateError) || strings.Contains(fmt.Sprint(err), protocolError) ||
 			strings.Contains(fmt.Sprint(err), noGoodAddress) {
-			// permet de laisse a l'utilisateur de killer le script sans rester dans une boucle
-			time.Sleep(100 * time.Millisecond)
 			e.log.Error("fail to listen p2p", zap.Int("port", e.cfg.Port))
 			e.cfg.Port = e.cfg.Port + 1
-			restart <- err
-			return
+			return err
+		} else {
+			e.log.Fatal("fail to listen p2p", zap.Error(err))
+			return err
 		}
-		e.log.Fatal("fail to connect to IPFS", zap.Error(err))
 	}
+	return nil
 }
 
-func (e *EndPoint) PushMsgForFiles() {
+func (e *EndPoint) PushMsgForFiles(stop chan error) {
 	go func() {
 		for {
+			select {
+			case <-stop: // closes when the caller cancels the ctx
+				return
+			default:
+			}
+
 			// wait 10 millisecon before retry
 			time.Sleep(10 * time.Millisecond)
 			if e.writerReady && e.readerReady {
@@ -370,24 +391,30 @@ func (e *EndPoint) makeBasicHost() error {
 	return nil
 }
 
-func (e *EndPoint) alertWaitFirstConnexion() {
+func (e *EndPoint) alertWaitFirstConnexion(stop chan error) {
 	if e.cfg.Target != "" {
 		return
 	}
-	go func() {
-		for {
-			if e.linked {
-				break
-			}
-			e.log.Warn("waiting for new P2P connexion ...")
-			if e.cfg.Secio {
-				e.log.Info(fmt.Sprintf("run \"go run main.go -p2p_target %s -secio\" on a different terminal", address.IAM))
-			} else {
-				e.log.Info(fmt.Sprintf("run \"go run main.go -p2p_target %s\" on a different terminal", address.IAM))
-			}
-			time.Sleep(30 * time.Second)
+
+	for {
+		if e.linked {
+			break
 		}
-	}()
+		e.log.Warn("waiting for new P2P connexion ...")
+		if e.cfg.Secio {
+			e.log.Info(fmt.Sprintf("run \"go run main.go -p2p_target %s -secio\" on a different terminal", address.IAM))
+		} else {
+			e.log.Info(fmt.Sprintf("run \"go run main.go -p2p_target %s\" on a different terminal", address.IAM))
+		}
+
+		select {
+		case <-stop: // closes when the caller cancels the ctx
+			break
+		default:
+		}
+
+		time.Sleep(30 * time.Second)
+	}
 }
 
 // Setup a stream handler.

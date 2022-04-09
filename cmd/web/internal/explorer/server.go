@@ -195,9 +195,9 @@ func (e *Explorer) listenOrDie(stop chan error) {
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	if err := e.model.GetTraces(); err != nil {
+	/* if err := e.model.GetTraces(); err != nil {
 		stop <- err
-	}
+	} */
 
 	if err = e.server.ListenAndServe(); err != nil {
 		stop <- err

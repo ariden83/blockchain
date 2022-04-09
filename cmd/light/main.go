@@ -61,8 +61,8 @@ func main() {
 
 	var p *p2p.EndPoint
 	p = p2p.Init(cfg.P2P, per, wallets, logs, evt, p2p.WithXCache(cfg.XCache))
-	p.Listen()
-	p.PushMsgForFiles()
+	p.Listen(stop)
+	p.PushMsgForFiles(stop)
 
 	go server.Listen()
 

@@ -1,12 +1,12 @@
 package p2p
 
 import (
+	"time"
+
 	"encoding/binary"
-	"fmt"
 	net "github.com/libp2p/go-libp2p-core"
 	"github.com/libp2p/go-libp2p-core/network"
 	"go.uber.org/zap"
-	"time"
 )
 
 func (e *EndPoint) handleCounter(s net.Stream) {
@@ -23,7 +23,8 @@ func (e *EndPoint) writeCounter(s network.Stream) {
 
 		err := binary.Write(s, binary.BigEndian, counter)
 		if err != nil {
-			e.log.Fatal("fail to write binary in counter", zap.Error(err))
+			e.log.Error("fail to write binary in counter", zap.Uint64("counter", counter), zap.Error(err))
+			break
 		}
 	}
 }
@@ -34,9 +35,8 @@ func (e *EndPoint) readCounter(s network.Stream) {
 
 		err := binary.Read(s, binary.BigEndian, &counter)
 		if err != nil {
-			e.log.Fatal("fail to read binary in counter", zap.Error(err))
+			e.log.Error("fail to read binary in counter", zap.Error(err))
+			break
 		}
-
-		e.log.Info(fmt.Sprintf("Received %d from %s", counter, s.ID()))
 	}
 }

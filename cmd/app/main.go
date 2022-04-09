@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	grpcEndpoint "github.com/ariden83/blockchain/internal/endpoint/grpc"
+	httpEndpoint "github.com/ariden83/blockchain/internal/endpoint/http"
+	"github.com/ariden83/blockchain/internal/metrics"
 	"log"
 	"os"
 	"os/signal"
@@ -13,13 +16,10 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/ariden83/blockchain/config"
-	grpcEndpoint "github.com/ariden83/blockchain/internal/endpoint/grpc"
-	httpEndpoint "github.com/ariden83/blockchain/internal/endpoint/http"
 	metricsEndpoint "github.com/ariden83/blockchain/internal/endpoint/metrics"
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/genesis"
 	"github.com/ariden83/blockchain/internal/logger"
-	"github.com/ariden83/blockchain/internal/metrics"
 	"github.com/ariden83/blockchain/internal/p2p"
 	"github.com/ariden83/blockchain/internal/persistence"
 	"github.com/ariden83/blockchain/internal/transactions"
@@ -67,9 +67,10 @@ func main() {
 	}
 	defer wallets.Close()
 
-	mtc := metrics.New(cfg.Metrics)
+	stop := make(chan error, 1)
 
 	s := Server{}
+	mtc := metrics.New(cfg.Metrics)
 
 	s.httpServer = httpEndpoint.New(httpEndpoint.WithPersistence(per),
 		httpEndpoint.WithTransactions(trans),
@@ -80,7 +81,7 @@ func main() {
 		httpEndpoint.WithUserAddress(cfg.Address),
 		httpEndpoint.WithConfig(cfg.API))
 
-	s.grpcServer = grpcEndpoint.New(grpcEndpoint.WithPersistence(per),
+	s.grpcServer = grpcEndpoint.New(stop, grpcEndpoint.WithPersistence(per),
 		grpcEndpoint.WithTransactions(trans),
 		grpcEndpoint.WithMetrics(mtc),
 		grpcEndpoint.WithLogs(logs),
@@ -91,18 +92,17 @@ func main() {
 
 	s.metricsServer = metricsEndpoint.New(cfg.Metrics, logs)
 
-	stop := make(chan error, 1)
-
 	var p *p2p.EndPoint
 	p = p2p.Init(cfg.P2P, per, wallets, logs, evt)
 	if p.Enabled() {
-		p.Listen()
+		p.Listen(stop)
 	}
 
 	gen := genesis.New(cfg, per, trans, p, evt)
 	gen.Load(stop)
 
 	s.Start(stop)
+
 	/**
 	 * And wait for shutdown via signal or error.
 	 */

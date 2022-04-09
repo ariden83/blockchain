@@ -137,7 +137,7 @@ func (m *Model) CreateBlock(ctx context.Context, privKey string) (*api.CreateBlo
 }
 
 func (m *Model) GetTraces() error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(m.timeOut)*time.Second)
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	logCTX := m.log.With(zap.String("service", "GetTraces"))
@@ -162,6 +162,12 @@ func (m *Model) GetTraces() error {
 			}
 			if resp != nil {
 				logCTX.Error(fmt.Sprintf("Resp received: %+v", resp))
+			}
+			select {
+			case <-stream.Context().Done():
+				break
+			case <-ctx.Done():
+				break
 			}
 		}
 	}()

@@ -139,7 +139,10 @@ message GetBalanceOutput{
     string totalSent = 4;
 }
 
-message TraceInput {}
+message TraceInput {
+    // Mandatory field
+    Context context = 1;
+}
 
 message TraceOutput {
     string id = 1;
