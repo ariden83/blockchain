@@ -112,13 +112,10 @@ func (e *EndPoint) Listen(stop chan error) {
 		for !hasBasicHost {
 			// try to connect to an existant host
 			if err := e.makeBasicHost(); err != nil {
-				if strings.Contains(fmt.Sprint(err), protocolError) || strings.Contains(fmt.Sprint(err), addressAMReadyUseError) {
-					time.Sleep(time.Millisecond * 10)
-					e.log.Error("fail to listen p2p", zap.Int("port", e.cfg.Port))
-					e.cfg.Port = e.cfg.Port + 1
-				} else {
-					e.log.Fatal("fail to listen p2p", zap.Error(err))
-				}
+				/* if strings.Contains(fmt.Sprint(err), protocolError) || strings.Contains(fmt.Sprint(err), addressAMReadyUseError) {}*/
+				time.Sleep(time.Millisecond * 10)
+				e.log.Error("fail to listen p2p", zap.Int("port", e.cfg.Port))
+				e.cfg.Port = e.cfg.Port + 1
 
 			} else {
 				e.log.Info("basic host connexion created")
@@ -152,25 +149,25 @@ func (e *EndPoint) Listen(stop chan error) {
 }
 
 func (e *EndPoint) retryConnectToIPFS() error {
-	if !e.HasTarget() {
-		return nil
-	}
-
 	e.log.Info("listening for new connections", zap.Int("port", e.cfg.Port))
 	// Set a stream handler on host A. /p2p/1.0.0 is
 	// a user-defined protocol name.
 	e.host.SetStreamHandler("/p2p/1.0.0", e.handleStream)
 
+	if !e.HasTarget() {
+		return nil
+	}
+
 	if err := e.connectToIPFS(e.host); err != nil {
-		if strings.Contains(fmt.Sprint(err), failNegociateError) || strings.Contains(fmt.Sprint(err), protocolError) ||
+		/* if strings.Contains(fmt.Sprint(err), failNegociateError) || strings.Contains(fmt.Sprint(err), protocolError) ||
 			strings.Contains(fmt.Sprint(err), noGoodAddress) {
 			e.log.Error("fail to listen p2p", zap.Int("port", e.cfg.Port))
 			e.cfg.Port = e.cfg.Port + 1
 			return err
-		} else {
-			e.log.Fatal("fail to listen p2p", zap.Error(err))
-			return err
-		}
+		} */
+		e.log.Error("fail to listen p2p", zap.Int("port", e.cfg.Port))
+		e.cfg.Port = e.cfg.Port + 1
+		return err
 	}
 	return nil
 }

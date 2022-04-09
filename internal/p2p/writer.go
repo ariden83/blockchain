@@ -76,7 +76,6 @@ func (e *EndPoint) writeData(rw *bufio.ReadWriter) {
 	go func() {
 		for block := range e.event.NewBlockReader() {
 			bytes := e.sendBlock(rw, block)
-			fmt.Println(fmt.Sprintf("********************************************* writeData %s", string(bytes)))
 			e.marshal(rw, event.Message{Type: event.NewBlock}, bytes)
 		}
 	}()
@@ -106,7 +105,6 @@ func (e *EndPoint) marshal(rw *bufio.ReadWriter, evt event.Message, bytes []byte
 	}
 
 	mutex.Lock()
-	fmt.Println(fmt.Sprintf("********************************************* marshal %s", string(allBytes)))
 	rw.WriteString(fmt.Sprintf("%s\n", string(allBytes)))
 	rw.Flush()
 	mutex.Unlock()

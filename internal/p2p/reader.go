@@ -57,7 +57,6 @@ func (e *EndPoint) readData(rw *bufio.ReadWriter) {
 				return
 			}
 			if str != "\n" {
-				fmt.Println(fmt.Sprintf("********************************************* readData %s", str))
 				mess := event.Message{}
 				if err := json.Unmarshal([]byte(str), &mess); err != nil {
 					e.log.Error("fail to unmarshal message received", zap.String("message", str), zap.Error(err))
