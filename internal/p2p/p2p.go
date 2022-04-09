@@ -114,13 +114,16 @@ func (e *EndPoint) Listen() {
 		for !hasBasicHost {
 			// try to connect to an existant host
 			if err := e.makeBasicHost(); err != nil {
-				if strings.Contains(fmt.Sprint(err), protocolError) || strings.Contains(fmt.Sprint(err), addressAMReadyUseError) {
+				/* if strings.Contains(fmt.Sprint(err), protocolError) || strings.Contains(fmt.Sprint(err), addressAMReadyUseError) {
 					time.Sleep(time.Millisecond * 10)
 					e.log.Error("fail to listen p2p", zap.Int("port", e.cfg.Port))
 					e.cfg.Port = e.cfg.Port + 1
 				} else {
 					e.log.Fatal("fail to listen p2p", zap.Error(err))
-				}
+				} */
+				time.Sleep(10 * time.Millisecond)
+				e.log.Error("fail to listen p2p", zap.Int("port", e.cfg.Port), zap.Error(err))
+				e.cfg.Port = e.cfg.Port + 1
 
 			} else {
 				e.log.Info("basic host connexion created")
@@ -162,15 +165,16 @@ func (e *EndPoint) retryConnectToIPFS() error {
 	}
 
 	if err := e.connectToIPFS(e.host); err != nil {
-		if strings.Contains(fmt.Sprint(err), failNegociateError) || strings.Contains(fmt.Sprint(err), protocolError) ||
+		/* if strings.Contains(fmt.Sprint(err), failNegociateError) || strings.Contains(fmt.Sprint(err), protocolError) ||
 			strings.Contains(fmt.Sprint(err), noGoodAddress) {
 			// permet de laisse a l'utilisateur de killer le script sans rester dans une boucle
-			time.Sleep(100 * time.Millisecond)
 			e.log.Error("fail to listen p2p", zap.Int("port", e.cfg.Port))
-			e.cfg.Port = e.cfg.Port + 1
-			return err
-		}
-		e.log.Fatal("fail to connect to IPFS", zap.Error(err))
+		} */
+		// permet de laisse a l'utilisateur de killer le script sans rester dans une boucle
+		time.Sleep(10 * time.Millisecond)
+		e.log.Error("fail to listen p2p", zap.Int("port", e.cfg.Port), zap.Error(err))
+		e.cfg.Port = e.cfg.Port + 1
+		return err
 	}
 	return nil
 }
