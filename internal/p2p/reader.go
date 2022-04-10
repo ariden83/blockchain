@@ -5,6 +5,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+
+	"github.com/davecgh/go-spew/spew"
+	"go.uber.org/zap"
+
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/blockchain/difficulty"
 	"github.com/ariden83/blockchain/internal/event"
@@ -13,8 +17,6 @@ import (
 	// "github.com/davecgh/go-spew/spew"
 	"github.com/ariden83/blockchain/internal/p2p/address"
 	"github.com/ariden83/blockchain/internal/wallet"
-	"github.com/davecgh/go-spew/spew"
-	"go.uber.org/zap"
 )
 
 var (

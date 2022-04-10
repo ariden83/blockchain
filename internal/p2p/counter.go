@@ -1,9 +1,9 @@
 package p2p
 
 import (
+	"encoding/binary"
 	"time"
 
-	"encoding/binary"
 	net "github.com/libp2p/go-libp2p-core"
 	"github.com/libp2p/go-libp2p-core/network"
 	"go.uber.org/zap"

@@ -1,11 +1,13 @@
 package logger
 
 import (
-	"github.com/ariden83/blockchain/config"
-	"github.com/ariden83/blockchain/internal/dir"
+	"os"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"os"
+
+	"github.com/ariden83/blockchain/config"
+	"github.com/ariden83/blockchain/internal/dir"
 )
 
 func Init(cfg config.Log) *zap.Logger {

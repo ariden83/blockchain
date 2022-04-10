@@ -1,8 +1,9 @@
 package http
 
 import (
-	"github.com/gorilla/mux"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func (e *EndPoint) makeMuxRouter() http.Handler {

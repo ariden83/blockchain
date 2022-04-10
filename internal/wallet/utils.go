@@ -3,9 +3,8 @@ package wallet
 import (
 	"errors"
 
-	"golang.org/x/crypto/bcrypt"
-
 	"github.com/wemeetagain/go-hdwallet"
+	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/sha3"
 )
 

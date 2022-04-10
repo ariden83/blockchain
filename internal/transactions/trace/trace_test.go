@@ -34,10 +34,28 @@ func Test_trace(t *testing.T) {
 	id := channel.GetID()
 	assert.NotEmpty(t, id)
 
+	waitChannel := make(chan bool)
+	waitChannel1 := make(chan bool)
+
+	i := 0
+	j := 0
+
+	go func() {
+		for {
+			if result, more := <-channel1.GetChan(); more {
+				assert.NotEmpty(t, result.ID)
+				j++
+				waitChannel <- true
+			}
+		}
+	}()
+
 	go func() {
 		for {
 			if result, more := <-channel.GetChan(); more {
 				assert.NotEmpty(t, result.ID)
+				i++
+				waitChannel1 <- true
 			}
 		}
 	}()
@@ -51,4 +69,10 @@ func Test_trace(t *testing.T) {
 
 	list = n.getListID()
 	assert.Equal(t, 1, len(list))
+
+	<-waitChannel
+	<-waitChannel1
+
+	assert.Equal(t, 1, i)
+	assert.Equal(t, 1, j)
 }

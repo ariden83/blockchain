@@ -1,8 +1,9 @@
 package event
 
 import (
-	"github.com/ariden83/blockchain/internal/p2p/validation"
 	"github.com/satori/go.uuid"
+
+	"github.com/ariden83/blockchain/internal/p2p/validation"
 )
 
 type Message struct {

@@ -1,9 +1,10 @@
 package transactions
 
 import (
-	"github.com/ariden83/blockchain/internal/blockchain"
 	"go.uber.org/zap"
 	"math/big"
+
+	"github.com/ariden83/blockchain/internal/blockchain"
 )
 
 func (t *Transactions) canPayTransactionFees(amount *big.Int) bool {

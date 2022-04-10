@@ -1,8 +1,9 @@
 package grpc
 
 import (
-	protoAPI "github.com/ariden83/blockchain/pkg/api"
 	"golang.org/x/net/context"
+
+	protoAPI "github.com/ariden83/blockchain/pkg/api"
 )
 
 // GetPong service

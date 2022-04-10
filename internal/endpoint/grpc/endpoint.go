@@ -16,14 +16,13 @@ import (
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 
-	protoAPI "github.com/ariden83/blockchain/pkg/api"
-
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/metrics"
 	"github.com/ariden83/blockchain/internal/persistence"
 	"github.com/ariden83/blockchain/internal/transactions"
 	"github.com/ariden83/blockchain/internal/wallet"
+	protoAPI "github.com/ariden83/blockchain/pkg/api"
 	"github.com/grpc-ecosystem/go-grpc-middleware"
 )
 

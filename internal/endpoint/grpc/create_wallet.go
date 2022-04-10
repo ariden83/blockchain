@@ -2,10 +2,12 @@ package grpc
 
 import (
 	"context"
+
+	"go.uber.org/zap"
+
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/pkg/api"
 	pkgErr "github.com/ariden83/blockchain/pkg/errors"
-	"go.uber.org/zap"
 )
 
 func (e *EndPoint) CreateWallet(_ context.Context, input *api.CreateWalletInput) (*api.CreateWalletOutput, error) {

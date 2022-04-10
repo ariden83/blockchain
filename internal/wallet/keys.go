@@ -1,10 +1,10 @@
 package wallet
 
 import (
-	"go.uber.org/zap"
 	"time"
 
 	"github.com/wemeetagain/go-hdwallet"
+	"go.uber.org/zap"
 )
 
 func (w *Wallets) allKeysFromMnemonic(mnemonic []byte) *Seed {

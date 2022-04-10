@@ -1,8 +1,9 @@
 package http
 
 import (
-	"go.uber.org/zap"
 	"net/http"
+
+	"go.uber.org/zap"
 )
 
 func (e *EndPoint) handleGetWallets(w http.ResponseWriter, r *http.Request) {

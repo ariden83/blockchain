@@ -1,9 +1,10 @@
 package errors
 
 import (
+	"net/http"
+
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"net/http"
 )
 
 // New returns an error that formats as the given text.

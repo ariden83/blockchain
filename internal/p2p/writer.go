@@ -4,16 +4,18 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"sync"
+	"time"
+
+	"github.com/davecgh/go-spew/spew"
+	"github.com/satori/go.uuid"
+	"go.uber.org/zap"
+
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/iterator"
 	"github.com/ariden83/blockchain/internal/p2p/address"
 	"github.com/ariden83/blockchain/internal/p2p/validation"
-	"github.com/davecgh/go-spew/spew"
-	"github.com/satori/go.uuid"
-	"go.uber.org/zap"
-	"sync"
-	"time"
 )
 
 var mutex = &sync.Mutex{}
