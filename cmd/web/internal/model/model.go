@@ -140,39 +140,46 @@ func (m *Model) GetTraces() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	logCTX := m.log.With(zap.String("service", "GetTraces"))
+	logCTX := m.log.With(zap.String("service", "traces"))
 
 	in := &api.TraceInput{}
+
 	stream, err := (*m.client).GetTraces(ctx, in)
 	if err != nil {
 		m.log.Error("open stream error", zap.Error(err))
 		return err
 	}
 
-	done := make(chan bool)
 	go func() {
-		for {
+		finished := false
+		for finished {
 			resp, err := stream.Recv()
 			if err == io.EOF {
-				done <- true //means stream is finished
-				return
+				finished = true
 			}
+
 			if err != nil {
 				logCTX.Error("cannot receive", zap.Error(err))
+				continue
 			}
+
 			if resp != nil {
-				logCTX.Error(fmt.Sprintf("Resp received: %+v", resp))
+				logCTX.Error(fmt.Sprintf("received: %+v", resp))
+				continue
 			}
+
 			select {
 			case <-stream.Context().Done():
-				break
+				finished = true
+				return
 			case <-ctx.Done():
-				break
+				finished = true
+				return
+			default:
+
 			}
 		}
 	}()
 
-	<-done //we will wait until all response is received
-	logCTX.Info("finished")
 	return nil
 }
