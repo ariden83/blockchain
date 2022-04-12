@@ -1,8 +1,10 @@
 package trace
 
 import (
+	"fmt"
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/utils"
+	"go.uber.org/zap"
 )
 
 type State int
@@ -39,21 +41,26 @@ func (c *Channel) GetID() string {
 
 func (c *Channel) Close() {
 	c.toClose = true
-	close(c.channel)
+	fmt.Println(fmt.Sprintf("******************************************************* close with id %s", c.id))
+	if c.channel != nil {
+		close(c.channel)
+	}
 }
 
 type Trace struct {
 	channel     chan Message
 	listChannel map[string]Channel
+	log         *zap.Logger
 }
 
-func New(cfg config.Trace) *Trace {
+func New(cfg config.Trace, log *zap.Logger) *Trace {
 	if !cfg.Enabled {
 		return nil
 	}
 	t := &Trace{
 		channel:     make(chan Message),
 		listChannel: map[string]Channel{},
+		log:         log,
 	}
 
 	go func() {
@@ -66,7 +73,8 @@ func New(cfg config.Trace) *Trace {
 func (t *Trace) setConcurrence() {
 	for data := range t.channel {
 		for _, c := range t.listChannel {
-			if c.toClose {
+			if c.toClose || c.channel == nil {
+				fmt.Println(fmt.Sprintf("******************************************** setConcurrence close"))
 				t.CloseReader(c)
 			} else {
 				c.channel <- data
@@ -96,6 +104,7 @@ func (t *Trace) Push(blockID string, state State) {
 	if blockID == "" {
 		return
 	}
+	fmt.Println(fmt.Sprintf("******************************************** send message in channel %s %+v", blockID, state))
 	t.channel <- Message{
 		ID:    blockID,
 		State: state,

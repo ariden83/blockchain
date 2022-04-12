@@ -78,10 +78,10 @@ func WithLogs(logs *zap.Logger) func(*Transactions) {
 	}
 }
 
-func WithTraces(cfg config.Trace) func(*Transactions) {
+func WithTraces(cfg config.Trace, logs *zap.Logger) func(*Transactions) {
 	return func(e *Transactions) {
 		if cfg.Enabled {
-			e.trace = trace.New(cfg)
+			e.trace = trace.New(cfg, logs.With(zap.String("service", "traces")))
 		}
 	}
 }

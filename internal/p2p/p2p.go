@@ -410,7 +410,7 @@ func (e *EndPoint) alertWaitFirstConnexion(stop chan error) {
 		default:
 		}
 
-		time.Sleep(30 * time.Second)
+		time.Sleep(30 * time.Minute)
 	}
 }
 

@@ -1,57 +1,46 @@
 package grpc
 
 import (
+	"fmt"
 	"io"
 
-	"go.uber.org/zap"
-
 	"github.com/ariden83/blockchain/pkg/api"
-	pkgErr "github.com/ariden83/blockchain/pkg/errors"
 )
 
 func (e *EndPoint) GetTraces(_ *api.TraceInput, stream api.Api_GetTracesServer) error {
-
+	fmt.Println(fmt.Sprintf("******************************************************* GetTraces start"))
 	channel := e.transaction.Trace()
 	if channel == nil {
 		return nil
 	}
 
-	go func() {
+	defer channel.Close()
+
+	if result, more := <-channel.GetChan(); more {
+		err := stream.Send(&api.TraceOutput{
+			Id:    result.ID,
+			State: result.State.String(),
+		})
+
+		if err == io.EOF {
+			return nil
+		} else if err != nil {
+			return err
+		}
+
 		select {
 		case <-stream.Context().Done():
+			fmt.Println(fmt.Sprintf("******************************************************* stream.Context().Done()"))
 			channel.Close()
-			break
+			return nil
 		case <-e.stop:
+			fmt.Println(fmt.Sprintf("******************************************************* e stop"))
 			channel.Close()
-			break
-		}
-		return
-	}()
-
-	for {
-		if result, more := <-channel.GetChan(); more {
-			if result.ID == "" {
-				continue
-			}
-			err := stream.Send(&api.TraceOutput{
-				Id:    result.ID,
-				State: result.State.String(),
-			})
-
-			if err == io.EOF {
-				e.log.Info("stream Reached EOF")
-				return nil
-			}
-
-			if err != nil {
-				e.log.Error("error on sending trace to stream", zap.Error(err), zap.String("id", result.ID))
-				return pkgErr.ErrInternalError
-			}
-
-		} else {
-			break
+			return nil
+		default:
 		}
 	}
 
+	fmt.Println(fmt.Sprintf("******************************************************* e stop"))
 	return nil
 }

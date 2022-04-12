@@ -21,7 +21,7 @@ func (t *Transactions) WriteBlock(privateKey []byte) (*blockchain.Block, error) 
 	cbtx.SetID()
 
 	newBlock := blockchain.AddBlock(lastHash, index, cbtx)
-	t.trace.Push(index.String(), trace.Create)
+	t.trace.Push(newBlock.Index.String(), trace.Create)
 	//mutex.Unlock()
 
 	if blockchain.IsBlockValid(newBlock, blockchain.BlockChain[len(blockchain.BlockChain)-1]) {

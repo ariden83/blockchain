@@ -36,6 +36,22 @@ New blockchain. See website of project [blockchain-altcoin.com](https://www.bloc
 * Implementing RSA Encryption and Signing in Golang [tutorial](https://www.sohamkamani.com/golang/rsa-encryption/) [code source](https://gist.github.com/sohamkamani/08377222d5e3e6bc130827f83b0c073e)
 * Decred is a blockchain-based cryptocurrency [code source](https://github.com/decred/dcrd)
 * Recommended practices for secure signature generation [tutorial](https://github.com/bitcoincashorg/bitcoincash.org/blob/master/spec/2019-05-15-schnorr.md#recommended-practices-for-secure-signature-generation)
+* Quantum computation simulator  [code source](https://github.com/itsubaki/q)
+
+## Keys Encrypting
+
+1. Ce qui est permanent
+- user : priv key
+- blockchain : pub key et pub blockchain key
+
+2. actions
+- user generate priv blockchain key with priv key
+- priv key generate pub blockchain key and a script
+- blockchain validator verify script is valid with pub blockhain key (possibilité de vérifier que script decode avec blockchain key = public key)
+
+3. PB: 
+- (pas de vérification si pub blockchain key = public key) > peut être résolu 
+- (pas si c'est bien la priv key de l'utilisateur qui fait la transaction pour les validators)
 
 ## Installation
 

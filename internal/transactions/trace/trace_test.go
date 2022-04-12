@@ -1,6 +1,7 @@
 package trace
 
 import (
+	"github.com/ariden83/blockchain/internal/logger"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -13,10 +14,18 @@ func (t *Trace) getListID() map[string]Channel {
 }
 
 func Test_trace(t *testing.T) {
-	n := New(config.Trace{false})
+	cfg := config.Log{
+		Path:     "./tmp/logs",
+		CLILevel: "info",
+		WithFile: false,
+	}
+
+	logs := logger.InitLight(cfg)
+
+	n := New(config.Trace{false}, logs)
 	assert.Nil(t, n)
 
-	n = New(config.Trace{true})
+	n = New(config.Trace{true}, logs)
 
 	list := n.getListID()
 	assert.Equal(t, 0, len(list))

@@ -101,7 +101,7 @@ func getDefaultConfig() *Config {
 		Name:         "blockChain",
 		Version:      "0.0.0",
 		Port:         4000,
-		DumpVar:      true,
+		DumpVar:      false,
 		Domain:       "http://localhost:4000",
 		TemplatesDir: "cmd/web/templates/",
 		StaticDir:    "./cmd/web/static/",
