@@ -41,7 +41,6 @@ func (c *Channel) GetID() string {
 
 func (c *Channel) Close() {
 	c.toClose = true
-	fmt.Println(fmt.Sprintf("******************************************************* close with id %s", c.id))
 	if c.channel != nil {
 		close(c.channel)
 	}
@@ -73,10 +72,7 @@ func New(cfg config.Trace, log *zap.Logger) *Trace {
 func (t *Trace) setConcurrence() {
 	for data := range t.channel {
 		for _, c := range t.listChannel {
-			if c.toClose || c.channel == nil {
-				fmt.Println(fmt.Sprintf("******************************************** setConcurrence close"))
-				t.CloseReader(c)
-			} else {
+			if c.channel != nil {
 				c.channel <- data
 			}
 		}
@@ -104,7 +100,7 @@ func (t *Trace) Push(blockID string, state State) {
 	if blockID == "" {
 		return
 	}
-	fmt.Println(fmt.Sprintf("******************************************** send message in channel %s %+v", blockID, state))
+	t.log.Info(fmt.Sprintf("send message in trace channel %s %+v", blockID, state))
 	t.channel <- Message{
 		ID:    blockID,
 		State: state,

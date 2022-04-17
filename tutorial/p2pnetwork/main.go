@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/libp2p/go-libp2p"
-	"github.com/libp2p/go-libp2p-core/discovery"
+	// "github.com/libp2p/go-libp2p-core/discovery"
 	"github.com/libp2p/go-libp2p-core/host"
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
@@ -52,7 +52,7 @@ func main() {
 	})
 
 	// Setup peer discovery.
-	discoveryService, err := discovery.NewMdnsService(
+	/* discoveryService, err := discovery.NewMdnsService(
 		context.Background(),
 		host,
 		time.Second,
@@ -64,7 +64,7 @@ func main() {
 	defer discoveryService.Close()
 
 	discoveryService.RegisterNotifee(&discoveryNotifee{h: host})
-
+	*/
 	// If we received a peer address, we should connect to it.
 	if *peerAddr != "" {
 		// Parse the multiaddr string.
