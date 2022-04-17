@@ -136,50 +136,43 @@ func (m *Model) CreateBlock(ctx context.Context, privKey string) (*api.CreateBlo
 	return data, nil
 }
 
-func (m *Model) GetTraces() error {
+func (m *Model) GetTraces() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	logCTX := m.log.With(zap.String("service", "traces"))
 
 	in := &api.TraceInput{}
-
 	stream, err := (*m.client).GetTraces(ctx, in)
 	if err != nil {
 		m.log.Error("open stream error", zap.Error(err))
-		return err
+		return
 	}
 
-	go func() {
-		finished := false
-		for finished {
-			resp, err := stream.Recv()
-			if err == io.EOF {
-				finished = true
-			}
-
-			if err != nil {
-				logCTX.Error("cannot receive", zap.Error(err))
-				continue
-			}
-
-			if resp != nil {
-				logCTX.Error(fmt.Sprintf("received: %+v", resp))
-				continue
-			}
-
-			select {
-			case <-stream.Context().Done():
-				finished = true
-				return
-			case <-ctx.Done():
-				finished = true
-				return
-			default:
-
-			}
+	available := true
+	for available {
+		resp, err := stream.Recv()
+		if err == io.EOF {
+			available = false
+			break
+		} else if err != nil {
+			logCTX.Error("cannot receive", zap.Error(err))
+			continue
 		}
-	}()
 
-	return nil
+		if resp != nil {
+			logCTX.Error(fmt.Sprintf("received: %+v", resp))
+			continue
+		}
+
+		select {
+		case <-stream.Context().Done():
+			available = false
+		case <-ctx.Done():
+			available = false
+		default:
+		}
+	}
+
+	stream.CloseSend()
 }

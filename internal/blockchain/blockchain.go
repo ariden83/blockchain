@@ -106,7 +106,7 @@ func (tx *Transaction) SetID() {
 	encoder := gob.NewEncoder(&encoded)
 	err := encoder.Encode(tx)
 	if err != nil {
-		log.Panic(err)
+		log.Panic(fmt.Errorf("fail on setID: %w", err))
 	}
 
 	hash = sha256.Sum256(encoded.Bytes())

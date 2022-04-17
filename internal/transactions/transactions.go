@@ -40,6 +40,7 @@ type ITransaction interface {
 	GetLastBlock() ([]byte, *big.Int, error)
 	SendBlock(input SendBlockInput) error
 	Trace() *trace.Channel
+	CloseTrace(c trace.Channel)
 }
 
 var mutex = &sync.Mutex{}
@@ -78,10 +79,10 @@ func WithLogs(logs *zap.Logger) func(*Transactions) {
 	}
 }
 
-func WithTraces(cfg config.Trace) func(*Transactions) {
+func WithTraces(cfg config.Trace, logs *zap.Logger) func(*Transactions) {
 	return func(e *Transactions) {
 		if cfg.Enabled {
-			e.trace = trace.New(cfg)
+			e.trace = trace.New(cfg, logs.With(zap.String("service", "traces")))
 		}
 	}
 }
@@ -481,4 +482,8 @@ func (t *Transactions) Trace() *trace.Channel {
 		return nil
 	}
 	return t.trace.NewReader()
+}
+
+func (t *Transactions) CloseTrace(c trace.Channel) {
+	t.trace.CloseReader(c)
 }

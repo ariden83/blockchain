@@ -19,9 +19,8 @@ func New(text string, options ...func(*errorString)) error {
 
 // errorString is a trivial implementation of error.
 type errorString struct {
-	s          string
-	status     int
-	grpcStatus codes.Code
+	s      string
+	status int
 }
 
 func (e *errorString) Error() string {
@@ -35,14 +34,13 @@ func (e *errorString) Status() int {
 func WithStatus(status int) func(*errorString) {
 	return func(e *errorString) {
 		e.status = status
-		e.grpcStatus = listStatus[status]
 	}
 }
 
-func (e *errorString) statusFromGRPC() int {
+func (e *errorString) statusFromGRPC() codes.Code {
 	for statusCode, num := range listStatus {
-		if num == e.grpcStatus {
-			return statusCode
+		if statusCode == e.status {
+			return num
 		}
 	}
 	return 0
@@ -50,9 +48,6 @@ func (e *errorString) statusFromGRPC() int {
 
 func StatusCode(err error) int {
 	if errWithStatus, ok := err.(*errorString); ok {
-		if errWithStatus.grpcStatus != 0 {
-			return errWithStatus.statusFromGRPC()
-		}
 		return errWithStatus.Status()
 	}
 	return http.StatusUpgradeRequired
@@ -60,10 +55,12 @@ func StatusCode(err error) int {
 
 func GRPC(e error) error {
 	if err, ok := e.(*errorString); ok {
-		return status.Errorf(
-			err.grpcStatus,
-			err.Error(),
-		)
+		if listStatus[err.Status()] != 0 {
+			return status.Errorf(
+				listStatus[err.Status()],
+				err.Error(),
+			)
+		}
 	}
 	return status.Errorf(
 		codes.InvalidArgument,
@@ -78,7 +75,7 @@ var listStatus = map[int]codes.Code{
 	http.StatusFailedDependency:   codes.Internal,
 	http.StatusNotFound:           codes.NotFound,
 	http.StatusUnauthorized:       codes.PermissionDenied,
-	http.StatusResetContent:       codes.FailedPrecondition,
+	http.StatusResetContent:       codes.InvalidArgument,
 }
 
 var (
