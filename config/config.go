@@ -53,7 +53,6 @@ type Trace struct {
 type Transactions struct {
 	Reward *big.Int
 	Miner
-	Trace Trace
 }
 
 // address of actual user which mine on this server
@@ -131,6 +130,7 @@ type Config struct {
 	P2P          P2P
 	XCache       XCache
 	GRPC         GRPC
+	Trace        Trace
 }
 
 func getDefaultConfig() *Config {
@@ -142,9 +142,9 @@ func getDefaultConfig() *Config {
 			Miner: Miner{
 				PubKey: "xpub661MyMwAqRbcFTZYiEcSv4Qj2Qr2NzQ7rjYc3iv9c6VSTxoYsqA9AA6nNbp8e9nVR9hRARXz5CApP6j5BxUnohyj89oSg3zZdDuKmGhdSFF",
 			},
-			Trace: Trace{
-				Enabled: true,
-			},
+		},
+		Trace: Trace{
+			Enabled: true,
 		},
 		Database: Database{
 			Path: "./tmp/blocks",

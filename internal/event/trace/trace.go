@@ -18,6 +18,7 @@ const (
 	Create
 	Validate
 	Done
+	Fail
 )
 
 type Message struct {

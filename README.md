@@ -293,6 +293,8 @@ go run main.go -l 8198 -d /ip4/127.0.0.1/tcp/8097/p2p/QmdJboshgG8BuRexqmq9opEsr4
 Après chaque création / update de la blockChain ou des seeds, le deuxième service lancé va se mettre à jour
 
 
+![minage](https://github.com/ariden83/blockchain/blob/main/readme/minage.png)
+
 ## GPG tutorial
 
 ## Création et export d'une clé

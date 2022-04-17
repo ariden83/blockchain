@@ -52,13 +52,12 @@ func main() {
 	}
 	defer per.Close()
 
-	evt := event.New()
+	evt := event.New(event.WithTraces(cfg.Trace, logs))
 
 	trans := transactions.New(
 		transactions.WithPersistence(per),
 		transactions.WithLogs(logs),
 		transactions.WithEvents(evt),
-		transactions.WithTraces(cfg.Transactions.Trace, logs),
 		transactions.WithConfig(cfg.Transactions))
 
 	wallets, err := wallet.Init(cfg.Wallet, logs)

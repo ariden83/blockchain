@@ -190,7 +190,6 @@ func (e *EndPoint) readNewBlock(msg event.Message) {
 	)
 	if err := json.Unmarshal(msg.Value, &validator); err != nil {
 		e.log.Error("fail to unmarshal block received", zap.Error(err))
-		//spew.Dump(string(msg.Value))
 		return
 	}
 
@@ -199,13 +198,6 @@ func (e *EndPoint) readNewBlock(msg event.Message) {
 		e.event.Push(event.Message{Type: event.BlockChain})
 		return
 	}
-
-	/*fmt.Println(fmt.Sprintf("****************************************** BlockChain %d", len(blockchain.BlockChain)-1))
-	spew.Dump(blockchain.BlockChain)
-	fmt.Println("****************************************** block")
-	spew.Dump(blockchain.BlockChain[len(blockchain.BlockChain)-1])
-	fmt.Println("****************************************** newBlock")
-	spew.Dump(newBlock)*/
 
 	// test si le block est bien le suivant du block actuellement en base
 	res := bytes.Compare(validator.Block.PrevHash, blockchain.BlockChain[len(blockchain.BlockChain)-1].Hash)
@@ -228,6 +220,7 @@ func (e *EndPoint) readNewBlock(msg event.Message) {
 				err = e.persistence.Update(validator.Block.Hash, ser)
 				e.Handle(err)
 
+				// e.event.PushTrace(validator.Block.Index.String(), trace.Done)
 				e.event.Push(event.Message{Type: event.BlockChain})
 				return
 			}
@@ -238,6 +231,7 @@ func (e *EndPoint) readNewBlock(msg event.Message) {
 				e.log.Error("fail to marshal new address", zap.Error(err))
 				return
 			}
+			// e.event.PushTrace(validator.Block.Index.String(), trace.Validate)
 			e.event.Push(event.Message{
 				Type:  event.NewBlock,
 				ID:    msg.ID + "validation",

@@ -7,13 +7,13 @@ import (
 )
 
 func (e *EndPoint) GetTraces(_ *api.TraceInput, stream api.Api_GetTracesServer) error {
-	channel := e.transaction.Trace()
+	channel := e.event.NewTraceReader()
 	if channel == nil {
 		return nil
 	}
 
 	defer func() {
-		e.transaction.CloseTrace(*channel)
+		e.event.CloseTraceReader(*channel)
 		e.log.Info("close get traces")
 	}()
 
