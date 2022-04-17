@@ -1,7 +1,6 @@
 package transactions
 
 import (
-	"fmt"
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/p2p/address"
 	"github.com/ariden83/blockchain/internal/p2p/validation"
@@ -16,17 +15,13 @@ func (t *Transactions) WriteBlock(privateKey []byte) (*blockchain.Block, error) 
 	}
 
 	t.trace.Push(blockchain.NextID(index).String(), trace.Minage)
-	fmt.Println(fmt.Sprintf("*************************************** WriteBlock 2"))
 
 	//mutex.Lock()
 	cbtx := t.CoinBaseTx(privateKey)
-	fmt.Println(fmt.Sprintf("*************************************** WriteBlock 3"))
 	cbtx.SetID()
 
 	newBlock := blockchain.AddBlock(lastHash, index, cbtx)
-	fmt.Println(fmt.Sprintf("*************************************** WriteBlock 4"))
 	t.trace.Push(newBlock.Index.String(), trace.Create)
-	fmt.Println(fmt.Sprintf("*************************************** WriteBlock 5"))
 	//mutex.Unlock()
 
 	if blockchain.IsBlockValid(newBlock, blockchain.BlockChain[len(blockchain.BlockChain)-1]) {
