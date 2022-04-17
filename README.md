@@ -295,6 +295,8 @@ Après chaque création / update de la blockChain ou des seeds, le deuxième ser
 
 ![minage](https://github.com/ariden83/blockchain/blob/main/readme/minage.png)
 
+![messaging](https://github.com/ariden83/blockchain/blob/main/readme/messages.png)
+
 ## GPG tutorial
 
 ## Création et export d'une clé

@@ -109,7 +109,6 @@ func (e *EndPoint) readBlockChainFull(chain []byte) {
 
 // get blockChain for the first time
 func (e *EndPoint) readBlockChain(chain []byte) {
-
 	var newBlockChain []blockchain.Block
 	if err := json.Unmarshal(chain, &newBlockChain); err != nil {
 		e.log.Error("fail to unmarshal blockChain received", zap.Error(err))
@@ -185,9 +184,7 @@ func (e *EndPoint) getNumOnNewBlockChain(newBlockChain []blockchain.Block, lastH
 }
 
 func (e *EndPoint) readNewBlock(msg event.Message) {
-	var (
-		validator validation.Validator
-	)
+	var validator validation.Validator
 	if err := json.Unmarshal(msg.Value, &validator); err != nil {
 		e.log.Error("fail to unmarshal block received", zap.Error(err))
 		return
