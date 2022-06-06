@@ -3,6 +3,7 @@ package genesis
 import (
 	"errors"
 	"fmt"
+	"github.com/ariden83/blockchain/internal/wallet"
 	"sync"
 
 	"github.com/davecgh/go-spew/spew"
@@ -24,11 +25,13 @@ type Genesis struct {
 	cfg         *config.Config
 	p2p         *p2p.EndPoint
 	event       *event.Event
+	wallets     wallet.IWallets
 }
 
 func New(cfg *config.Config, pers *persistence.Persistence, trans *transactions.Transactions,
-	p *p2p.EndPoint, evt *event.Event) *Genesis {
+	p *p2p.EndPoint, evt *event.Event, wallets wallet.IWallets) *Genesis {
 	return &Genesis{
+		wallets:     wallets,
 		persistence: pers,
 		transaction: trans,
 		cfg:         cfg,
@@ -96,7 +99,14 @@ func (g *Genesis) Load(stop chan error) {
 }
 
 func (g *Genesis) createGenesis(stop chan error) []byte {
-	cbtx := g.transaction.CoinBaseTx([]byte(g.cfg.Transactions.PrivateKey))
+	privateKey := []byte(g.cfg.Transactions.PrivateKey)
+	if g.cfg.Transactions.PrivateKey == "" {
+		seed, _ := g.wallets.Create([]byte("test"))
+		privateKey = seed.PrivKey
+	}
+	g.wallets = nil
+
+	cbtx := g.transaction.CoinBaseTx(privateKey)
 	genesis := blockchain.Genesis(cbtx)
 	fmt.Println("Genesis proved")
 

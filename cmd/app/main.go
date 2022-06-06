@@ -97,7 +97,7 @@ func main() {
 		p.Listen(stop)
 	}
 
-	gen := genesis.New(cfg, per, trans, p, evt)
+	gen := genesis.New(cfg, per, trans, p, evt, wallets)
 	gen.Load(stop)
 
 	s.Start(stop)

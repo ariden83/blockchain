@@ -1,0 +1,17 @@
+{{ define "test-fr" }}<!DOCTYPE html><html lang="fr">{{
+template "head" .
+}}<body>
+<div class="container-fluid">
+    {{ template "header" . }}
+    <main>
+        <section class="todoapp container">
+            <noscript>
+                <strong>We're sorry but password auth doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+            </noscript>
+            <div id="app">If you're seeing this, the app didn't mount.</div>
+        </section>
+    </main>
+    {{ template "footer" . }}
+</div>
+</body>
+</html>{{ end }}

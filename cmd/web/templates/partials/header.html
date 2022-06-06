@@ -21,22 +21,15 @@
                   </li>
                 {{ end }}
                 </div>
-
            {{ else }}
                 <div class="col-xs-3">
                   <a href="{{ .URL }}" title="{{ .Title }}">{{ .Pre }} <span>{{ .Name }}</span></a>
                 </div>
            {{ end }}
         {{ end }}
-
                <div class="col-xs-3">
-                   {{ if not .Authentified}}
-                   <a href="/login" title="Logout">Login</a>
-                   {{ else }}
-                  <a href="/logout" title="Logout">Logout</a>
-                   {{end}}
+                   {{ if not .Authentified}}<a href="/login" title="Logout">Login</a>{{ else }}<a href="/logout" title="Logout">Logout</a>{{end}}
                </div>
-
             </div>
         </div>
       </aside>

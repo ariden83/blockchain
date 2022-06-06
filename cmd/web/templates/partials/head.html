@@ -6,25 +6,28 @@
 
   <title>{{ .PageTitle }} | blockchain Coin</title>
 
+  <meta name="description" content="{{ .PageTitle }}" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:url" content="/" />
+  <meta name="twitter:title" content="blockchain-altcoin" />
+  <meta name="twitter:description" content="{{ .PageTitle }}" />
+  <!-- <meta name="twitter:image" content="http://dev.to/social_previews/user/139093.png"> -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="blockchain-altcoin" />
+  <meta property="og:description" content="{{ .PageTitle }}" />
+  <!-- <meta property="og:image" content="http://dev.to/social_previews/user/139093.png" /> -->
+
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto" />
   <link rel="icon" type="image/jpg" href="/static/favicon.ico"/>
-  <link rel="shortcut icon" href="https://www.blockchain-altcoin/static/blockchain-altcoin.png" />
+  <link rel="shortcut icon" href="/static/blockchain-altcoin.png" />
   <link rel="stylesheet" href="/static/index.css?0.0.23" />
-
-  {{if .CSS }}
-  {{range $i, $a := .CSS}}
-  <link rel="stylesheet" href="{{$a}}" />
-  {{ end }}
-  {{ end }}
-
+  {{if .CSS }}{{range $i, $a := .CSS}}<link rel="stylesheet" href="{{$a}}" />{{ end }}{{ end }}
   <script src="https://unpkg.com/vue@next"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
-{{if .Javascripts }}
-{{range $i, $a := .Javascripts}}
-  <script src="{{$a}}"></script>
-{{ end }}
-{{ end }}
+
+  {{if .Javascripts }}{{range $i, $a := .Javascripts}}<script src="{{$a}}"></script>{{ end }}{{ end }}
+  {{if .ModuleJavascripts }}{{range $i, $a := .ModuleJavascripts}}<script type="module" src="{{$a}}"></script>{{ end }}{{ end }}
 </head>
 {{ end }}

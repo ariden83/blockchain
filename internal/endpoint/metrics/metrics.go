@@ -102,6 +102,9 @@ func (e *EndPoint) router() http.Handler {
 }
 
 func (e *EndPoint) Shutdown(ctx context.Context) {
+	if e.server == nil {
+		return
+	}
 	err := e.server.Shutdown(ctx)
 	if err != nil {
 		e.log.Error("fail to shutdown server", zap.Error(err))

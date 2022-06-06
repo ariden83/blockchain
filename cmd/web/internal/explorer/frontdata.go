@@ -5,12 +5,13 @@ import (
 )
 
 type FrontData struct {
-	PageTitle    string
-	Authentified bool
-	Menus        []Menus
-	Javascripts  []string
-	CSS          []string
-	siteTitle    string
+	PageTitle         string
+	Authentified      bool
+	Menus             []Menus
+	Javascripts       []string
+	ModuleJavascripts []string
+	CSS               []string
+	siteTitle         string
 }
 
 type Menus struct {
@@ -34,6 +35,11 @@ func (e *Explorer) frontData(rw http.ResponseWriter, r *http.Request) *FrontData
 
 func (f *FrontData) JS(js []string) *FrontData {
 	f.Javascripts = js
+	return f
+}
+
+func (f *FrontData) ModuleJS(js []string) *FrontData {
+	f.ModuleJavascripts = js
 	return f
 }
 

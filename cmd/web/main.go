@@ -3,18 +3,20 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"go.uber.org/zap"
+
 	"github.com/ariden83/blockchain/cmd/web/config"
 	"github.com/ariden83/blockchain/cmd/web/internal/auth"
 	"github.com/ariden83/blockchain/cmd/web/internal/explorer"
 	"github.com/ariden83/blockchain/cmd/web/internal/metrics"
 	"github.com/ariden83/blockchain/cmd/web/internal/model"
 	"github.com/ariden83/blockchain/internal/logger"
-	"go.uber.org/zap"
-	"log"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 )
 
 func main() {

@@ -14,8 +14,9 @@ Wallet website. See website of project [blockchain-altcoin.com](https://www.bloc
 * Eth API [tutorial](https://eth.wiki/json-rpc/API#json-rpc-methods)
 * Brave [tutorial](brave://wallet/crypto/unlock)
 * Websocket by owulveryck [source](https://gist.github.com/owulveryck/57d8c2469fd1f8a840747b064c50ff4e)
-* Websocket by  [source](https://github.com/gorilla/websocket/blob/master/examples/echo/server.go)
-https://github.com/gorilla/websocket/blob/master/examples/echo/server.go
+* Websocket by [source](https://github.com/gorilla/websocket/blob/master/examples/echo/server.go)
+* Charts h [source](ttps://github.com/gorilla/websocket/blob/master/examples/echo/server.go)
+* Trading Charts [source](https://adrianmanchev.github.io/trading-charts/)
 
 ## Command
 
