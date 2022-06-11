@@ -79,10 +79,8 @@ type Config struct {
 	Version       string `config:"version"`
 	DumpVar       bool   `config:"dump_var"`
 	Domain        string `config:"domain"`
-	TemplatesDir  string `config:"template_dir"`
-	StaticDir     string `config:"static_dir"`
-	LocalesDir    string `config:"locales_dir"`
-	StaticRoute   string `config:"static_route"`
+	TemplatesDir  string `config:"template_dir" yaml:"template_dir"`
+	StaticDir     string `config:"static_dir" yaml:"static_dir"`
 	Port          int    `config:"port"`
 	Log           config.Log
 	Api           Api
@@ -105,8 +103,6 @@ func getDefaultConfig() *Config {
 		Domain:       "http://localhost:4000",
 		TemplatesDir: "cmd/web/templates/",
 		StaticDir:    "./cmd/web/static/",
-		LocalesDir:   "./cmd/web/locales/",
-		StaticRoute:  "/static/",
 		Log: config.Log{
 			CLILevel: "info",
 			WithFile: false,

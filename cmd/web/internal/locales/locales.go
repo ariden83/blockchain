@@ -1,11 +1,13 @@
 package locales
 
 import (
+	"net/http"
+
 	"github.com/BurntSushi/toml"
-	"github.com/ariden83/blockchain/cmd/web/config"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
-	"net/http"
+
+	"github.com/ariden83/blockchain/cmd/web/config"
 )
 
 type Locales struct {
@@ -13,6 +15,7 @@ type Locales struct {
 }
 
 func New(cfg config.Locales) *Locales {
+
 	bundle := i18n.NewBundle(language.English)
 	bundle.RegisterUnmarshalFunc("toml", toml.Unmarshal)
 	bundle.MustLoadMessageFile(cfg.Path + "active.en.toml")

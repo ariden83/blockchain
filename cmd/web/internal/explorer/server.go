@@ -2,13 +2,13 @@ package explorer
 
 import (
 	"context"
-	"github.com/ariden83/blockchain/cmd/web/config"
-	"github.com/ariden83/blockchain/cmd/web/internal/auth"
-	"github.com/ariden83/blockchain/cmd/web/internal/auth/classic"
-	"github.com/ariden83/blockchain/cmd/web/internal/locales"
-	"github.com/ariden83/blockchain/cmd/web/internal/metrics"
-	"github.com/ariden83/blockchain/cmd/web/internal/model"
-	"github.com/ariden83/blockchain/cmd/web/internal/recaptcha"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/go-oauth2/oauth2/v4"
 	"github.com/go-oauth2/oauth2/v4/errors"
 	"github.com/go-oauth2/oauth2/v4/generates"
@@ -23,12 +23,14 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/urfave/negroni"
 	"go.uber.org/zap"
-	"net/http"
-	"os"
-	"path/filepath"
-	"strconv"
-	"strings"
-	"time"
+
+	"github.com/ariden83/blockchain/cmd/web/config"
+	"github.com/ariden83/blockchain/cmd/web/internal/auth"
+	"github.com/ariden83/blockchain/cmd/web/internal/auth/classic"
+	"github.com/ariden83/blockchain/cmd/web/internal/locales"
+	"github.com/ariden83/blockchain/cmd/web/internal/metrics"
+	"github.com/ariden83/blockchain/cmd/web/internal/model"
+	"github.com/ariden83/blockchain/cmd/web/internal/recaptcha"
 )
 
 type Explorer struct {

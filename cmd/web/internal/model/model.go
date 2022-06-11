@@ -42,7 +42,6 @@ func New(cfg config.BlockchainAPI, log *zap.Logger) (*Model, error) {
 	logCTX.Info("init grpc connexion", zap.String("url", cfg.URL))
 
 	client := api.NewApiClient(conn)
-
 	return &Model{
 		log:       logCTX,
 		timeOut:   cfg.TimeOut,
