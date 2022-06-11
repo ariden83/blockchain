@@ -3,9 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	grpcEndpoint "github.com/ariden83/blockchain/internal/endpoint/grpc"
-	httpEndpoint "github.com/ariden83/blockchain/internal/endpoint/http"
-	"github.com/ariden83/blockchain/internal/metrics"
 	"log"
 	"os"
 	"os/signal"
@@ -15,6 +12,7 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/ariden83/blockchain/internal/metrics"
 	"github.com/ariden83/blockchain/config"
 	metricsEndpoint "github.com/ariden83/blockchain/internal/endpoint/metrics"
 	"github.com/ariden83/blockchain/internal/event"
@@ -24,6 +22,8 @@ import (
 	"github.com/ariden83/blockchain/internal/persistence"
 	"github.com/ariden83/blockchain/internal/transactions"
 	"github.com/ariden83/blockchain/internal/wallet"
+	grpcEndpoint "github.com/ariden83/blockchain/internal/endpoint/grpc"
+	httpEndpoint "github.com/ariden83/blockchain/internal/endpoint/http"
 )
 
 func main() {

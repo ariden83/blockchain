@@ -3,14 +3,15 @@ package config
 import (
 	"context"
 	"fmt"
-	"github.com/heetch/confita"
-	"github.com/heetch/confita/backend"
-	"github.com/heetch/confita/backend/env"
-	"github.com/heetch/confita/backend/flags"
 	"math/big"
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/heetch/confita"
+	"github.com/heetch/confita/backend"
+	"github.com/heetch/confita/backend/env"
+	"github.com/heetch/confita/backend/flags"
 )
 
 type Database struct {
