@@ -19,7 +19,7 @@ import (
 	"github.com/ariden83/blockchain/internal/genesis"
 	"github.com/ariden83/blockchain/internal/logger"
 	"github.com/ariden83/blockchain/internal/p2p"
-	"github.com/ariden83/blockchain/internal/persistence"
+	persistencefactory "github.com/ariden83/blockchain/internal/persistence/factory"
 	"github.com/ariden83/blockchain/internal/transactions"
 	"github.com/ariden83/blockchain/internal/wallet"
 	grpcEndpoint "github.com/ariden83/blockchain/internal/endpoint/grpc"
@@ -46,7 +46,7 @@ func main() {
 	logs = logs.With(zap.String("v", cfg.Version))
 	defer logs.Sync()
 
-	per, err := persistence.Init(cfg.Database)
+	per, err := persistencefactory.New(cfg.Database)
 	if err != nil {
 		logs.Fatal("fail to init persistence", zap.Error(err))
 	}

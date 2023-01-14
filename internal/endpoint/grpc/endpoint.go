@@ -28,7 +28,7 @@ import (
 
 type EndPoint struct {
 	cfg         config.GRPC
-	persistence persistence.IPersistence
+	persistence persistenceadapter.Adapter
 	transaction transactions.ITransaction
 	server      *grpc.Server
 	wallets     wallet.IWallets
@@ -58,7 +58,7 @@ func WithConfig(cfg config.GRPC) func(*EndPoint) {
 	}
 }
 
-func WithPersistence(p persistence.IPersistence) func(*EndPoint) {
+func WithPersistence(p persistenceadapter.Adapter) func(*EndPoint) {
 	return func(e *EndPoint) {
 		e.persistence = p
 	}

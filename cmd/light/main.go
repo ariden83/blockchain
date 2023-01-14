@@ -8,7 +8,6 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/ariden83/blockchain/cmd/light/internal/persistance"
 	"github.com/ariden83/blockchain/config"
 	httpEndpoint "github.com/ariden83/blockchain/internal/endpoint/http"
 	"github.com/ariden83/blockchain/internal/event"
@@ -17,6 +16,7 @@ import (
 	"github.com/ariden83/blockchain/internal/p2p"
 	"github.com/ariden83/blockchain/internal/transactions"
 	"github.com/ariden83/blockchain/internal/wallet"
+	persistencefactory "github.com/ariden83/blockchain/internal/persistence/factory"
 )
 
 func main() {
@@ -41,7 +41,13 @@ func main() {
 	evt := event.New()
 	stop := make(chan error, 1)
 
-	per := &persistance.Persistence{}
+	per, err := persistencefactory.New(persistencefactory.Config{
+		Implementation: persistencefactory.ImplementationStub,
+	})
+	if err != nil {
+		logs.Fatal("fail to init persistence", zap.Error(err))
+	}
+
 	trans := transactions.New(
 		transactions.WithPersistence(per),
 		transactions.WithLogs(logs),

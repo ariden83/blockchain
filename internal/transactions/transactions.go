@@ -23,7 +23,7 @@ import (
 type Transactions struct {
 	Reward          *big.Int
 	serverPublicKey string
-	persistence     persistence.IPersistence
+	persistence     persistenceadapter.Adapter
 	event           *event.Event
 	log             *zap.Logger
 }
@@ -57,7 +57,7 @@ func WithConfig(cfg config.Transactions) func(*Transactions) {
 	}
 }
 
-func WithPersistence(p persistence.IPersistence) func(*Transactions) {
+func WithPersistence(p persistenceadapter.Adapter) func(*Transactions) {
 	return func(e *Transactions) {
 		e.persistence = p
 	}

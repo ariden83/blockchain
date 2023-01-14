@@ -3,7 +3,6 @@ package genesis
 import (
 	"errors"
 	"fmt"
-	"github.com/ariden83/blockchain/internal/wallet"
 	"sync"
 
 	"github.com/davecgh/go-spew/spew"
@@ -12,6 +11,7 @@ import (
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/p2p"
+	"github.com/ariden83/blockchain/internal/wallet"
 	"github.com/ariden83/blockchain/internal/persistence"
 	"github.com/ariden83/blockchain/internal/transactions"
 	"github.com/ariden83/blockchain/internal/utils"
@@ -20,7 +20,7 @@ import (
 var mutex = &sync.Mutex{}
 
 type Genesis struct {
-	persistence *persistence.Persistence
+	persistence persistenceadapter.Adapter
 	transaction *transactions.Transactions
 	cfg         *config.Config
 	p2p         *p2p.EndPoint
@@ -28,7 +28,7 @@ type Genesis struct {
 	wallets     wallet.IWallets
 }
 
-func New(cfg *config.Config, pers *persistence.Persistence, trans *transactions.Transactions,
+func New(cfg *config.Config, pers persistenceadapter.Adapter, trans *transactions.Transactions,
 	p *p2p.EndPoint, evt *event.Event, wallets wallet.IWallets) *Genesis {
 	return &Genesis{
 		wallets:     wallets,

@@ -37,20 +37,20 @@ import (
 )
 
 type EndPoint struct {
+	address     []string
 	cfg         config.P2P
-	persistence persistence.IPersistence
-	host        host.Host
-	wallets     wallet.IWallets
-	log         *zap.Logger
+	dbLoad      bool
 	event       *event.Event
 	enabled     bool
+	host        host.Host
 	linked      bool
-	dbLoad      bool
+	log         *zap.Logger
 	msgReceived []string
+	persistence persistenceadapter.Adapter
+	readerReady bool
+	wallets     wallet.IWallets
 	xCache      *xcache.Cache
 	writerReady bool
-	readerReady bool
-	address     []string
 }
 
 // Option is the type of option passed to the constructor.
@@ -58,7 +58,7 @@ type Option func(e *EndPoint)
 
 func Init(
 	cfg config.P2P,
-	per persistence.IPersistence,
+	per persistenceadapter.Adapter,
 	wallets wallet.IWallets,
 	logs *zap.Logger,
 	evt *event.Event,

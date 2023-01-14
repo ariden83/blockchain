@@ -6,14 +6,15 @@ import (
 	"github.com/ariden83/blockchain/internal/utils"
 )
 
+// BlockChainIterator represent a blockchain iterator.
 type BlockChainIterator struct {
 	CurrentHash []byte
-	Persistence persistence.IPersistence
+	Persistence persistenceadapter.Adapter
 	// Database    *badger.DB
 }
 
-// Iterator takes our BlockChain struct and returns it as a BlockCHainIterator struct
-func New(p persistence.IPersistence) *BlockChainIterator {
+// New returns a new iterator takes our BlockChain struct and returns it as a BlockChainIterator.
+func New(p persistenceadapter.Adapter) *BlockChainIterator {
 	iterator := BlockChainIterator{
 		CurrentHash: p.LastHash(),
 		Persistence: p,
@@ -22,6 +23,7 @@ func New(p persistence.IPersistence) *BlockChainIterator {
 	return &iterator
 }
 
+// Next can get the next blockchain iterator.
 func (b *BlockChainIterator) Next() (*blockchain.Block, error) {
 	val, err := b.Persistence.GetCurrentHashSerialize(b.CurrentHash)
 	if err != nil {

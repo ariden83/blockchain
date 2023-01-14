@@ -24,15 +24,15 @@ var mutex = &sync.Mutex{}
 
 type EndPoint struct {
 	cfg           config.API
-	persistence   persistence.IPersistence
-	transaction   transactions.ITransaction
-	server        *http.Server
-	metricsServer *http.Server
-	wallets       wallet.IWallets
-	metrics       *metrics.Metrics
-	log           *zap.Logger
 	event         *event.Event
+	log           *zap.Logger
+	metrics       *metrics.Metrics
+	metricsServer *http.Server
+	persistence   persistenceadapter.Adapter
+	server        *http.Server
+	transaction   transactions.ITransaction
 	userAddress   string
+	wallets       wallet.IWallets
 }
 
 func New(options ...func(*EndPoint)) *EndPoint {
@@ -51,7 +51,7 @@ func WithConfig(cfg config.API) func(*EndPoint) {
 	}
 }
 
-func WithPersistence(p persistence.IPersistence) func(*EndPoint) {
+func WithPersistence(p persistenceadapter.Adapter) func(*EndPoint) {
 	return func(e *EndPoint) {
 		e.persistence = p
 	}

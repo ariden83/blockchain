@@ -12,12 +12,11 @@ import (
 	"github.com/heetch/confita/backend"
 	"github.com/heetch/confita/backend/env"
 	"github.com/heetch/confita/backend/flags"
+
+	"github.com/ariden83/blockchain/internal/persistence/impl/badger"
+	persistencefactory "github.com/ariden83/blockchain/internal/persistence/factory"
 )
 
-type Database struct {
-	Path string `config:"blockchain_db_path"`
-	File string `config:"blockchain_file"`
-}
 
 type Gas struct {
 	// Minimum amount of Wei per GAS to be paid for a transaction to be accepted for mining. Note: gasprice is listed in wei. Note 2: --gasprice is a “Legacy Option”
@@ -125,7 +124,7 @@ type Config struct {
 	Wallet       Wallet
 	Metrics      Metrics
 	Transactions Transactions
-	Database     Database
+	Database     persistencefactory.Config
 	API          API
 	Log          Log
 	P2P          P2P
@@ -147,9 +146,12 @@ func getDefaultConfig() *Config {
 		Trace: Trace{
 			Enabled: true,
 		},
-		Database: Database{
-			Path: "./tmp/blocks",
-			File: "./tmp/blocks/MANIFEST",
+		Database: persistencefactory.Config{
+			Implementation: persistencefactory.ImplementationBadger,
+			Badger: badger.Config{
+				Path: "./tmp/blocks",
+				File: "./tmp/blocks/MANIFEST",
+			},
 		},
 		Wallet: Wallet{
 			Path:     "./tmp/wallets",

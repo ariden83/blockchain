@@ -22,7 +22,7 @@ func TestMain(m *testing.M) {
 // This example demonstrates creating a script which pays to a bitcoin address.
 // It also prints the created script hex and uses the DisasmString function to
 // display the disassembled script.
-func Test_Example_(t *testing.T) {
+func Test_Example(t *testing.T) {
 	var (
 		sign    *Signature
 		pubkey  *bchec.PublicKey
