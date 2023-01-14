@@ -72,8 +72,8 @@ type TxInput struct {
 	SchnorrKey []byte
 }
 
-//TxOutput represents a transaction in the blockchain
-//For Example, I sent you 5 coins. Value would == 5, and it would have my unique PubKey
+// TxOutput represents a transaction in the blockchain
+// For Example, I sent you 5 coins. Value would == 5, and it would have my unique PubKey
 type TxOutput struct {
 	// Value would be representative of the amount of coins in a transaction
 	Value *big.Int

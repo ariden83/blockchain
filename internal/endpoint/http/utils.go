@@ -2,9 +2,10 @@ package http
 
 import (
 	"encoding/json"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
+
+	"go.uber.org/zap"
 )
 
 type BodyReceived interface{}
