@@ -22,7 +22,8 @@ import (
 	"github.com/ariden83/blockchain/internal/metrics"
 	"github.com/ariden83/blockchain/internal/p2p"
 	persistencefactory "github.com/ariden83/blockchain/internal/persistence/factory"
-	"github.com/ariden83/blockchain/internal/transactions"
+	transactionfactory "github.com/ariden83/blockchain/internal/transaction/factory"
+	"github.com/ariden83/blockchain/internal/transaction/impl/transaction"
 	"github.com/ariden83/blockchain/internal/wallet"
 )
 
@@ -54,13 +55,17 @@ func main() {
 
 	evt := event.New(event.WithTraces(cfg.Trace, logs))
 
-	trans := transactions.New(
-		transactions.WithPersistence(per),
-		transactions.WithLogs(logs),
-		transactions.WithEvents(evt),
-		transactions.WithConfig(cfg.Transactions))
+	trans, err := transactionfactory.New(
+		transactionfactory.Config{Implementation: transactionfactory.ImplementationTransaction},
+		transaction.WithPersistence(per),
+		transaction.WithLogs(logs),
+		transaction.WithEvents(evt),
+		transaction.WithConfig(cfg.Transactions))
+	if err != nil {
+		logs.Fatal("fail to init transaction", zap.Error(err))
+	}
 
-	wallets, err := wallet.Init(cfg.Wallet, logs)
+	wallets, err := wallet.New(cfg.Wallet, logs)
 	if err != nil {
 		logs.Fatal("fail to init wallet", zap.Error(err))
 	}
@@ -69,7 +74,7 @@ func main() {
 	stop := make(chan error, 1)
 
 	s := Server{}
-	mtc := metrics.New(cfg.Metrics)
+	mtc := metrics.New(cfg.Metrics, nil)
 
 	s.httpServer = httpEndpoint.New(httpEndpoint.WithPersistence(per),
 		httpEndpoint.WithTransactions(trans),
@@ -92,7 +97,7 @@ func main() {
 	s.metricsServer = metricsEndpoint.New(cfg.Metrics, logs)
 
 	var p *p2p.EndPoint
-	p = p2p.Init(cfg.P2P, per, wallets, logs, evt)
+	p = p2p.New(cfg.P2P, per, wallets, logs, evt)
 	if p.Enabled() {
 		p.Listen(stop)
 	}

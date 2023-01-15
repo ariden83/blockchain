@@ -12,7 +12,7 @@ import (
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/p2p"
 	"github.com/ariden83/blockchain/internal/persistence"
-	"github.com/ariden83/blockchain/internal/transactions"
+	"github.com/ariden83/blockchain/internal/transaction"
 	"github.com/ariden83/blockchain/internal/utils"
 	"github.com/ariden83/blockchain/internal/wallet"
 )
@@ -21,18 +21,18 @@ var mutex = &sync.Mutex{}
 
 type Genesis struct {
 	persistence persistenceadapter.Adapter
-	transaction *transactions.Transactions
+	transaction transaction.Adapter
 	cfg         *config.Config
 	p2p         *p2p.EndPoint
 	event       *event.Event
 	wallets     wallet.IWallets
 }
 
-func New(cfg *config.Config, pers persistenceadapter.Adapter, trans *transactions.Transactions,
-	p *p2p.EndPoint, evt *event.Event, wallets wallet.IWallets) *Genesis {
+func New(cfg *config.Config, persistence persistenceadapter.Adapter, trans transaction.Adapter, p *p2p.EndPoint,
+	evt *event.Event, wallets wallet.IWallets) *Genesis {
 	return &Genesis{
 		wallets:     wallets,
-		persistence: pers,
+		persistence: persistence,
 		transaction: trans,
 		cfg:         cfg,
 		p2p:         p,
@@ -41,7 +41,7 @@ func New(cfg *config.Config, pers persistenceadapter.Adapter, trans *transaction
 }
 
 func (g *Genesis) Genesis() bool {
-	if g.cfg.P2P.Target == "" {
+	if g.p2p.Target() == "" {
 		// call default genesis
 		return false
 	}

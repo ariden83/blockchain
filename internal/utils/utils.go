@@ -18,15 +18,15 @@ func Deserialize(data []byte, i DeserializedOutput) error {
 
 type SerializeInput interface{}
 
-func Serialize(b SerializeInput) ([]byte, error) {
+func Serialize(serializeStr SerializeInput) ([]byte, error) {
 	var res bytes.Buffer
 	encoder := gob.NewEncoder(&res)
 
-	err := encoder.Encode(b)
+	err := encoder.Encode(serializeStr)
 	return res.Bytes(), err
 }
 
-func RandomString(n int) string {
+func RandomString(n uint8) string {
 	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
 	s := make([]rune, n)

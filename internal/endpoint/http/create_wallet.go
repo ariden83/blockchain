@@ -12,7 +12,7 @@ import (
 func (e *EndPoint) handleCreateWallet(w http.ResponseWriter, r *http.Request) {
 	req := &api.CreateWalletInput{}
 
-	log := e.log.With(zap.String("input", "createBlock"))
+	log := e.log.With(zap.String("input", "createWallet"))
 	if err := e.decodeBody(w, log, r.Body, req); err != nil {
 		return
 	}

@@ -20,7 +20,7 @@ import (
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/metrics"
 	"github.com/ariden83/blockchain/internal/persistence"
-	"github.com/ariden83/blockchain/internal/transactions"
+	"github.com/ariden83/blockchain/internal/transaction"
 	"github.com/ariden83/blockchain/internal/wallet"
 	protoAPI "github.com/ariden83/blockchain/pkg/api"
 	"github.com/grpc-ecosystem/go-grpc-middleware"
@@ -29,7 +29,7 @@ import (
 type EndPoint struct {
 	cfg         config.GRPC
 	persistence persistenceadapter.Adapter
-	transaction transactions.ITransaction
+	transaction transaction.Adapter
 	server      *grpc.Server
 	wallets     wallet.IWallets
 	metrics     *metrics.Metrics
@@ -64,7 +64,7 @@ func WithPersistence(p persistenceadapter.Adapter) func(*EndPoint) {
 	}
 }
 
-func WithTransactions(t transactions.ITransaction) func(*EndPoint) {
+func WithTransactions(t transaction.Adapter) func(*EndPoint) {
 	return func(e *EndPoint) {
 		e.transaction = t
 	}

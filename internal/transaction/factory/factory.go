@@ -1,11 +1,11 @@
-package persistencefactory
+package transactionfactory
 
 import (
 	"fmt"
 
-	persistenceadapter "github.com/ariden83/blockchain/internal/persistence"
-	"github.com/ariden83/blockchain/internal/persistence/impl/badger"
-	"github.com/ariden83/blockchain/internal/persistence/impl/stub"
+	transactionadapter "github.com/ariden83/blockchain/internal/transaction"
+	"github.com/ariden83/blockchain/internal/transaction/impl/stub"
+	"github.com/ariden83/blockchain/internal/transaction/impl/transaction"
 )
 
 const (
@@ -13,26 +13,25 @@ const (
 	ImplementationUnknown = ""
 	// ImplementationStub is an implementation that does nothing and return no error.
 	ImplementationStub = "stub"
-	// ImplementationBadger uses a badger impl.
-	ImplementationBadger = "badger"
+	// ImplementationTransaction uses a transaction impl.
+	ImplementationTransaction = "transaction"
 )
 
 // Config struct which describe how build an ad adapter instance.
 type Config struct {
 	Implementation string `mapstructure:"impl"`
-	Badger         badger.Config
 }
 
 // New creates a new Adapter instance based on a Config.
-func New(config Config) (persistenceadapter.Adapter, error) {
+func New(config Config, options ...func(transactions *transaction.Transactions)) (transactionadapter.Adapter, error) {
 	var (
-		adapter persistenceadapter.Adapter
+		adapter transactionadapter.Adapter
 		err     error
 	)
 
 	switch config.Implementation {
-	case ImplementationBadger:
-		adapter, err = badger.New(config.Badger)
+	case ImplementationTransaction:
+		adapter = transaction.New(options...)
 	case ImplementationStub:
 		adapter = stub.New()
 	case ImplementationUnknown:

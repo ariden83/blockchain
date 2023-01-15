@@ -14,7 +14,7 @@ import (
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/metrics"
 	"github.com/ariden83/blockchain/internal/persistence"
-	"github.com/ariden83/blockchain/internal/transactions"
+	"github.com/ariden83/blockchain/internal/transaction"
 	"github.com/ariden83/blockchain/internal/wallet"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -30,13 +30,15 @@ type EndPoint struct {
 	metricsServer *http.Server
 	persistence   persistenceadapter.Adapter
 	server        *http.Server
-	transaction   transactions.ITransaction
+	transaction   transaction.Adapter
 	userAddress   string
 	wallets       wallet.IWallets
 }
 
 func New(options ...func(*EndPoint)) *EndPoint {
-	ep := &EndPoint{}
+	ep := &EndPoint{
+		log: zap.NewNop(),
+	}
 
 	for _, o := range options {
 		o(ep)
@@ -57,7 +59,7 @@ func WithPersistence(p persistenceadapter.Adapter) func(*EndPoint) {
 	}
 }
 
-func WithTransactions(t transactions.ITransaction) func(*EndPoint) {
+func WithTransactions(t transaction.Adapter) func(*EndPoint) {
 	return func(e *EndPoint) {
 		e.transaction = t
 	}

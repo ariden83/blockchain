@@ -6,20 +6,23 @@ import (
 
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/event/trace"
-	"github.com/ariden83/blockchain/internal/p2p/validation"
+	"github.com/ariden83/blockchain/internal/p2p/validator"
 )
 
+// Message represent a message push on a channel.
 type Message struct {
 	Type  EventType
 	ID    string
 	Value []byte
 }
 
+// EventType represent a message event type.
 type EventType int
 
+// Event represent a new adapter Event.
 type Event struct {
 	channel      chan Message
-	channelBlock chan validation.Validator
+	channelBlock chan validator.Validator
 	listChannel  []chan Message
 	trace        *trace.Trace
 }
@@ -83,7 +86,7 @@ func (e *Event) NewReader() chan Message {
 	return newChan
 }
 
-func (e *Event) PushBlock(block validation.Validator) {
+func (e *Event) PushBlock(block validator.Validator) {
 	e.channelBlock <- block
 }
 
@@ -93,8 +96,8 @@ func (e *Event) PushTrace(blockID string, state trace.State) {
 	}
 }
 
-func (e *Event) NewBlockReader() chan validation.Validator {
-	e.channelBlock = make(chan validation.Validator)
+func (e *Event) NewBlockReader() chan validator.Validator {
+	e.channelBlock = make(chan validator.Validator)
 	return e.channelBlock
 }
 
@@ -102,6 +105,14 @@ func (e *Event) NewTraceReader() *trace.Channel {
 	return e.trace.NewReader()
 }
 
+// CloseTraceReader must close trace reader.
 func (e *Event) CloseTraceReader(c trace.Channel) {
 	e.trace.CloseReader(c)
+}
+
+// CloseReaders must close all readers.
+func (e *Event) CloseReaders() {
+	for _, c := range e.listChannel {
+		close(c)
+	}
 }

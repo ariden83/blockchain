@@ -37,7 +37,7 @@ type IWallets interface {
 	GetUserAddress([]byte) string
 }
 
-func Init(cfg config.Wallet, log *zap.Logger) (*Wallets, error) {
+func New(cfg config.Wallet, log *zap.Logger) (*Wallets, error) {
 	var err error
 	opts := badger.DefaultOptions(cfg.Path)
 

@@ -15,7 +15,7 @@ func Test_Persistence(t *testing.T) {
 	t.Run("GetLastHash", func(t *testing.T) {
 		lastHash, err := p.GetLastHash()
 		assert.NoError(t, err)
-		assert.Nil(t, lastHash)
+		assert.Empty(t, lastHash)
 	})
 
 	t.Run("Update", func(t *testing.T) {
@@ -26,14 +26,14 @@ func Test_Persistence(t *testing.T) {
 
 	t.Run("LastHash", func(t *testing.T) {
 		lastHash := p.LastHash()
-		assert.Nil(t, lastHash)
+		assert.Empty(t, lastHash)
 	})
 
 	t.Run("GetCurrentHashSerialize", func(t *testing.T) {
 		hashSerialize := []byte("hashSerialize")
 		lastHash, err := p.GetCurrentHashSerialize(hashSerialize)
 		assert.NoError(t, err)
-		assert.Nil(t, lastHash)
+		assert.Empty(t, lastHash)
 	})
 
 	t.Run("GetCurrentHashSerialize", func(t *testing.T) {

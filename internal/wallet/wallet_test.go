@@ -1,6 +1,7 @@
 package wallet
 
 import (
+	"go.uber.org/zap"
 	"log"
 	"testing"
 
@@ -14,6 +15,12 @@ import (
 	"github.com/ariden83/blockchain/internal/logger"
 )
 
+func Test_New_Wallet(t *testing.T) {
+	wallerAdapter, err := New(config.Wallet{}, zap.NewNop())
+	assert.NoError(t, err)
+	assert.NotNil(t, wallerAdapter)
+}
+
 func Test_Hash(t *testing.T) {
 	t.Run("test hash comparaison", func(t *testing.T) {
 		mnemonic := []byte("couple robot escape silent main once smoke check good basket mimic similar")
@@ -26,7 +33,7 @@ func Test_Hash(t *testing.T) {
 	})
 }
 
-func Test_hdwallet_pubkey_always_same(t *testing.T) {
+func Test_HDWallet_PubKey_Always_Same(t *testing.T) {
 	seed := crypt.CreateHash()
 	mnemonic, err := mnemonic.New([]byte(seed), mnemonic.English)
 	assert.NoError(t, err)
@@ -41,7 +48,7 @@ func Test_hdwallet_pubkey_always_same(t *testing.T) {
 	}
 }
 
-func Test_hdwallet_privkey_string_privkey(t *testing.T) {
+func Test_HDWallet_PrivKey_String_PrivKey(t *testing.T) {
 	seed := crypt.CreateHash()
 	mnemonic, err := mnemonic.New([]byte(seed), mnemonic.English)
 	assert.NoError(t, err)

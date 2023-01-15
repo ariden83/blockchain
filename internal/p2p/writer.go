@@ -15,7 +15,7 @@ import (
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/iterator"
 	"github.com/ariden83/blockchain/internal/p2p/address"
-	"github.com/ariden83/blockchain/internal/p2p/validation"
+	"github.com/ariden83/blockchain/internal/p2p/validator"
 )
 
 var mutex = &sync.Mutex{}
@@ -28,7 +28,7 @@ func (e *EndPoint) writeData(rw *bufio.ReadWriter) {
 		for {
 			e.event.Push(event.Message{
 				Type:  event.Address,
-				Value: address.RecreateAddress(),
+				Value: address.IAM.RecreateMyAddress(),
 			})
 
 			now := time.Now()
@@ -130,7 +130,7 @@ func (e *EndPoint) callFiles(_ *bufio.ReadWriter) []byte {
 
 func (e *EndPoint) sendAddress(_ *bufio.ReadWriter) []byte {
 
-	bytes, err := json.Marshal(address.GetNewAddress())
+	bytes, err := json.Marshal(address.IAM.GetNewAddress())
 	if err != nil {
 		e.log.Error("fail to marshal new address", zap.Error(err))
 		return []byte{}
@@ -149,7 +149,7 @@ func (e *EndPoint) resendBlock(_ *bufio.ReadWriter) []byte {
 	return bytes
 }
 
-func (e *EndPoint) sendBlock(_ *bufio.ReadWriter, block validation.Validator) []byte {
+func (e *EndPoint) sendBlock(_ *bufio.ReadWriter, block validator.Validator) []byte {
 	bytes, err := json.Marshal(block)
 	if err != nil {
 		e.log.Error("fail to marshal block message to send", zap.Error(err))

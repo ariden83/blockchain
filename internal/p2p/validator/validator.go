@@ -1,4 +1,4 @@
-package validation
+package validator
 
 import (
 	"github.com/ariden83/blockchain/internal/blockchain"
@@ -10,6 +10,16 @@ type Validator struct {
 	Accepted map[string]bool
 	Refused  map[string]bool
 	Servers  []string
+}
+
+// New creates a new validator.
+func New(block blockchain.Block, servers []string) Validator {
+	return Validator{
+		Block:    block,
+		Servers:  servers,
+		Accepted: map[string]bool{},
+		Refused:  map[string]bool{},
+	}
 }
 
 func (v *Validator) IsAcceptedByMajority() bool {
@@ -27,18 +37,9 @@ func (v *Validator) IsRefusedByMajority() bool {
 }
 
 func (v *Validator) Accept() {
-	v.Accepted[address.GetMe()] = true
+	v.Accepted[address.IAM.Address()] = true
 }
 
 func (v *Validator) Refuse() {
-	v.Refused[address.GetMe()] = true
-}
-
-func New(block blockchain.Block, servers []string) Validator {
-	return Validator{
-		Block:    block,
-		Servers:  servers,
-		Accepted: map[string]bool{},
-		Refused:  map[string]bool{},
-	}
+	v.Refused[address.IAM.Address()] = true
 }

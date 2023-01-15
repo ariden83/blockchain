@@ -1,4 +1,4 @@
-package transactions
+package transaction
 
 import (
 	"errors"
@@ -6,11 +6,11 @@ import (
 
 	"go.uber.org/zap"
 
-	pkgError "github.com/ariden83/blockchain/pkg/errors"
-
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/p2p/address"
-	"github.com/ariden83/blockchain/internal/p2p/validation"
+	"github.com/ariden83/blockchain/internal/p2p/validator"
+	"github.com/ariden83/blockchain/internal/transaction"
+	pkgError "github.com/ariden83/blockchain/pkg/errors"
 )
 
 type SendBlockInput struct {
@@ -19,7 +19,7 @@ type SendBlockInput struct {
 	Amount *big.Int
 }
 
-func (t *Transactions) SendBlock(input SendBlockInput) error {
+func (t *Transactions) SendBlock(input transaction.SendBlockInput) error {
 	lastHash, index, err := t.GetLastBlock()
 	if err != nil {
 		return err
@@ -42,7 +42,7 @@ func (t *Transactions) SendBlock(input SendBlockInput) error {
 	}
 
 	mutex.Lock()
-	t.event.PushBlock(validation.New(newBlock, address.GetCurrentAddress()))
+	t.event.PushBlock(validator.New(newBlock, address.IAM.CurrentAddress()))
 	mutex.Unlock()
 
 	/*mutex.Lock()

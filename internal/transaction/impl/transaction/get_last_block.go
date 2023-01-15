@@ -1,4 +1,4 @@
-package transactions
+package transaction
 
 import (
 	"errors"

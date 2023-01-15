@@ -83,7 +83,7 @@ func (t *Trace) setConcurrence() {
 
 func (t *Trace) NewReader() *Channel {
 	c := Channel{
-		id:      utils.RandomString(5),
+		id:      utils.RandomString(uint8(5)),
 		channel: make(chan Message),
 	}
 

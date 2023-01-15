@@ -11,6 +11,7 @@ require (
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0
 	github.com/dgraph-io/badger v1.6.2
 	github.com/gcash/bchd v0.18.1
+	github.com/go-chi/chi v1.5.4
 	github.com/go-oauth2/oauth2/v4 v4.4.2
 	github.com/go-session/session v3.1.2+incompatible
 	github.com/golang/protobuf v1.5.2

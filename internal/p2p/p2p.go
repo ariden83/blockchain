@@ -49,6 +49,7 @@ type EndPoint struct {
 	msgReceived []string
 	persistence persistenceadapter.Adapter
 	readerReady bool
+	target      string
 	wallets     wallet.IWallets
 	xCache      *xcache.Cache
 	writerReady bool
@@ -57,7 +58,7 @@ type EndPoint struct {
 // Option is the type of option passed to the constructor.
 type Option func(e *EndPoint)
 
-func Init(
+func New(
 	cfg config.P2P,
 	per persistenceadapter.Adapter,
 	wallets wallet.IWallets,
@@ -68,11 +69,12 @@ func Init(
 
 	e := &EndPoint{
 		cfg:         cfg,
-		persistence: per,
-		wallets:     wallets,
-		log:         logs.With(zap.String("service", "p2p")),
-		event:       evt,
 		enabled:     cfg.Enabled,
+		event:       evt,
+		log:         logs.With(zap.String("service", "p2p")),
+		persistence: per,
+		target:      cfg.Target,
+		wallets:     wallets,
 	}
 
 	for _, o := range opts {
@@ -95,7 +97,7 @@ func WithXCache(cfg config.XCache) Option {
 			xcache.WithPruneSize(int32(cfg.Size/20)+1))
 
 		if err != nil {
-			e.log.Error("fail to init xcache for p2p service", zap.Error(err))
+			e.log.Error("fail to init xCache for p2p service", zap.Error(err))
 		}
 	}
 }
@@ -204,8 +206,16 @@ func (e *EndPoint) hasRequiredPort() {
 	}
 }
 
+func (e *EndPoint) SetTarget(target string) {
+	e.target = target
+}
+
+func (e *EndPoint) Target() string {
+	return e.target
+}
+
 func (e *EndPoint) HasTarget() bool {
-	if e.cfg.Target == "" {
+	if e.target == "" {
 		// call default genesis
 		return false
 	}
@@ -215,9 +225,9 @@ func (e *EndPoint) HasTarget() bool {
 func (e *EndPoint) connectToIPFS(ha host.Host) error {
 	// The following code extracts target's peer ID from the
 	// given multiaddress
-	ipfsAddr, err := ma.NewMultiaddr(e.cfg.Target)
+	ipfsAddr, err := ma.NewMultiaddr(e.target)
 	if err != nil {
-		e.log.Error("fail to set new multi address", zap.Error(err), zap.String("target", e.cfg.Target))
+		e.log.Error("fail to set new multi address", zap.Error(err), zap.String("target", e.target))
 		return err
 	}
 
@@ -250,7 +260,7 @@ func (e *EndPoint) connectToIPFS(ha host.Host) error {
 	// /ip4/<a.b.c.d>/ipfs/<peer> becomes /ip4/<a.b.c.d>
 	targetPeerAddr, err := ma.NewMultiaddr(fmt.Sprintf("/ipfs/%s", peer.Encode(peerid)))
 	if err != nil {
-		e.log.Error("fail to set new multi address", zap.Error(err), zap.String("target", e.cfg.Target))
+		e.log.Error("fail to set new multi address", zap.Error(err), zap.String("target", e.target))
 		return err
 	}
 
@@ -260,7 +270,7 @@ func (e *EndPoint) connectToIPFS(ha host.Host) error {
 	// so LibP2P knows how to contact it
 	ha.Peerstore().AddAddr(peerid, targetAddr, pstore.PermanentAddrTTL)
 
-	e.log.Info("opening stream p2p", zap.String("target", e.cfg.Target))
+	e.log.Info("opening stream p2p", zap.String("target", e.target))
 	// make a new stream from host B to host A
 	// it should be handled on host A by the handler we set above because
 	// we use the same /p2p/1.0.0 protocol
@@ -359,7 +369,7 @@ func (e *EndPoint) makeBasicHost() error {
 
 	// Parse the multiaddr string.
 	peerMA, err := ma.NewMultiaddr(fmt.Sprintf("/ipfs/%s", e.host.ID().Pretty()))
-	//peerMA, err := ma.NewMultiaddr(e.cfg.Target)
+	//peerMA, err := ma.NewMultiaddr(e.target)
 	if err != nil {
 		return err
 	}
@@ -376,19 +386,19 @@ func (e *EndPoint) makeBasicHost() error {
 		}
 	}
 
-	address.SetIAM(addr.Encapsulate(peerMA).String())
-	e.log.Info(fmt.Sprintf("I am %s\n", address.IAM))
+	address.IAM.SetAddress(addr.Encapsulate(peerMA).String())
+	e.log.Info(fmt.Sprintf("I am %s\n", address.IAM.Address()))
 	if e.cfg.Secio {
-		e.log.Info(fmt.Sprintf("Now run \"go run main.go -p2p_target %s -secio\" on a different terminal", address.IAM))
+		e.log.Info(fmt.Sprintf("Now run \"go run main.go -p2p_target %s -secio\" on a different terminal", address.IAM.Address()))
 	} else {
-		e.log.Info(fmt.Sprintf("Now run \"go run main.go -p2p_target %s\" on a different terminal", address.IAM))
+		e.log.Info(fmt.Sprintf("Now run \"go run main.go -p2p_target %s\" on a different terminal", address.IAM.Address()))
 	}
 
 	return nil
 }
 
 func (e *EndPoint) alertWaitFirstConnexion(stop chan error) {
-	if e.cfg.Target != "" {
+	if e.target != "" {
 		return
 	}
 
@@ -398,9 +408,9 @@ func (e *EndPoint) alertWaitFirstConnexion(stop chan error) {
 		}
 		e.log.Warn("waiting for new P2P connexion ...")
 		if e.cfg.Secio {
-			e.log.Info(fmt.Sprintf("run \"go run main.go -p2p_target %s -secio\" on a different terminal", address.IAM))
+			e.log.Info(fmt.Sprintf("run \"go run main.go -p2p_target %s -secio\" on a different terminal", address.IAM.Address()))
 		} else {
-			e.log.Info(fmt.Sprintf("run \"go run main.go -p2p_target %s\" on a different terminal", address.IAM))
+			e.log.Info(fmt.Sprintf("run \"go run main.go -p2p_target %s\" on a different terminal", address.IAM.Address()))
 		}
 
 		select {

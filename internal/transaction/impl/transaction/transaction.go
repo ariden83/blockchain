@@ -1,4 +1,4 @@
-package transactions
+package transaction
 
 import (
 	"math/big"
@@ -26,17 +26,6 @@ type Transactions struct {
 	persistence     persistenceadapter.Adapter
 	event           *event.Event
 	log             *zap.Logger
-}
-
-type ITransaction interface {
-	New([]byte, []byte, *big.Int) (*blockchain.Transaction, error)
-	CoinBaseTx([]byte) *blockchain.Transaction
-	FindUserBalance([]byte) *big.Int
-	FindUserTokensSend([]byte) *big.Int
-	FindUserTokensReceived([]byte) *big.Int
-	WriteBlock([]byte) (*blockchain.Block, error)
-	GetLastBlock() ([]byte, *big.Int, error)
-	SendBlock(input SendBlockInput) error
 }
 
 var mutex = &sync.Mutex{}

@@ -15,7 +15,11 @@ type Metrics struct {
 	ApiParamsCounter *prometheus.CounterVec
 }
 
-func New(c config.Metrics) *Metrics {
+func New(c config.Metrics, reg prometheus.Registerer) *Metrics {
+	if reg == nil {
+		reg = prometheus.DefaultRegisterer
+	}
+
 	namespace := c.Namespace
 	metric := &Metrics{
 		RouteCountReqs: prometheus.NewCounterVec(

@@ -5,50 +5,63 @@ import (
 	"sync"
 )
 
-var (
-	// only use by API call
-	CurrentAddress []string
-	// use to share address on network
-	NewAddress []string
-	IAM        string
-	mutex      = &sync.Mutex{}
-)
+var IAM Address
 
-func GetMe() string {
-	return IAM
+func init() {
+	IAM = New()
 }
 
-func SetIAM(iam string) {
-	IAM = iam
-	NewAddress = []string{iam}
-	CurrentAddress = NewAddress
+type Address struct {
+	// CurrentAddress is only use by API call.
+	currentAddress []string
+	// NewAddress is used to share address on network.
+	newAddress []string
+	// IAM represent my address.
+	iam   string
+	mutex *sync.Mutex
 }
 
-func RecreateAddress() []byte {
-	CurrentAddress = NewAddress
-	NewAddress = []string{IAM}
+func New() Address {
+	return Address{
+		mutex: &sync.Mutex{},
+	}
+}
 
-	bytes, err := json.Marshal(NewAddress)
+func (a *Address) Address() string {
+	return a.iam
+}
+
+func (a *Address) SetAddress(myAddress string) {
+	a.iam = myAddress
+	a.newAddress = []string{a.iam}
+	a.currentAddress = a.newAddress
+}
+
+func (a *Address) RecreateMyAddress() []byte {
+	a.currentAddress = a.newAddress
+	a.newAddress = []string{a.iam}
+
+	bytes, err := json.Marshal(a.newAddress)
 	if err != nil {
 		return []byte{}
 	}
 	return bytes
 }
 
-func GetCurrentAddress() []string {
-	return CurrentAddress
+func (a *Address) CurrentAddress() []string {
+	return a.currentAddress
 }
 
-func GetNewAddress() []string {
-	return NewAddress
+func (a *Address) GetNewAddress() []string {
+	return a.newAddress
 }
 
-func UpdateAddress(received []string) []string {
+func (a *Address) UpdateAddress(received []string) []string {
 	toNewAddress := map[string]bool{}
 	for _, addr := range received {
 		toNewAddress[addr] = true
 	}
-	for _, addr := range NewAddress {
+	for _, addr := range a.newAddress {
 		toNewAddress[addr] = true
 	}
 
@@ -56,8 +69,8 @@ func UpdateAddress(received []string) []string {
 	for key := range toNewAddress {
 		saveAddress = append(saveAddress, key)
 	}
-	mutex.Lock()
-	NewAddress = saveAddress
-	mutex.Unlock()
-	return NewAddress
+	a.mutex.Lock()
+	a.newAddress = saveAddress
+	a.mutex.Unlock()
+	return a.newAddress
 }

@@ -12,7 +12,7 @@ import (
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/blockchain/difficulty"
 	"github.com/ariden83/blockchain/internal/event"
-	"github.com/ariden83/blockchain/internal/p2p/validation"
+	"github.com/ariden83/blockchain/internal/p2p/validator"
 	"github.com/ariden83/blockchain/internal/utils"
 	// "github.com/davecgh/go-spew/spew"
 	"github.com/ariden83/blockchain/internal/p2p/address"
@@ -184,7 +184,7 @@ func (e *EndPoint) getNumOnNewBlockChain(newBlockChain []blockchain.Block, lastH
 }
 
 func (e *EndPoint) readNewBlock(msg event.Message) {
-	var validator validation.Validator
+	var validator validator.Validator
 	if err := json.Unmarshal(msg.Value, &validator); err != nil {
 		e.log.Error("fail to unmarshal block received", zap.Error(err))
 		return
@@ -298,7 +298,7 @@ func (e *EndPoint) readWallets(chain []byte) {
 }
 
 func (e *EndPoint) readPool(_ []byte) {
-	e.log.Info("************************************************************ readPool")
+	e.log.Info("readPool")
 }
 
 // on renotifie wallets and blockChain
@@ -308,14 +308,14 @@ func (e *EndPoint) readFilesAsk() {
 }
 
 func (e *EndPoint) updateAddress(m event.Message) {
-	addressReceived := []string{}
+	var addressReceived []string
 	if err := json.Unmarshal(m.Value, &addressReceived); err != nil {
 		spew.Dump(string(m.Value))
 		e.log.Error("fail to unmarshal addresses received", zap.Error(err))
 		return
 	}
 
-	updateAddress := address.UpdateAddress(addressReceived)
+	updateAddress := address.IAM.UpdateAddress(addressReceived)
 
 	if len(addressReceived) != len(updateAddress) {
 		e.event.Push(event.Message{
