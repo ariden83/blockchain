@@ -1,0 +1,228 @@
+package main
+
+import (
+	"encoding/json"
+	"io"
+	"log"
+	"math/big"
+	"net/http"
+	"os"
+	"sync"
+	"time"
+
+	"github.com/LuisAcerv/btchdwallet/crypt"
+	"github.com/blockcypher/gobcy"
+	"github.com/brianium/mnemonic"
+	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
+
+	"github.com/ariden83/blockchain/internal/hdwallet"
+)
+
+// Seed represents each 'item' in the blockchain
+type Seed struct {
+	Address   string
+	Timestamp string
+	PubKey    string
+	PrivKey   string
+	Mnemonic  string
+}
+
+type SeedNoPrivKey struct {
+	Address   string
+	Timestamp string
+	PubKey    string
+}
+
+// Seeds is a series of validated Blocks
+var (
+	seeds []Seed
+	mutex = &sync.Mutex{}
+)
+
+func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Fatal(run())
+}
+
+// web server
+func run() error {
+	mux := makeMuxRouter()
+	httpPort := os.Getenv("SEED_PORT")
+	log.Println("HTTP Server Listening on port :", httpPort)
+	s := &http.Server{
+		Addr:           ":" + httpPort,
+		Handler:        mux,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+
+	if err := s.ListenAndServe(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// create handlers
+func makeMuxRouter() http.Handler {
+	muxRouter := mux.NewRouter()
+	muxRouter.HandleFunc("/seeds", handleGetAllSeeds).Methods("GET")
+	muxRouter.HandleFunc("/create", handleCreateWallet).Methods("POST")
+	muxRouter.HandleFunc("/wallet", handleGetWallet).Methods("POST")
+	muxRouter.HandleFunc("/balance", handleGetBalance).Methods("POST")
+	return muxRouter
+}
+
+func getAllSeeds() []SeedNoPrivKey {
+	var allSeeds []SeedNoPrivKey
+	for _, j := range seeds {
+		allSeeds = append(allSeeds, SeedNoPrivKey{
+			Address:   j.Address,
+			Timestamp: j.Timestamp,
+			PubKey:    j.PubKey,
+		})
+	}
+	return allSeeds
+}
+
+func handleGetAllSeeds(w http.ResponseWriter, r *http.Request) {
+	bytes, err := json.MarshalIndent(getAllSeeds(), "", "  ")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	io.WriteString(w, string(bytes))
+}
+
+func handleCreateWallet(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	seed := crypt.CreateHash()
+	mnemonic, _ := mnemonic.New([]byte(seed), mnemonic.English)
+
+	// Create a master private key
+	masterPrv := hdwallet.MasterKey([]byte(mnemonic.Sentence()))
+
+	// Convert a private key to public key
+	masterPub := masterPrv.Pub()
+
+	// Get your address
+	address := masterPub.Address()
+
+	t := time.Now()
+	newSeed := Seed{
+		Address:   address,
+		PubKey:    masterPub.String(),
+		PrivKey:   masterPrv.String(),
+		Mnemonic:  mnemonic.Sentence(),
+		Timestamp: t.String(),
+	}
+	mutex.Lock()
+	seeds = append(seeds, newSeed)
+	mutex.Unlock()
+	respondWithJSON(w, r, http.StatusCreated, newSeed)
+}
+
+type getWalletInput struct {
+	Mnemonic string `json:"mnemonic"`
+}
+
+func handleGetWallet(w http.ResponseWriter, r *http.Request) {
+	var p getWalletInput
+
+	r.Body = http.MaxBytesReader(w, r.Body, 1048)
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+	err := dec.Decode(&p)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	err = dec.Decode(&struct{}{})
+	if err != io.EOF {
+		msg := "Request body must only contain a single JSON object"
+		http.Error(w, msg, http.StatusBadRequest)
+		return
+	}
+
+	// Get private key from mnemonic
+	masterPrv := hdwallet.MasterKey([]byte(p.Mnemonic))
+
+	// Convert a private key to public key
+	masterPub := masterPrv.Pub()
+
+	// Get your address
+	address := masterPub.Address()
+	respondWithJSON(w, r, http.StatusCreated, Seed{
+		Address: address,
+		PubKey:  masterPub.String(),
+		PrivKey: masterPrv.String(),
+	})
+}
+
+type balanceInput struct {
+	Address string `json:"address"`
+}
+
+type balanceOutput struct {
+	Address            string
+	Balance            big.Int
+	TotalReceived      big.Int
+	TotalSent          big.Int
+	UnconfirmedBalance big.Int
+}
+
+func handleGetBalance(w http.ResponseWriter, r *http.Request) {
+	var b balanceInput
+
+	r.Body = http.MaxBytesReader(w, r.Body, 1048)
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+	err := dec.Decode(&b)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	err = dec.Decode(&struct{}{})
+	if err != io.EOF {
+		msg := "Request body must only contain a single JSON object"
+		http.Error(w, msg, http.StatusBadRequest)
+		return
+	}
+
+	btc := gobcy.API{
+		os.Getenv("TOKEN"),
+		"btc",
+		"main",
+	}
+
+	addr, err := btc.GetAddrBal(b.Address, nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	respondWithJSON(w, r, http.StatusOK, balanceOutput{
+		Address:            b.Address,
+		Balance:            addr.Balance,
+		TotalReceived:      addr.TotalReceived,
+		TotalSent:          addr.TotalSent,
+		UnconfirmedBalance: addr.UnconfirmedBalance,
+	})
+}
+
+func respondWithJSON(w http.ResponseWriter, r *http.Request, code int, payload interface{}) {
+	response, err := json.MarshalIndent(payload, "", "  ")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(code)
+	w.Write(response)
+}

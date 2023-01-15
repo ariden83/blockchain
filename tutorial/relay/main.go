@@ -5,11 +5,11 @@ import (
 	"log"
 
 	"github.com/libp2p/go-libp2p"
-	"github.com/libp2p/go-libp2p-core/network"
-	"github.com/libp2p/go-libp2p-core/peer"
+	"github.com/libp2p/go-libp2p/core/network"
+	"github.com/libp2p/go-libp2p/core/peer"
 
-	circuit "github.com/libp2p/go-libp2p-circuit"
-	swarm "github.com/libp2p/go-libp2p-swarm"
+	"github.com/libp2p/go-libp2p/p2p/net/swarm"
+	circuit "github.com/libp2p/go-libp2p/p2p/protocol/circuitv2/relay"
 	ma "github.com/multiformats/go-multiaddr"
 )
 
@@ -20,9 +20,8 @@ func main() {
 // https://docs.libp2p.io/concepts/circuit-relay/
 func run() {
 	// Créez trois hôtes libp2p, activez les capacités de client de relais sur chacun d'eux
-	ctx := context.Background()
 	// Dites à l'hôte d'utiliser des relais
-	h1, err := libp2p.New(ctx, libp2p.EnableRelay())
+	h1, err := libp2p.New(libp2p.EnableRelay())
 	if err != nil {
 		log.Printf("Failed to create h1: %v", err)
 		return
@@ -30,19 +29,19 @@ func run() {
 
 	// Dites à l'hôte de relayer les connexions pour d'autres pairs (la possibilité d'*utiliser*
 	// un relais vs la capacité d'*être* un relais)
-	h2, err := libp2p.New(ctx, libp2p.DisableRelay())
+	h2, err := libp2p.New(libp2p.DisableRelay())
 	if err != nil {
 		log.Printf("Failed to create h2: %v", err)
 		return
 	}
-	_, err = circuit.NewRelay(context.Background(), h2, nil, circuit.OptHop)
+	_, err = circuit.New(h2, nil)
 	if err != nil {
 		log.Printf("Failed to instantiate h2 relay: %v", err)
 		return
 	}
 
 	// Mettez à zéro les adresses d'écoute pour l'hôte, afin qu'il ne puisse communiquer que via le circuit p2p pour notre exemple
-	h3, err := libp2p.New(ctx, libp2p.ListenAddrs(), libp2p.EnableRelay())
+	h3, err := libp2p.New(libp2p.ListenAddrs(), libp2p.EnableRelay())
 	if err != nil {
 		log.Printf("Failed to create h3: %v", err)
 		return

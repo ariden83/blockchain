@@ -2,9 +2,10 @@ package trace
 
 import (
 	"fmt"
+	"go.uber.org/zap"
+
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/utils"
-	"go.uber.org/zap"
 )
 
 type State int

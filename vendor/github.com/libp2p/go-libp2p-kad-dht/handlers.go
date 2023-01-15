@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/libp2p/go-libp2p-core/peer"
-	pstore "github.com/libp2p/go-libp2p-peerstore"
+	"github.com/libp2p/go-libp2p/core/peer"
+	pstore "github.com/libp2p/go-libp2p/p2p/host/peerstore"
 
 	"github.com/gogo/protobuf/proto"
 	ds "github.com/ipfs/go-datastore"
@@ -342,7 +342,7 @@ func (dht *IpfsDHT) handleAddProvider(ctx context.Context, p peer.ID, pmes *pb.M
 		return nil, fmt.Errorf("handleAddProvider key is empty")
 	}
 
-	logger.Debugf("adding provider", "from", p, "key", internal.LoggableProviderRecordBytes(key))
+	logger.Debugw("adding provider", "from", p, "key", internal.LoggableProviderRecordBytes(key))
 
 	// add provider should use the address given in the message
 	pinfos := pb.PBPeersToPeerInfos(pmes.GetProviderPeers())

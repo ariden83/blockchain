@@ -4,7 +4,7 @@ type Persistence struct {
 	lastHash []byte
 }
 
-func New() *Persistence{
+func New() *Persistence {
 	return &Persistence{}
 }
 

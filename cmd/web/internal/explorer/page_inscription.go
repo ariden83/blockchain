@@ -100,21 +100,22 @@ type postInscriptionAPIReq struct {
 //
 // POST inscriptionAPI
 //
-//     Consumes:
-//     - application/json
+//	Consumes:
+//	- application/json
 //
-//     Produces:
-//     - application/json
+//	Produces:
+//	- application/json
 //
-//     Schemes: http, https
+//	Schemes: http, https
 //
 // Responses:
-//    default: genericError
-//        200: postInscriptionAPIResp
-//        401: genericError
-//        404: genericError
-//        412: genericError
-//        500: genericError
+//
+//	default: genericError
+//	    200: postInscriptionAPIResp
+//	    401: genericError
+//	    404: genericError
+//	    412: genericError
+//	    500: genericError
 func (e *Explorer) inscriptionAPI(rw http.ResponseWriter, r *http.Request) {
 	_, authorized := e.authorized(rw, r)
 	if authorized {

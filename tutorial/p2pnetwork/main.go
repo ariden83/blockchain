@@ -11,10 +11,10 @@ import (
 	"time"
 
 	"github.com/libp2p/go-libp2p"
-	// "github.com/libp2p/go-libp2p-core/discovery"
-	"github.com/libp2p/go-libp2p-core/host"
-	"github.com/libp2p/go-libp2p-core/network"
-	"github.com/libp2p/go-libp2p-core/peer"
+	// "github.com/libp2p/go-libp2p/core/discovery"
+	"github.com/libp2p/go-libp2p/core/host"
+	"github.com/libp2p/go-libp2p/core/network"
+	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/multiformats/go-multiaddr"
 )
 
@@ -33,7 +33,7 @@ func main() {
 	//
 	// Setting the TCP port as 0 makes libp2p choose an available port for us.
 	// You could, of course, specify one if you like.
-	host, err := libp2p.New(context.Background(), libp2p.ListenAddrStrings("/ip4/127.0.0.1/tcp/0"))
+	host, err := libp2p.New(libp2p.ListenAddrStrings("/ip4/127.0.0.1/tcp/0"))
 	if err != nil {
 		panic(err)
 	}

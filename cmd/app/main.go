@@ -12,18 +12,18 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/ariden83/blockchain/internal/metrics"
 	"github.com/ariden83/blockchain/config"
+	grpcEndpoint "github.com/ariden83/blockchain/internal/endpoint/grpc"
+	httpEndpoint "github.com/ariden83/blockchain/internal/endpoint/http"
 	metricsEndpoint "github.com/ariden83/blockchain/internal/endpoint/metrics"
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/genesis"
 	"github.com/ariden83/blockchain/internal/logger"
+	"github.com/ariden83/blockchain/internal/metrics"
 	"github.com/ariden83/blockchain/internal/p2p"
 	persistencefactory "github.com/ariden83/blockchain/internal/persistence/factory"
 	"github.com/ariden83/blockchain/internal/transactions"
 	"github.com/ariden83/blockchain/internal/wallet"
-	grpcEndpoint "github.com/ariden83/blockchain/internal/endpoint/grpc"
-	httpEndpoint "github.com/ariden83/blockchain/internal/endpoint/http"
 )
 
 func main() {

@@ -32,6 +32,7 @@ type Conn struct {
 
 	// handshakeStatus is 1 if the connection is currently transferring
 	// application data (i.e. is not currently processing a handshake).
+	// handshakeStatus == 1 implies handshakeErr == nil.
 	// This field is only to be accessed with sync/atomic.
 	handshakeStatus uint32
 	// constant after handshake; protected by handshakeMutex
@@ -124,6 +125,9 @@ type Conn struct {
 	used0RTT bool
 
 	tmp [16]byte
+
+	connStateMutex sync.Mutex
+	connState      ConnectionStateWith0RTT
 }
 
 // Access to net.Conn methods.
@@ -1458,6 +1462,13 @@ func (c *Conn) HandshakeContext(ctx context.Context) error {
 }
 
 func (c *Conn) handshakeContext(ctx context.Context) (ret error) {
+	// Fast sync/atomic-based exit if there is no handshake in flight and the
+	// last one succeeded without an error. Avoids the expensive context setup
+	// and mutex for most Read and Write calls.
+	if c.handshakeComplete() {
+		return nil
+	}
+
 	handshakeCtx, cancel := context.WithCancel(ctx)
 	// Note: defer this before starting the "interrupter" goroutine
 	// so that we can tell the difference between the input being canceled and
@@ -1516,25 +1527,25 @@ func (c *Conn) handshakeContext(ctx context.Context) (ret error) {
 	if c.handshakeErr == nil && !c.handshakeComplete() {
 		c.handshakeErr = errors.New("tls: internal error: handshake should have had a result")
 	}
+	if c.handshakeErr != nil && c.handshakeComplete() {
+		panic("tls: internal error: handshake returned an error but is marked successful")
+	}
 
 	return c.handshakeErr
 }
 
 // ConnectionState returns basic TLS details about the connection.
 func (c *Conn) ConnectionState() ConnectionState {
-	c.handshakeMutex.Lock()
-	defer c.handshakeMutex.Unlock()
-	return c.connectionStateLocked()
+	c.connStateMutex.Lock()
+	defer c.connStateMutex.Unlock()
+	return c.connState.ConnectionState
 }
 
 // ConnectionStateWith0RTT returns basic TLS details (incl. 0-RTT status) about the connection.
 func (c *Conn) ConnectionStateWith0RTT() ConnectionStateWith0RTT {
-	c.handshakeMutex.Lock()
-	defer c.handshakeMutex.Unlock()
-	return ConnectionStateWith0RTT{
-		ConnectionState: c.connectionStateLocked(),
-		Used0RTT:        c.used0RTT,
-	}
+	c.connStateMutex.Lock()
+	defer c.connStateMutex.Unlock()
+	return c.connState
 }
 
 func (c *Conn) connectionStateLocked() ConnectionState {
@@ -1563,6 +1574,15 @@ func (c *Conn) connectionStateLocked() ConnectionState {
 		state.ekm = c.ekm
 	}
 	return toConnectionState(state)
+}
+
+func (c *Conn) updateConnectionState() {
+	c.connStateMutex.Lock()
+	defer c.connStateMutex.Unlock()
+	c.connState = ConnectionStateWith0RTT{
+		Used0RTT:        c.used0RTT,
+		ConnectionState: c.connectionStateLocked(),
+	}
 }
 
 // OCSPResponse returns the stapled OCSP response from the TLS server, if

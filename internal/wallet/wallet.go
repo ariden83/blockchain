@@ -15,9 +15,7 @@ import (
 	pkgError "github.com/ariden83/blockchain/pkg/errors"
 )
 
-var (
-	mutex = &sync.Mutex{}
-)
+var mutex = &sync.Mutex{}
 
 type Wallets struct {
 	File      string

@@ -12,19 +12,20 @@ import (
 	"time"
 
 	"github.com/libp2p/go-libp2p"
-	connmgr "github.com/libp2p/go-libp2p-connmgr"
-	net "github.com/libp2p/go-libp2p-core"
-	"github.com/libp2p/go-libp2p-core/crypto"
-	host "github.com/libp2p/go-libp2p-core/host"
-	"github.com/libp2p/go-libp2p-core/network"
-	peer "github.com/libp2p/go-libp2p-core/peer"
-	pstore "github.com/libp2p/go-libp2p-core/peerstore"
-	"github.com/libp2p/go-libp2p-core/protocol"
-	"github.com/libp2p/go-libp2p-core/routing"
+	"github.com/libp2p/go-libp2p/core/crypto"
+	"github.com/libp2p/go-libp2p/core/host"
+	"github.com/libp2p/go-libp2p/core/network"
+	"github.com/libp2p/go-libp2p/core/peer"
+	"github.com/libp2p/go-libp2p/core/protocol"
+	"github.com/libp2p/go-libp2p/core/routing"
+
+	pstore "github.com/libp2p/go-libp2p/core/peerstore"
+	"github.com/libp2p/go-libp2p/p2p/net/connmgr"
+
 	dht "github.com/libp2p/go-libp2p-kad-dht"
-	noise "github.com/libp2p/go-libp2p-noise"
-	libp2pquic "github.com/libp2p/go-libp2p-quic-transport"
-	libp2ptls "github.com/libp2p/go-libp2p-tls"
+	"github.com/libp2p/go-libp2p/p2p/security/noise"
+	libp2ptls "github.com/libp2p/go-libp2p/p2p/security/tls"
+
 	ma "github.com/multiformats/go-multiaddr"
 	"github.com/satori/go.uuid"
 
@@ -308,27 +309,31 @@ func (e *EndPoint) makeBasicHost() error {
 
 	var idht *dht.IpfsDHT
 
-	opts := []libp2p.Option{
+	connmgr, err := connmgr.NewConnManager(
+		100, // Lowwater
+		400, // HighWater,
+		connmgr.WithGracePeriod(time.Minute),
+	)
+	if err != nil {
+		return err
+	}
+
+	e.host, err = libp2p.New( // Use the keypair we generated
+		libp2p.Identity(priv),
+		// Multiple listen addresses
 		libp2p.ListenAddrStrings(
 			fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", e.cfg.Port),      // regular tcp connections
-			fmt.Sprintf("/ip4/0.0.0.0/udp/%d/quic", e.cfg.Port), // a UDP endpoint for the QUIC transport
+			fmt.Sprintf("/ip4/0.0.0.0/tcp/%d/quic", e.cfg.Port), // a UDP endpoint for the QUIC transport
 		),
-		libp2p.Identity(priv),
 		// support TLS connections
 		libp2p.Security(libp2ptls.ID, libp2ptls.New),
-		// support Noise connections
+		// support noise connections
 		libp2p.Security(noise.ID, noise.New),
-		// support QUIC
-		libp2p.Transport(libp2pquic.NewTransport),
 		// support any other default transports (TCP)
 		libp2p.DefaultTransports,
 		// Let's prevent our peer from having too many
 		// connections by attaching a connection manager.
-		libp2p.ConnectionManager(connmgr.NewConnManager(
-			100,         // Lowwater
-			400,         // HighWater,
-			time.Minute, // GracePeriod
-		)),
+		libp2p.ConnectionManager(connmgr),
 		// Attempt to open ports using uPNP for NATed hosts.
 		libp2p.NATPortMap(),
 		// Let this host use the DHT to find other hosts
@@ -336,10 +341,6 @@ func (e *EndPoint) makeBasicHost() error {
 			idht, err = dht.New(ctx, h)
 			return idht, err
 		}),
-		// Let this host use relays and advertise itself on relays if
-		// it finds it is behind NAT. Use libp2p.Relay(options...) to
-		// enable active relays and more.
-		libp2p.EnableAutoRelay(),
 		// If you want to help other peers to figure out if they are behind
 		// NATs, you can launch the server-side of AutoNAT too (AutoRelay
 		// already runs the client)
@@ -347,9 +348,7 @@ func (e *EndPoint) makeBasicHost() error {
 		// This service is highly rate-limited and should not cause any
 		// performance issues.
 		libp2p.EnableNATService(),
-	}
-
-	e.host, err = libp2p.New(context.Background(), opts...)
+	)
 	if err != nil {
 		e.log.Error("fail to set basic host", zap.Int("port", e.cfg.Port))
 		return err
@@ -419,10 +418,7 @@ func (e *EndPoint) alertWaitFirstConnexion(stop chan error) {
 // This gets called every time a peer connects and opens a stream to this node.
 func (e *EndPoint) setStreamHandler() {
 	protocolID := protocol.ID(e.cfg.ProtocolID)
-	e.host.SetStreamHandler(protocolID, func(s network.Stream) {
-		e.writeCounter(s)
-		e.readCounter(s)
-	})
+	e.host.SetStreamHandler(protocolID, e.handleStream)
 }
 
 func (e *EndPoint) setIoReader() io.Reader {
@@ -435,12 +431,12 @@ func (e *EndPoint) setIoReader() io.Reader {
 	return r
 }
 
-func (e *EndPoint) handleStream(s net.Stream) {
+func (e *EndPoint) handleStream(stream network.Stream) {
 	e.linked = true
 	e.log.Info("Got a new stream p2p")
 	e.address = append(e.address)
 	// Create a buffer stream for non blocking read and write.
-	rw := bufio.NewReadWriter(bufio.NewReader(s), bufio.NewWriter(s))
+	rw := bufio.NewReadWriter(bufio.NewReader(stream), bufio.NewWriter(stream))
 
 	e.readData(rw)
 	e.writeData(rw)

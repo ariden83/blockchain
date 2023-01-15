@@ -13,10 +13,9 @@ import (
 	"github.com/heetch/confita/backend/env"
 	"github.com/heetch/confita/backend/flags"
 
-	"github.com/ariden83/blockchain/internal/persistence/impl/badger"
 	persistencefactory "github.com/ariden83/blockchain/internal/persistence/factory"
+	"github.com/ariden83/blockchain/internal/persistence/impl/badger"
 )
-
 
 type Gas struct {
 	// Minimum amount of Wei per GAS to be paid for a transaction to be accepted for mining. Note: gasprice is listed in wei. Note 2: --gasprice is a “Legacy Option”

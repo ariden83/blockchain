@@ -1,12 +1,12 @@
 package trace
 
 import (
-	"github.com/ariden83/blockchain/internal/logger"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
 	"github.com/ariden83/blockchain/config"
+	"github.com/ariden83/blockchain/internal/logger"
 )
 
 func (t *Trace) getListID() map[string]Channel {

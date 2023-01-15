@@ -11,7 +11,8 @@ import (
 	"github.com/brianium/mnemonic"
 	"github.com/gcash/bchd/bchec"
 	"github.com/stretchr/testify/assert"
-	"github.com/wemeetagain/go-hdwallet"
+
+	"github.com/ariden83/blockchain/internal/hdwallet"
 )
 
 func TestMain(m *testing.M) {

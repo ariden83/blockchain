@@ -8,9 +8,9 @@ import (
 	"github.com/brianium/mnemonic"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/wemeetagain/go-hdwallet"
 
 	"github.com/ariden83/blockchain/config"
+	"github.com/ariden83/blockchain/internal/hdwallet"
 	"github.com/ariden83/blockchain/internal/logger"
 )
 

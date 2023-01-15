@@ -3,9 +3,10 @@ package wallet
 import (
 	"errors"
 
-	"github.com/wemeetagain/go-hdwallet"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/sha3"
+
+	"github.com/ariden83/blockchain/internal/hdwallet"
 )
 
 func GetPubKey(privKey []byte) ([]byte, error) {

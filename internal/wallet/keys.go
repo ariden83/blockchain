@@ -3,8 +3,9 @@ package wallet
 import (
 	"time"
 
-	"github.com/wemeetagain/go-hdwallet"
 	"go.uber.org/zap"
+
+	"github.com/ariden83/blockchain/internal/hdwallet"
 )
 
 func (w *Wallets) allKeysFromMnemonic(mnemonic []byte) *Seed {

@@ -4,12 +4,11 @@ import (
 	"encoding/binary"
 	"time"
 
-	net "github.com/libp2p/go-libp2p-core"
-	"github.com/libp2p/go-libp2p-core/network"
+	"github.com/libp2p/go-libp2p/core/network"
 	"go.uber.org/zap"
 )
 
-func (e *EndPoint) handleCounter(s net.Stream) {
+func (e *EndPoint) handleCounter(s network.Stream) {
 	go e.writeCounter(s)
 	go e.readCounter(s)
 }

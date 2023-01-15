@@ -21,12 +21,12 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	golog "github.com/ipfs/go-log"
 	gologging "github.com/ipfs/go-log"
-	libp2p "github.com/libp2p/go-libp2p"
-	net "github.com/libp2p/go-libp2p-core"
-	crypto "github.com/libp2p/go-libp2p-core/crypto"
-	host "github.com/libp2p/go-libp2p-core/host"
-	peer "github.com/libp2p/go-libp2p-core/peer"
-	pstore "github.com/libp2p/go-libp2p-core/peerstore"
+	"github.com/libp2p/go-libp2p"
+	"github.com/libp2p/go-libp2p/core/crypto"
+	"github.com/libp2p/go-libp2p/core/host"
+	"github.com/libp2p/go-libp2p/core/network"
+	"github.com/libp2p/go-libp2p/core/peer"
+	pstore "github.com/libp2p/go-libp2p/core/peerstore"
 	ma "github.com/multiformats/go-multiaddr"
 )
 
@@ -65,12 +65,10 @@ func makeBasicHost(listenPort int, secio bool, randseed int64) (host.Host, error
 		return nil, err
 	}
 
-	opts := []libp2p.Option{
+	basicHost, err := libp2p.New(
 		libp2p.ListenAddrStrings(fmt.Sprintf("/ip4/127.0.0.1/tcp/%d", listenPort)),
 		libp2p.Identity(priv),
-	}
-
-	basicHost, err := libp2p.New(context.Background(), opts...)
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -100,17 +98,14 @@ func makeBasicHost(listenPort int, secio bool, randseed int64) (host.Host, error
 	return basicHost, nil
 }
 
-func handleStream(s net.Stream) {
-
+func handleStream(stream network.Stream) {
 	log.Println("Got a new stream!")
 
 	// Create a buffer stream for non blocking read and write.
-	rw := bufio.NewReadWriter(bufio.NewReader(s), bufio.NewWriter(s))
+	rw := bufio.NewReadWriter(bufio.NewReader(stream), bufio.NewWriter(stream))
 
 	go readData(rw)
 	go writeData(rw)
-
-	// stream 's' will stay open until you close it (or the other side closes it).
 }
 
 func readData(rw *bufio.ReadWriter) {

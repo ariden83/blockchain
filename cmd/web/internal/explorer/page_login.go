@@ -215,21 +215,22 @@ type postLoginAPIReq struct {
 //
 // POST loginAPI
 //
-//     Consumes:
-//     - application/json
+//	Consumes:
+//	- application/json
 //
-//     Produces:
-//     - application/json
+//	Produces:
+//	- application/json
 //
-//     Schemes: http, https
+//	Schemes: http, https
 //
 // Responses:
-//    default: genericError
-//        200: postLoginAPIResp
-//        401: genericError
-//        404: genericError
-//        412: genericError
-//        500: genericError
+//
+//	default: genericError
+//	    200: postLoginAPIResp
+//	    401: genericError
+//	    404: genericError
+//	    412: genericError
+//	    500: genericError
 func (e *Explorer) loginAPI(rw http.ResponseWriter, r *http.Request) {
 	_, authorized := e.authorized(rw, r)
 	if authorized {

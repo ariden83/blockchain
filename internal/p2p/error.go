@@ -1,8 +1,6 @@
 package p2p
 
-import (
-	"go.uber.org/zap"
-)
+import "go.uber.org/zap"
 
 var (
 	failNegociateError     = "failed to negotiate security protocol: peer id mismatch"

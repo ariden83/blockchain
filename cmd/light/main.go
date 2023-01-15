@@ -14,9 +14,9 @@ import (
 	"github.com/ariden83/blockchain/internal/logger"
 	"github.com/ariden83/blockchain/internal/metrics"
 	"github.com/ariden83/blockchain/internal/p2p"
+	persistencefactory "github.com/ariden83/blockchain/internal/persistence/factory"
 	"github.com/ariden83/blockchain/internal/transactions"
 	"github.com/ariden83/blockchain/internal/wallet"
-	persistencefactory "github.com/ariden83/blockchain/internal/persistence/factory"
 )
 
 func main() {

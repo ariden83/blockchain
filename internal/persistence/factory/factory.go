@@ -19,15 +19,15 @@ const (
 
 // Config struct which describe how build an ad adapter instance.
 type Config struct {
-	Implementation string             `mapstructure:"impl"`
-	Badger badger.Config
+	Implementation string `mapstructure:"impl"`
+	Badger         badger.Config
 }
 
 // New creates a new Adapter instance based on a Config.
 func New(config Config) (persistenceadapter.Adapter, error) {
 	var (
 		adapter persistenceadapter.Adapter
-		err error
+		err     error
 	)
 
 	switch config.Implementation {
