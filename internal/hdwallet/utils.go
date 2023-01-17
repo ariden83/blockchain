@@ -74,10 +74,16 @@ func privToPub(key []byte) []byte {
 }
 
 func onCurve(x, y *big.Int) bool {
+	if x == nil || y == nil {
+		return false
+	}
 	return curve.IsOnCurve(x, y)
 }
 
 func compress(x, y *big.Int) []byte {
+	if x == nil || y == nil {
+		return []byte{}
+	}
 	two := big.NewInt(2)
 	rem := two.Mod(y, two).Uint64()
 	rem += 2
@@ -94,6 +100,9 @@ func compress(x, y *big.Int) []byte {
 
 // 2.3.4 of SEC1 - http://www.secg.org/index.php?action=secg,docs_secg
 func expand(key []byte) (*big.Int, *big.Int) {
+	if len(key) < 33 {
+		return nil, nil
+	}
 	params := curve.Params()
 	exp := big.NewInt(1)
 	exp.Add(params.P, exp)
