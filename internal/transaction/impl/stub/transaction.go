@@ -11,6 +11,7 @@ import (
 	transactionadapter "github.com/ariden83/blockchain/internal/transaction"
 )
 
+// Transactions represent a transactions adapter.
 type Transactions struct {
 	Reward          *big.Int
 	serverPublicKey string

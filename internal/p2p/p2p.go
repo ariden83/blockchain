@@ -1,3 +1,4 @@
+// Package P2P represent a peer to peer linked on go-libp2p.
 package p2p
 
 import (
@@ -58,6 +59,7 @@ type EndPoint struct {
 // Option is the type of option passed to the constructor.
 type Option func(e *EndPoint)
 
+// New represent a new peer to peer adapter.
 func New(
 	cfg config.P2P,
 	per persistenceadapter.Adapter,
@@ -84,6 +86,7 @@ func New(
 	return e
 }
 
+// WithXCache offer the possibility to add a cache system to the peer to peer adapter.
 func WithXCache(cfg config.XCache) Option {
 	return func(e *EndPoint) {
 		var err error
@@ -102,6 +105,7 @@ func WithXCache(cfg config.XCache) Option {
 	}
 }
 
+// Enabled lets you know if the peer to peer system is activated.
 func (e *EndPoint) Enabled() bool {
 	return e.enabled
 }
