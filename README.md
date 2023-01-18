@@ -2,7 +2,6 @@
 
 [![ariden83](https://codecov.io/gh/ariden83/blockchain/branch/master/graph/badge.svg)](https://codecov.io/gh/ariden83/blockchain)
 [![Build Status](https://travis-ci.org/ariden83/blockchain.svg?branch=master)](https://travis-ci.org/ariden83/blockchain)
-[![Lint Status](https://github.com/myusername/myrepo/workflows/golangci-lint/badge.svg)](https://github.com/ariden83/blockchain)
 
 New blockchain. See website of project [blockchain-altcoin.com](https://www.blockchain-altcoin.com/)
 
@@ -20,18 +19,18 @@ New blockchain. See website of project [blockchain-altcoin.com](https://www.bloc
 | [code source](https://replit.com/@nheingit/GolangBlockChain-4)
 * Ethereum block structure explained [tutorial](https://medium.com/@eiki1212/ethereum-block-structure-explained-1893bb226bd6)
 * Ethereum accounts transactions gas [tutorial](https://hudsonjameson.com/2017-06-27-accounts-transactions-gas-ethereum/)
-* Le minage en 7 étapes [tutorial](http://www.ab-consulting.fr/blog/blockchain/minage-7-etapes=)
+* Mining in 7 steps [tutorial](http://www.ab-consulting.fr/blog/blockchain/minage-7-etapes=)
 * libp2p in go tutorial [tutorial](https://dev.to/feliperosa/getting-started-with-libp2p-in-go-4hoa)
 * p2p discovery mdns [code source](https://gitlab.dms3.io/p2p/go-p2p/-/blob/master/p2p/discovery/mdns.go)
 * p2P examples [examples](https://github.com/libp2p/go-libp2p/tree/master/examples/)
 * blockchain go project by Nomad [code source](https://github.com/librity/nc_nomadcoin)
 * badger - database [tutorial](https://dgraph.io/docs/badger/get-started/)
 * cipher GCM [tutorial](https://pilabor.com/blog/2021/05/js-gcm-encrypt-dotnet-decrypt/)
-* Clés privées, clés publiques et adresses dans Bitcoin [tutorial](https://cryptoast.fr/cles-privees-cles-publiques-et-adresses-dans-bitcoin/)
-* Comment marchent les transactions bitcoin [tutorial](https://www.pensezblockchain.ca/les-transactions-bitcoin-partie-1)
-* Qu'est-ce que P2PKH [tutorial](https://academy.bit2me.com/fr/qu%27est-ce-que-p2pkh/)
-* Comment fonctionne P2PKH [tutorial](https://learnmeabitcoin-com.translate.goog/technical/p2pkh?_x_tr_sl=auto&_x_tr_tl=fr&_x_tr_hl=fr&_x_tr_pto=wapp)
-* Créez une transaction Bitcoin brute et signez-la avec Golang [code source](https://ichi.pro/fr/creez-une-transaction-bitcoin-brute-et-signez-la-avec-golang-165707908919466)
+* Private keys, public keys and addresses in Bitcoin [tutorial](https://cryptoast.fr/cles-privees-cles-publiques-et-adresses-dans-bitcoin/)
+* How bitcoin transactions work [tutorial](https://www.pensezblockchain.ca/les-transactions-bitcoin-partie-1)
+* What is P2PKH [tutorial](https://academy.bit2me.com/fr/qu%27est-ce-que-p2pkh/)
+* How works P2PKH [tutorial](https://learnmeabitcoin-com.translate.goog/technical/p2pkh?_x_tr_sl=auto&_x_tr_tl=fr&_x_tr_hl=fr&_x_tr_pto=wapp)
+* Create a raw Bitcoin transaction and sign it with Golang [code source](https://ichi.pro/fr/creez-une-transaction-bitcoin-brute-et-signez-la-avec-golang-165707908919466)
 * btcd is an alternative full node bitcoin implementation written in Go (golang) [code source](https://github.com/btcsuite/btcd)
 * Implementing RSA Encryption and Signing in Golang [tutorial](https://www.sohamkamani.com/golang/rsa-encryption/) [code source](https://gist.github.com/sohamkamani/08377222d5e3e6bc130827f83b0c073e)
 * Decred is a blockchain-based cryptocurrency [code source](https://github.com/decred/dcrd)
@@ -40,9 +39,9 @@ New blockchain. See website of project [blockchain-altcoin.com](https://www.bloc
 
 ## Keys Encrypting
 
-1. Ce qui est permanent
+1. What is permanent
 - user : priv key
-- blockchain : pub key et pub blockchain key
+- blockchain : pub key and pub blockchain key
 
 2. actions
 - user generate priv blockchain key with priv key
@@ -50,8 +49,8 @@ New blockchain. See website of project [blockchain-altcoin.com](https://www.bloc
 - blockchain validator verify script is valid with pub blockhain key (possibilité de vérifier que script decode avec blockchain key = public key)
 
 3. PB: 
-- (pas de vérification si pub blockchain key = public key) > peut être résolu 
-- (pas si c'est bien la priv key de l'utilisateur qui fait la transaction pour les validators)
+- (no check if pub blockchain key = public key) > can be solved
+- (not if it is the priv key of the user who makes the transaction for the validators)
 
 ## Installation
 
