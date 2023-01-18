@@ -18,12 +18,6 @@ import (
 	"github.com/ariden83/blockchain/internal/blockchain/difficulty"
 )
 
-type Validation struct {
-	Total   int
-	Refused int
-	Ok      int
-}
-
 type Block struct {
 	Index        *big.Int
 	Validation   Validation
@@ -55,6 +49,12 @@ type Transaction struct {
 	Timestamp int64
 }
 
+type Validation struct {
+	Total   int
+	Refused int
+	Ok      int
+}
+
 // Important to note that each output is Indivisible.
 // Vous ne pouvez pas "faire de changement" avec n'importe quelle sortie.
 // Si la valeur est 10, afin de donner 5 à quelqu'un, nous devons faire deux sorties de cinq pièces.
@@ -72,6 +72,11 @@ type TxInput struct {
 	SchnorrKey []byte
 }
 
+func (in *TxInput) CanUnlock(data []byte) bool {
+	res := bytes.Compare(in.Sig, data)
+	return res == 0
+}
+
 // TxOutput represents a transaction in the blockchain
 // For Example, I sent you 5 coins. Value would == 5, and it would have my unique PubKey
 type TxOutput struct {
@@ -83,20 +88,15 @@ type TxOutput struct {
 	PubKey []byte
 }
 
+func (out *TxOutput) CanBeUnlocked(data []byte) bool {
+	res := bytes.Compare(out.PubKey, data)
+	return res == 0
+}
+
 func (tx *Transaction) IsCoinBase() bool {
 	//This checks a transaction and will only return true if it is a newly minted "coin"
 	// Aka a CoinBase transaction
 	return len(tx.Inputs) == 1 && len(tx.Inputs[0].ID) == 0 && tx.Inputs[0].Out == -1
-}
-
-func (in *TxInput) CanUnlock(data []byte) bool {
-	res := bytes.Compare(in.Sig, data)
-	return res == 0
-}
-
-func (out *TxOutput) CanBeUnlocked(data []byte) bool {
-	res := bytes.Compare(out.PubKey, data)
-	return res == 0
 }
 
 func (tx *Transaction) SetID() {
@@ -118,6 +118,10 @@ var (
 	BlockChain []Block
 )
 
+func init() {
+	BlockChain = []Block{}
+}
+
 /*
 type BlockchainConstrucktor struct {}
 
@@ -125,6 +129,7 @@ func Init() *BlockchainConstrucktor{
 	return &BlockchainConstrucktor{}
 }*/
 
+// Genesis create the initial blockchain.
 func Genesis(coinBase *Transaction) *Block {
 	genesisBlock := Block{}
 	genesisBlock = AddBlock([]byte{}, big.NewInt(1), coinBase)
@@ -138,7 +143,7 @@ func Genesis(coinBase *Transaction) *Block {
 	return &genesisBlock
 }
 
-// calculateHash SHA256 hashing
+// calculateHash represent a SHA256 hashing.
 func calculateHash(block Block) []byte {
 	record := block.Index.String() + strconv.FormatInt(block.Timestamp, 16) + string(block.PrevHash) + block.Nonce
 	h := sha256.New()
@@ -147,7 +152,7 @@ func calculateHash(block Block) []byte {
 	return []byte(hex.EncodeToString(hashed))
 }
 
-// IsBlockValid make sure block is valid by checking index, and comparing the hash of the previous block
+// IsBlockValid make sure block is valid by checking index, and comparing the hash of the previous block.
 func IsBlockValid(newBlock, oldBlock Block) bool {
 	newIndexWaiting := big.NewInt(0)
 	newIndexWaiting = newIndexWaiting.Add(oldBlock.Index, big.NewInt(1))
@@ -172,12 +177,13 @@ func IsBlockValid(newBlock, oldBlock Block) bool {
 	return true
 }
 
+// NextID increment to current ID.
 func NextID(index *big.Int) *big.Int {
 	newIndex := big.NewInt(0)
 	return newIndex.Add(index, big.NewInt(1))
 }
 
-// AddBlock create a new block using previous block's hash
+// AddBlock create a new block using previous block's hash.
 func AddBlock(lastHash []byte, index *big.Int, coinBase *Transaction) Block {
 	var (
 		t        = time.Now().UnixNano() / int64(time.Millisecond)
@@ -212,17 +218,19 @@ func AddBlock(lastHash []byte, index *big.Int, coinBase *Transaction) Block {
 	return newBlock
 }
 
+// GetLastBlock return the last block in blockchain.
 func GetLastBlock() Block {
 	return BlockChain[len(BlockChain)-1]
 }
 
+// isHashValid test if it'is valid hash.
 func isHashValid(hash []byte, difficulty int) bool {
 	prefix := strings.Repeat("0", difficulty)
 	return strings.HasPrefix(string(hash), prefix)
 }
 
+// IsValid test if the block is valid.
 // @todo parse all blockChain
 func IsValid(_ []Block) bool {
-
 	return true
 }

@@ -18,6 +18,7 @@ type Adapter interface {
 	SendBlock(input SendBlockInput) error
 }
 
+// SendBlockInput represent a new block input to send.
 type SendBlockInput struct {
 	From   []byte
 	To     []byte

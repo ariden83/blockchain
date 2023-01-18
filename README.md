@@ -2,7 +2,7 @@
 
 [![ariden83](https://codecov.io/gh/ariden83/blockchain/branch/master/graph/badge.svg)](https://codecov.io/gh/ariden83/blockchain)
 [![Build Status](https://travis-ci.org/ariden83/blockchain.svg?branch=master)](https://travis-ci.org/ariden83/blockchain)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fariden83%2Fblockchain.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fariden83%2Fblockchain?ref=badge_shield)
+[![Lint Status](https://github.com/myusername/myrepo/workflows/golangci-lint/badge.svg)](https://github.com/ariden83/blockchain)
 
 New blockchain. See website of project [blockchain-altcoin.com](https://www.blockchain-altcoin.com/)
 
@@ -87,17 +87,17 @@ http://127.0.0.1:8082/readiness
 
 ### Features
 
-- [x] Récupère l'ensemble des seeds et la blockchain complète lors de la conexion avec le premier server
+- [x] Retrieves all seeds and the full blockchain when connecting with the first server
 - [x] Generate a new seed
 - [x] Access to your wallet
 - [x] Mine a new bloc
 - [x] Send tokens to another
 - [x] Access to your balance
-- [x] Les blocs créés sont obligatoirement validés par plus de 50% des serveurs connectés
-- [x] Le service requiert minimum deux serveurs pour fonctionner
-- [x] Liste les serveurs actuellement actifs
-- [x] Ajout des frais de transactions en faveur du mineur
-- [x] Evolution de la difficulté
+- [x] The blocks created are necessarily validated by more than 50% of the connected servers
+- [x] The service requires at least two servers to operate
+- [x] List currently active servers
+- [x] Addition of transaction fees in favor of the minor
+- [x] Evolution of the difficulty
 
 ### Future
 - [ ] Fully Tested
@@ -109,8 +109,8 @@ http://127.0.0.1:8082/readiness
 - [ ] Encrypt data with cypher key
 - [ ] Load seed database in many times
 - [ ] Load blockchain database in many times
-- [ ] Ajouter un champ metadata dans chaque seed (pour infos complementaires)
-- [ ] Se brancher à l'API metamask
+- [ ] Add a metadata field in each seed (for additional info)
+- [ ] Connect to the metamask API
 - ...
 
 ### Godocs
@@ -242,32 +242,32 @@ Balance of xpub661MyMwAqRbcFTZYiEcSv4Qj2Qr2NzQ7rjYc3iv9c6VSTxoYsqA9AA6nNbp8e9nVR
 
 #### 6) SEND ONE TOKEN TO THE 2nd WALLET
 
-a) On envoi la somme du compte A au compte B
+a) We send the sum from account A to account B.
 
 ```
 curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' 'http://127.0.0.1:8098/send' -d '{"from": "xpub661MyMwAqRbcFTZYiEcSv4Qj2Qr2NzQ7rjYc3iv9c6VSTxoYsqA9AA6nNbp8e9nVR9hRARXz5CApP6j5BxUnohyj89oSg3zZdDuKmGhdSFF", "to": "xpub661MyMwAqRbcG4VYfVo7ptRncn7wsGMjNubLNrm5Stu5ERP4RtJqo7sQgSQAESwyJKi442EJ6sNWRz5wWZ2ecFE8p1JEJs6qGkzPKncdkhb", "amount": 3}'
 ```
 
-b) On récupère la balance du compte envoyeur
+b) We recover the balance of the sending account.
 
 ```
 curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' 'http://127.0.0.1:8098/balance' -d '{"key": "xpub661MyMwAqRbcFTZYiEcSv4Qj2Qr2NzQ7rjYc3iv9c6VSTxoYsqA9AA6nNbp8e9nVR9hRARXz5CApP6j5BxUnohyj89oSg3zZdDuKmGhdSFF"}'
 ```
 
-retourne 
+return 
 
 
 ```
 Balance of xpub661MyMwAqRbcFTZYiEcSv4Qj2Qr2NzQ7rjYc3iv9c6VSTxoYsqA9AA6nNbp8e9nVR9hRARXz5CApP6j5BxUnohyj89oSg3zZdDuKmGhdSFF: 97
 ```
 
-c) On récupère la balance du compte receptionneur
+c) We recover the balance of the receiving account
 
 ```
 curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' 'http://127.0.0.1:8098/balance' -d '{"key": "xpub661MyMwAqRbcG4VYfVo7ptRncn7wsGMjNubLNrm5Stu5ERP4RtJqo7sQgSQAESwyJKi442EJ6sNWRz5wWZ2ecFE8p1JEJs6qGkzPKncdkhb"}'
 ```
 
-retourne 
+return 
 
 
 ```
@@ -276,21 +276,21 @@ Balance of xpub661MyMwAqRbcG4VYfVo7ptRncn7wsGMjNubLNrm5Stu5ERP4RtJqo7sQgSQAESwyJ
 
 #### 7) Communicate new update of blockChain / wallet with every blockChain service
 
-Après la commande 
+After order
 
 ```
 make local
 > 2021-10-15T16:40:38.669+0200	INFO	Now run "go run main.go -l 8198 -d /ip4/127.0.0.1/tcp/8097/p2p/QmdJboshgG8BuRexqmq9opEsr49Zw961UqSMQrrfXxyzxQ" on a different terminal
 ```
 
-il faut récupérer l'adresse TCP transmise dans les logs et l'executer dans un nouveau terminal
+you must retrieve the TCP address transmitted in the logs and execute it in a new terminal.
 
 ```
 cd ./cmd/p2p
 go run main.go -l 8198 -d /ip4/127.0.0.1/tcp/8097/p2p/QmdJboshgG8BuRexqmq9opEsr49Zw961UqSMQrrfXxyzxQ
 ```
 
-Après chaque création / update de la blockChain ou des seeds, le deuxième service lancé va se mettre à jour
+After each creation / update of the blockChain or seeds, the second service launched will update.
 
 
 ![minage](https://github.com/ariden83/blockchain/blob/main/readme/minage.png)
@@ -299,18 +299,18 @@ Après chaque création / update de la blockChain ou des seeds, le deuxième ser
 
 ## GPG tutorial
 
-## Création et export d'une clé
+## Creating and exporting a key
 
 ```
-// Création d'une clé publique
+// Creation of a public key
 gpg --gen-key
 
-// Export de la clé publique
+// Exporting the public key
 gpg --export --armor adrienparrochia@gmail.com > pubkey.asc
 
 scp -r -p pubkey.asc ariden@51.15.171.142:/home/ariden/
 
-// Export de la clé publique
+// Exporting the public key
 gpg --import pubkey.asc
 ```
 
@@ -380,6 +380,3 @@ nc localhost 9000
 5
 7
 ...
-```
-
-
