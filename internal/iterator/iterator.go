@@ -1,3 +1,4 @@
+// Package iterator implements a blockchain iterator.
 package iterator
 
 import (

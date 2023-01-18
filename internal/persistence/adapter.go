@@ -1,3 +1,4 @@
+// Package persistenceadapter implements a data persistence system, without having to go through a database server.
 package persistenceadapter
 
 // Adapter is an interface which describes all the methods to interact with persistence.

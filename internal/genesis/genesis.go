@@ -1,3 +1,4 @@
+// Package genesis implements a new genesis block with full celo blockchain already configured.
 package genesis
 
 import (

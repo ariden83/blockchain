@@ -1,3 +1,4 @@
+// Package event implements an event streaming platform to communcate to allow sharing of all events to different servers.
 package event
 
 import (

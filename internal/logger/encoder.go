@@ -1,3 +1,4 @@
+// Package logger implements a new logger based on the zap lib.
 package logger
 
 import (
