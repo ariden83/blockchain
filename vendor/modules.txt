@@ -229,9 +229,6 @@ github.com/jbenet/go-temp-err-catcher
 ## explicit; go 1.12
 github.com/jbenet/goprocess
 github.com/jbenet/goprocess/context
-# github.com/joho/godotenv v1.4.0
-## explicit; go 1.12
-github.com/joho/godotenv
 # github.com/karlseguin/ccache v2.0.3+incompatible
 ## explicit
 github.com/karlseguin/ccache
