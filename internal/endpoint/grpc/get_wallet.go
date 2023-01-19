@@ -9,6 +9,7 @@ import (
 	pkgErr "github.com/ariden83/blockchain/pkg/errors"
 )
 
+// GetWallet
 func (e *EndPoint) GetWallet(_ context.Context, req *api.GetWalletInput) (*api.GetWalletOutput, error) {
 	if req.GetMnemonic() == nil || req.GetPassword() == nil {
 		err := pkgErr.ErrMissingFields
@@ -16,7 +17,7 @@ func (e *EndPoint) GetWallet(_ context.Context, req *api.GetWalletInput) (*api.G
 		return nil, pkgErr.GRPC(err)
 	}
 
-	seed, err := e.wallets.GetSeed(req.GetMnemonic(), req.GetPassword())
+	seed, err := e.wallets.Seed(req.GetMnemonic(), req.GetPassword())
 	if err != nil {
 		return nil, pkgErr.GRPC(err)
 	}

@@ -88,7 +88,7 @@ func Test_Create(t *testing.T) {
 	isValidate := w.Validate(seedCreate.PrivKey)
 	require.True(t, isValidate)
 
-	seed, err := w.GetSeed(seedCreate.Mnemonic, password)
+	seed, err := w.Seed(seedCreate.Mnemonic, password)
 	require.NoError(t, err)
 	require.NotNil(t, seed)
 	require.Equal(t, seed.PubKey, seedCreate.PubKey)
