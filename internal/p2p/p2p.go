@@ -110,6 +110,7 @@ func (e *EndPoint) Enabled() bool {
 	return e.enabled
 }
 
+// Listen start to listen the peer to peer connexion.
 func (e *EndPoint) Listen(stop chan error) {
 	e.hasRequiredPort()
 

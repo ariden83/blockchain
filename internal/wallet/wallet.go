@@ -17,6 +17,7 @@ import (
 
 var mutex = &sync.Mutex{}
 
+// Wallets represent a wallet adapter.
 type Wallets struct {
 	File      string
 	Seeds     []SeedNoPrivKey
@@ -30,13 +31,14 @@ type IWallets interface {
 	Create([]byte) (*Seed, error)
 	Close() error
 	DBExists() bool
-	GetSeed([]byte, []byte) (*Seed, error)
+	Seed([]byte, []byte) (*Seed, error)
 	GetSeeds() ([]SeedNoPrivKey, error)
 	UpdateSeeds([]SeedNoPrivKey)
 	Validate([]byte) bool
 	GetUserAddress([]byte) string
 }
 
+// New represent a new wallet adapter.
 func New(cfg config.Wallet, log *zap.Logger) (*Wallets, error) {
 	var err error
 	opts := badger.DefaultOptions(cfg.Path)
@@ -54,6 +56,7 @@ func New(cfg config.Wallet, log *zap.Logger) (*Wallets, error) {
 	return &wallets, err
 }
 
+// GetSeeds get all seeds in local memory.
 func (w *Wallets) GetSeeds() ([]SeedNoPrivKey, error) {
 	var allSeeds []SeedNoPrivKey
 
@@ -97,11 +100,13 @@ func (w *Wallets) GetSeeds() ([]SeedNoPrivKey, error) {
 	return allSeeds, nil
 }
 
+// UpdateSeeds update the local list of seeds.
 // @todo update wallet database
 func (w *Wallets) UpdateSeeds(seed []SeedNoPrivKey) {
 	w.Seeds = seed
 }
 
+// Create a new seed by associating it with a password.
 func (w *Wallets) Create(password []byte) (*Seed, error) {
 	password, err := encryptPassword(password)
 	if err != nil {
@@ -130,6 +135,7 @@ func (w *Wallets) Create(password []byte) (*Seed, error) {
 	return seed, nil
 }
 
+// Validate a private key.
 func (w *Wallets) Validate(privKey []byte) bool {
 	seed, err := w.allKeysFromPrivate(privKey)
 	if err != nil {
@@ -147,7 +153,8 @@ func (w *Wallets) Validate(privKey []byte) bool {
 	return false
 }
 
-func (w *Wallets) GetSeed(mnemonic, password []byte) (*Seed, error) {
+// Seed finds a seed from a combination of a password and a mnemonic.
+func (w *Wallets) Seed(mnemonic, password []byte) (*Seed, error) {
 	seed := w.allKeysFromMnemonic(mnemonic)
 	encryptPassword, err := encryptPassword(password)
 	if err != nil {
@@ -175,6 +182,7 @@ func (w *Wallets) GetSeed(mnemonic, password []byte) (*Seed, error) {
 	return seed, nil
 }
 
+// Close the wallet adapter.
 func (w *Wallets) Close() error {
 	if w.db != nil {
 		return w.db.Close()

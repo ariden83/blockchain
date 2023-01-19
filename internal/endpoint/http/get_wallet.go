@@ -9,6 +9,7 @@ import (
 	pkgErr "github.com/ariden83/blockchain/pkg/errors"
 )
 
+// handleGetWallet
 func (e *EndPoint) handleGetWallet(rw http.ResponseWriter, r *http.Request) {
 	req := &api.GetWalletInput{}
 
@@ -24,7 +25,7 @@ func (e *EndPoint) handleGetWallet(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	seed, err := e.wallets.GetSeed(req.GetMnemonic(), req.GetPassword())
+	seed, err := e.wallets.Seed(req.GetMnemonic(), req.GetPassword())
 	if err != nil {
 		return
 	}
