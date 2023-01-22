@@ -51,6 +51,7 @@ func (e *EndPoint) handlePrintBlockChain(w http.ResponseWriter, _ *http.Request)
 func (e *EndPoint) handleGetBlockChain(w http.ResponseWriter, _ *http.Request) {
 	iterator := iterator.New(e.persistence)
 
+	return
 	for {
 		block, err := iterator.Next()
 		if err != nil {
@@ -65,9 +66,7 @@ func (e *EndPoint) handleGetBlockChain(w http.ResponseWriter, _ *http.Request) {
 			e.log.Error("fail to WriteString", zap.Error(err))
 			return
 		}
-		/*pow := blockchain.NewProofOfWork(block)
-		io.WriteString(w, fmt.Sprintf("Pow: %s\n", strconv.FormatBool(pow.Validate())))*/
-		// This works because the Genesis block has no PrevHash to point to.
+
 		if len(block.PrevHash) == 0 {
 			break
 		}

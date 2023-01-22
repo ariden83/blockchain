@@ -13,5 +13,5 @@ func (e *EndPoint) handleGetWallets(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	e.JSON(w, http.StatusBadRequest, allSeeds)
+	e.JSON(w, http.StatusOK, allSeeds)
 }
