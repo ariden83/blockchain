@@ -16,13 +16,13 @@ import (
 
 func (e *Explorer) requestIDHeader(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	var reqID string
-	reqID = r.Header.Get(RequestIDHeaderKey)
+	reqID = r.Header.Get(XRequestIDHeaderKey)
 	if reqID == "" {
 		reqID = uuid.NewV4().String()
 	}
-	w.Header().Set(RequestIDHeaderKey, reqID)
-	ctx := context.WithValue(r.Context(), RequestIDKey, reqID)
-	ctx = logger.ToContext(ctx, e.log.With(zap.String(RequestIDKey, reqID)))
+	w.Header().Set(XRequestIDHeaderKey, reqID)
+	ctx := context.WithValue(r.Context(), RequestIDHeader, reqID)
+	ctx = logger.ToContext(ctx, e.log.With(zap.String(RequestIDHeader, reqID)))
 	next(w, r)
 }
 
