@@ -140,7 +140,7 @@ func (e *Explorer) inscriptionAPI(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.Password == "" {
-		logCTX.Error("missing password", zap.String("password", req.Password))
+		logCTX.Error("missing password")
 		e.JSONfail(pkgErr.ErrMissingPassword, rw)
 		return
 	}
@@ -151,7 +151,7 @@ func (e *Explorer) inscriptionAPI(rw http.ResponseWriter, r *http.Request) {
 	}
 	if e.reCaptcha != nil {
 		if valid := e.reCaptcha.Verify(req.Recaptcha, ip); !valid {
-			logCTX.Warn("fail to verify captcha", zap.String("captcha", req.Recaptcha))
+			logCTX.Warn("fail to verify captcha")
 			e.JSONfail(err, rw)
 			return
 		}
@@ -159,7 +159,7 @@ func (e *Explorer) inscriptionAPI(rw http.ResponseWriter, r *http.Request) {
 
 	password, err := decoder.Decrypt(req.Password, decoder.GetPrivateKey())
 	if err != nil {
-		logCTX.Error("fail to decode password", zap.String("password", req.Password))
+		logCTX.Error("fail to decode password")
 		e.JSONfail(err, rw)
 		return
 	}

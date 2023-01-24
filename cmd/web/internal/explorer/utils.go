@@ -11,11 +11,13 @@ import (
 )
 
 const (
-	RequestIDHeaderKey = "X-Request-ID"
-	RequestIDKey       = "RequestID"
+	// XRequestIDHeaderKey represent the label of X request ID header.
+	XRequestIDHeaderKey = "X-Request-ID"
+	// XRequestIDHeaderKey represent the label of request ID header.
+	RequestIDHeader = "RequestID"
 )
 
-// GenericError Default response when we have an error
+// GenericError Default response when we have an error.
 //
 // swagger:response genericError
 // nolint
@@ -24,7 +26,7 @@ type GenericError struct {
 	Body ErrorResponse `json:"body"`
 }
 
-// ErrorResponse structure of error response
+// ErrorResponse structure of error response.
 type ErrorResponse struct {
 	// The status code
 	Code int `json:"code"`
@@ -38,7 +40,7 @@ func (e *Explorer) fail(err error, w http.ResponseWriter) {
 	http.Error(w, err.Error(), pkgErr.StatusCode(err))
 }
 
-// fail Respond error to json format
+// fail Respond error to json format.
 func (e *Explorer) JSONfail(err error, w http.ResponseWriter) {
 	w.WriteHeader(pkgErr.StatusCode(err))
 	error := ErrorResponse{
