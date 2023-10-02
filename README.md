@@ -36,7 +36,6 @@ New blockchain. See website of project [blockchain-altcoin.com](https://www.bloc
 * Decred is a blockchain-based cryptocurrency [code source](https://github.com/decred/dcrd)
 * Recommended practices for secure signature generation [tutorial](https://github.com/bitcoincashorg/bitcoincash.org/blob/master/spec/2019-05-15-schnorr.md#recommended-practices-for-secure-signature-generation)
 * Quantum computation simulator [code source](https://github.com/itsubaki/q)
-* Blackhole définition [documentation](https://morioh.com/a/a54e87d3aee8/what-is-blackhole-protocol-black-or-what-is-blackhole-protocol-token-or-what-is-black-token)
 
 ## Keys Encrypting
 
