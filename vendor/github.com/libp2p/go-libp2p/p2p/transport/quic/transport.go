@@ -10,8 +10,6 @@ import (
 	"sync"
 	"time"
 
-	manet "github.com/multiformats/go-multiaddr/net"
-
 	"github.com/libp2p/go-libp2p/core/connmgr"
 	ic "github.com/libp2p/go-libp2p/core/crypto"
 	"github.com/libp2p/go-libp2p/core/network"
@@ -21,11 +19,11 @@ import (
 	p2ptls "github.com/libp2p/go-libp2p/p2p/security/tls"
 	"github.com/libp2p/go-libp2p/p2p/transport/quicreuse"
 
+	logging "github.com/ipfs/go-log/v2"
 	ma "github.com/multiformats/go-multiaddr"
 	mafmt "github.com/multiformats/go-multiaddr-fmt"
-
-	logging "github.com/ipfs/go-log/v2"
-	"github.com/lucas-clemente/quic-go"
+	manet "github.com/multiformats/go-multiaddr/net"
+	"github.com/quic-go/quic-go"
 )
 
 var log = logging.Logger("quic-transport")
@@ -47,6 +45,9 @@ type transport struct {
 
 	holePunchingMx sync.Mutex
 	holePunching   map[holePunchKey]*activeHolePunch
+
+	rndMx sync.Mutex
+	rnd   rand.Rand
 
 	connMx sync.Mutex
 	conns  map[quic.Connection]*conn
@@ -96,14 +97,14 @@ func NewTransport(key ic.PrivKey, connManager *quicreuse.ConnManager, psk pnet.P
 		rcmgr:        rcmgr,
 		conns:        make(map[quic.Connection]*conn),
 		holePunching: make(map[holePunchKey]*activeHolePunch),
+		rnd:          *rand.New(rand.NewSource(time.Now().UnixNano())),
 
 		listeners: make(map[string][]*virtualListener),
 	}, nil
 }
 
 // Dial dials a new QUIC connection
-func (t *transport) Dial(ctx context.Context, raddr ma.Multiaddr, p peer.ID) (tpt.CapableConn, error) {
-	tlsConf, keyCh := t.identity.ConfigForPeer(p)
+func (t *transport) Dial(ctx context.Context, raddr ma.Multiaddr, p peer.ID) (_c tpt.CapableConn, _err error) {
 	if ok, isClient, _ := network.GetSimultaneousConnect(ctx); ok && !isClient {
 		return t.holePunch(ctx, raddr, p)
 	}
@@ -113,11 +114,22 @@ func (t *transport) Dial(ctx context.Context, raddr ma.Multiaddr, p peer.ID) (tp
 		log.Debugw("resource manager blocked outgoing connection", "peer", p, "addr", raddr, "error", err)
 		return nil, err
 	}
-	if err := scope.SetPeer(p); err != nil {
-		log.Debugw("resource manager blocked outgoing connection for peer", "peer", p, "addr", raddr, "error", err)
+
+	c, err := t.dialWithScope(ctx, raddr, p, scope)
+	if err != nil {
 		scope.Done()
 		return nil, err
 	}
+	return c, nil
+}
+
+func (t *transport) dialWithScope(ctx context.Context, raddr ma.Multiaddr, p peer.ID, scope network.ConnManagementScope) (tpt.CapableConn, error) {
+	if err := scope.SetPeer(p); err != nil {
+		log.Debugw("resource manager blocked outgoing connection for peer", "peer", p, "addr", raddr, "error", err)
+		return nil, err
+	}
+
+	tlsConf, keyCh := t.identity.ConfigForPeer(p)
 	pconn, err := t.connManager.DialQUIC(ctx, raddr, tlsConf, t.allowWindowIncrease)
 	if err != nil {
 		return nil, err
@@ -131,7 +143,6 @@ func (t *transport) Dial(ctx context.Context, raddr ma.Multiaddr, p peer.ID) (tp
 	}
 	if remotePubKey == nil {
 		pconn.CloseWithError(1, "")
-		scope.Done()
 		return nil, errors.New("p2p/transport/quic BUG: expected remote pub key to be set")
 	}
 
@@ -144,7 +155,6 @@ func (t *transport) Dial(ctx context.Context, raddr ma.Multiaddr, p peer.ID) (tp
 		quicConn:        pconn,
 		transport:       t,
 		scope:           scope,
-		privKey:         t.privKey,
 		localPeer:       t.localPeer,
 		localMultiaddr:  localMultiaddr,
 		remotePubKey:    remotePubKey,
@@ -210,7 +220,10 @@ func (t *transport) holePunch(ctx context.Context, raddr ma.Multiaddr, p peer.ID
 	var punchErr error
 loop:
 	for i := 0; ; i++ {
-		if _, err := rand.Read(payload); err != nil {
+		t.rndMx.Lock()
+		_, err := t.rnd.Read(payload)
+		t.rndMx.Unlock()
+		if err != nil {
 			punchErr = err
 			break
 		}

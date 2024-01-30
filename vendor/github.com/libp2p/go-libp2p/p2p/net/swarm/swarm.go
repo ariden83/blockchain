@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/libp2p/go-libp2p/core/connmgr"
+	"github.com/libp2p/go-libp2p/core/event"
 	"github.com/libp2p/go-libp2p/core/metrics"
 	"github.com/libp2p/go-libp2p/core/network"
 	"github.com/libp2p/go-libp2p/core/peer"
@@ -71,6 +72,13 @@ func WithMetrics(reporter metrics.Reporter) Option {
 	}
 }
 
+func WithMetricsTracer(t MetricsTracer) Option {
+	return func(s *Swarm) error {
+		s.metricsTracer = t
+		return nil
+	}
+}
+
 func WithDialTimeout(t time.Duration) Option {
 	return func(s *Swarm) error {
 		s.dialTimeout = t
@@ -103,6 +111,8 @@ type Swarm struct {
 	// Close refcount. This allows us to fully wait for the swarm to be torn
 	// down before continuing.
 	refs sync.WaitGroup
+
+	emitter event.Emitter
 
 	rcmgr network.ResourceManager
 
@@ -139,7 +149,7 @@ type Swarm struct {
 	maResolver *madns.Resolver
 
 	// stream handlers
-	streamh atomic.Value
+	streamh atomic.Pointer[network.StreamHandler]
 
 	// dialing helpers
 	dsync   *dialSync
@@ -151,15 +161,21 @@ type Swarm struct {
 	ctx       context.Context // is canceled when Close is called
 	ctxCancel context.CancelFunc
 
-	bwc metrics.Reporter
+	bwc           metrics.Reporter
+	metricsTracer MetricsTracer
 }
 
 // NewSwarm constructs a Swarm.
-func NewSwarm(local peer.ID, peers peerstore.Peerstore, opts ...Option) (*Swarm, error) {
+func NewSwarm(local peer.ID, peers peerstore.Peerstore, eventBus event.Bus, opts ...Option) (*Swarm, error) {
+	emitter, err := eventBus.Emitter(new(event.EvtPeerConnectednessChanged))
+	if err != nil {
+		return nil, err
+	}
 	ctx, cancel := context.WithCancel(context.Background())
 	s := &Swarm{
 		local:            local,
 		peers:            peers,
+		emitter:          emitter,
 		ctx:              ctx,
 		ctxCancel:        cancel,
 		dialTimeout:      defaultDialTimeout,
@@ -194,6 +210,8 @@ func (s *Swarm) Close() error {
 
 func (s *Swarm) close() {
 	s.ctxCancel()
+
+	s.emitter.Close()
 
 	// Prevents new connections and/or listeners from being added to the swarm.
 	s.listeners.Lock()
@@ -311,6 +329,7 @@ func (s *Swarm) addConn(tc transport.CapableConn, dir network.Direction) (*Conn,
 	}
 
 	c.streams.m = make(map[*Stream]struct{})
+	isFirstConnection := len(s.conns.m[p]) == 0
 	s.conns.m[p] = append(s.conns.m[p], c)
 
 	// Add two swarm refs:
@@ -322,6 +341,15 @@ func (s *Swarm) addConn(tc transport.CapableConn, dir network.Direction) (*Conn,
 	// Disconnect notifications until after the Connect notifications done.
 	c.notifyLk.Lock()
 	s.conns.Unlock()
+
+	// Emit event after releasing `s.conns` lock so that a consumer can still
+	// use swarm methods that need the `s.conns` lock.
+	if isFirstConnection {
+		s.emitter.Emit(event.EvtPeerConnectednessChanged{
+			Peer:          p,
+			Connectedness: network.Connected,
+		})
+	}
 
 	s.notifyAll(func(f network.Notifiee) {
 		f.Connected(s, c)
@@ -339,13 +367,16 @@ func (s *Swarm) Peerstore() peerstore.Peerstore {
 
 // SetStreamHandler assigns the handler for new streams.
 func (s *Swarm) SetStreamHandler(handler network.StreamHandler) {
-	s.streamh.Store(handler)
+	s.streamh.Store(&handler)
 }
 
 // StreamHandler gets the handler for new streams.
 func (s *Swarm) StreamHandler() network.StreamHandler {
-	handler, _ := s.streamh.Load().(network.StreamHandler)
-	return handler
+	handler := s.streamh.Load()
+	if handler == nil {
+		return nil
+	}
+	return *handler
 }
 
 // NewStream creates a new stream on any available connection to peer, dialing
@@ -599,21 +630,33 @@ func (s *Swarm) removeConn(c *Conn) {
 	p := c.RemotePeer()
 
 	s.conns.Lock()
-	defer s.conns.Unlock()
+
 	cs := s.conns.m[p]
+
+	if len(cs) == 1 {
+		delete(s.conns.m, p)
+		s.conns.Unlock()
+
+		// Emit event after releasing `s.conns` lock so that a consumer can still
+		// use swarm methods that need the `s.conns` lock.
+		s.emitter.Emit(event.EvtPeerConnectednessChanged{
+			Peer:          p,
+			Connectedness: network.NotConnected,
+		})
+		return
+	}
+
+	defer s.conns.Unlock()
+
 	for i, ci := range cs {
 		if ci == c {
-			if len(cs) == 1 {
-				delete(s.conns.m, p)
-			} else {
-				// NOTE: We're intentionally preserving order.
-				// This way, connections to a peer are always
-				// sorted oldest to newest.
-				copy(cs[i:], cs[i+1:])
-				cs[len(cs)-1] = nil
-				s.conns.m[p] = cs[:len(cs)-1]
-			}
-			return
+			// NOTE: We're intentionally preserving order.
+			// This way, connections to a peer are always
+			// sorted oldest to newest.
+			copy(cs[i:], cs[i+1:])
+			cs[len(cs)-1] = nil
+			s.conns.m[p] = cs[:len(cs)-1]
+			break
 		}
 	}
 }
@@ -630,3 +673,34 @@ func (s *Swarm) ResourceManager() network.ResourceManager {
 // Swarm is a Network.
 var _ network.Network = (*Swarm)(nil)
 var _ transport.TransportNetwork = (*Swarm)(nil)
+
+type connWithMetrics struct {
+	transport.CapableConn
+	opened        time.Time
+	dir           network.Direction
+	metricsTracer MetricsTracer
+}
+
+func wrapWithMetrics(capableConn transport.CapableConn, metricsTracer MetricsTracer, opened time.Time, dir network.Direction) connWithMetrics {
+	c := connWithMetrics{CapableConn: capableConn, opened: opened, dir: dir, metricsTracer: metricsTracer}
+	c.metricsTracer.OpenedConnection(c.dir, capableConn.RemotePublicKey(), capableConn.ConnState(), capableConn.LocalMultiaddr())
+	return c
+}
+
+func (c connWithMetrics) completedHandshake() {
+	c.metricsTracer.CompletedHandshake(time.Since(c.opened), c.ConnState(), c.LocalMultiaddr())
+}
+
+func (c connWithMetrics) Close() error {
+	c.metricsTracer.ClosedConnection(c.dir, time.Since(c.opened), c.ConnState(), c.LocalMultiaddr())
+	return c.CapableConn.Close()
+}
+
+func (c connWithMetrics) Stat() network.ConnStats {
+	if cs, ok := c.CapableConn.(network.ConnStat); ok {
+		return cs.Stat()
+	}
+	return network.ConnStats{}
+}
+
+var _ network.ConnStat = connWithMetrics{}

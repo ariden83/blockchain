@@ -12,11 +12,10 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/libp2p/go-libp2p/core/peerstore"
 	"github.com/libp2p/go-libp2p/core/transport"
-	"github.com/lucas-clemente/quic-go"
-
 	ma "github.com/multiformats/go-multiaddr"
 	madns "github.com/multiformats/go-multiaddr-dns"
 	manet "github.com/multiformats/go-multiaddr/net"
+	"github.com/quic-go/quic-go"
 )
 
 // The maximum number of address resolution steps we'll perform for a single
@@ -335,6 +334,7 @@ func (s *Swarm) addrsForDial(ctx context.Context, p peer.ID) ([]ma.Multiaddr, er
 	if forceDirect, _ := network.GetForceDirectDial(ctx); forceDirect {
 		goodAddrs = ma.FilterAddrs(goodAddrs, s.nonProxyAddr)
 	}
+	goodAddrs = network.DedupAddrs(goodAddrs)
 
 	if len(goodAddrs) == 0 {
 		return nil, ErrNoGoodAddresses
@@ -483,6 +483,11 @@ func (s *Swarm) dialAddr(ctx context.Context, p peer.ID, addr ma.Multiaddr) (tra
 	if s.local == p {
 		return nil, ErrDialToSelf
 	}
+	// Check before we start work
+	if err := ctx.Err(); err != nil {
+		log.Debugf("%s swarm not dialing. Context cancelled: %v. %s %s", s.local, err, p, addr)
+		return nil, err
+	}
 	log.Debugf("%s swarm dialing %s %s", s.local, p, addr)
 
 	tpt := s.TransportForDialing(addr)
@@ -490,11 +495,20 @@ func (s *Swarm) dialAddr(ctx context.Context, p peer.ID, addr ma.Multiaddr) (tra
 		return nil, ErrNoTransport
 	}
 
+	start := time.Now()
 	connC, err := tpt.Dial(ctx, addr, p)
 	if err != nil {
+		if s.metricsTracer != nil {
+			s.metricsTracer.FailedDialing(addr, err)
+		}
 		return nil, err
 	}
 	canonicallog.LogPeerStatus(100, connC.RemotePeer(), connC.RemoteMultiaddr(), "connection_status", "established", "dir", "outbound")
+	if s.metricsTracer != nil {
+		connWithMetrics := wrapWithMetrics(connC, s.metricsTracer, start, network.DirOutbound)
+		connWithMetrics.completedHandshake()
+		connC = connWithMetrics
+	}
 
 	// Trust the transport? Yeah... right.
 	if connC.RemotePeer() != p {

@@ -6,13 +6,24 @@ import (
 	"time"
 
 	"github.com/libp2p/go-libp2p/core/peer"
-
-	"github.com/benbjohnson/clock"
 )
 
+// AutoRelay will call this function when it needs new candidates because it is
+// not connected to the desired number of relays or we get disconnected from one
+// of the relays. Implementations must send *at most* numPeers, and close the
+// channel when they don't intend to provide any more peers. AutoRelay will not
+// call the callback again until the channel is closed. Implementations should
+// send new peers, but may send peers they sent before. AutoRelay implements a
+// per-peer backoff (see WithBackoff). See WithMinInterval for setting the
+// minimum interval between calls to the callback. The context.Context passed
+// may be canceled when AutoRelay feels satisfied, it will be canceled when the
+// node is shutting down. If the context is canceled you MUST close the output
+// channel at some point.
+type PeerSource func(ctx context.Context, num int) <-chan peer.AddrInfo
+
 type config struct {
-	clock      clock.Clock
-	peerSource func(ctx context.Context, num int) <-chan peer.AddrInfo
+	clock      ClockWithInstantTimer
+	peerSource PeerSource
 	// minimum interval used to call the peerSource callback
 	minInterval time.Duration
 	// see WithMinCandidates
@@ -29,17 +40,19 @@ type config struct {
 	// see WithMaxCandidateAge
 	maxCandidateAge  time.Duration
 	setMinCandidates bool
-	enableCircuitV1  bool
+	// see WithMetricsTracer
+	metricsTracer MetricsTracer
 }
 
 var defaultConfig = config{
-	clock:           clock.New(),
+	clock:           RealClock{},
 	minCandidates:   4,
 	maxCandidates:   20,
 	bootDelay:       3 * time.Minute,
 	backoff:         time.Hour,
 	desiredRelays:   2,
 	maxCandidateAge: 30 * time.Minute,
+	minInterval:     30 * time.Second,
 }
 
 var (
@@ -65,7 +78,7 @@ func WithStaticRelays(static []peer.AddrInfo) Option {
 				c <- static[i]
 			}
 			return c
-		}, 30*time.Second)(c)
+		})(c)
 		WithMinCandidates(len(static))(c)
 		WithMaxCandidates(len(static))(c)
 		WithNumRelays(len(static))(c)
@@ -75,23 +88,12 @@ func WithStaticRelays(static []peer.AddrInfo) Option {
 }
 
 // WithPeerSource defines a callback for AutoRelay to query for more relay candidates.
-// AutoRelay will call this function when it needs new candidates is connected to the desired number of
-// relays, and it has enough candidates (in case we get disconnected from one of the relays).
-// Implementations must send *at most* numPeers, and close the channel when they don't intend to provide
-// any more peers.
-// AutoRelay will not call the callback again until the channel is closed.
-// Implementations should send new peers, but may send peers they sent before. AutoRelay implements
-// a per-peer backoff (see WithBackoff).
-// minInterval is the minimum interval this callback is called with, even if AutoRelay needs new candidates.
-// The context.Context passed MAY be canceled when AutoRelay feels satisfied, it will be canceled when the node is shutting down.
-// If the channel is canceled you MUST close the output channel at some point.
-func WithPeerSource(f func(ctx context.Context, numPeers int) <-chan peer.AddrInfo, minInterval time.Duration) Option {
+func WithPeerSource(f PeerSource) Option {
 	return func(c *config) error {
 		if c.peerSource != nil {
 			return errAlreadyHavePeerSource
 		}
 		c.peerSource = f
-		c.minInterval = minInterval
 		return nil
 	}
 }
@@ -148,14 +150,6 @@ func WithBackoff(d time.Duration) Option {
 	}
 }
 
-// WithCircuitV1Support enables support for circuit v1 relays.
-func WithCircuitV1Support() Option {
-	return func(c *config) error {
-		c.enableCircuitV1 = true
-		return nil
-	}
-}
-
 // WithMaxCandidateAge sets the maximum age of a candidate.
 // When we are connected to the desired number of relays, we don't ask the peer source for new candidates.
 // This can lead to AutoRelay's candidate list becoming outdated, and means we won't be able
@@ -168,9 +162,72 @@ func WithMaxCandidateAge(d time.Duration) Option {
 	}
 }
 
-func WithClock(cl clock.Clock) Option {
+// InstantTimer is a timer that triggers at some instant rather than some duration
+type InstantTimer interface {
+	Reset(d time.Time) bool
+	Stop() bool
+	Ch() <-chan time.Time
+}
+
+// ClockWithInstantTimer is a clock that can create timers that trigger at some
+// instant rather than some duration
+type ClockWithInstantTimer interface {
+	Now() time.Time
+	Since(t time.Time) time.Duration
+	InstantTimer(when time.Time) InstantTimer
+}
+
+type RealTimer struct{ t *time.Timer }
+
+var _ InstantTimer = (*RealTimer)(nil)
+
+func (t RealTimer) Ch() <-chan time.Time {
+	return t.t.C
+}
+
+func (t RealTimer) Reset(d time.Time) bool {
+	return t.t.Reset(time.Until(d))
+}
+
+func (t RealTimer) Stop() bool {
+	return t.t.Stop()
+}
+
+type RealClock struct{}
+
+var _ ClockWithInstantTimer = RealClock{}
+
+func (RealClock) Now() time.Time {
+	return time.Now()
+}
+func (RealClock) Since(t time.Time) time.Duration {
+	return time.Since(t)
+}
+func (RealClock) InstantTimer(when time.Time) InstantTimer {
+	t := time.NewTimer(time.Until(when))
+	return &RealTimer{t}
+}
+
+func WithClock(cl ClockWithInstantTimer) Option {
 	return func(c *config) error {
 		c.clock = cl
+		return nil
+	}
+}
+
+// WithMinInterval sets the minimum interval after which peerSource callback will be called for more
+// candidates even if AutoRelay needs new candidates.
+func WithMinInterval(interval time.Duration) Option {
+	return func(c *config) error {
+		c.minInterval = interval
+		return nil
+	}
+}
+
+// WithMetricsTracer configures autorelay to use mt to track metrics
+func WithMetricsTracer(mt MetricsTracer) Option {
+	return func(c *config) error {
+		c.metricsTracer = mt
 		return nil
 	}
 }

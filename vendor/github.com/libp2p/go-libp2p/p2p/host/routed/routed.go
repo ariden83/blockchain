@@ -114,20 +114,21 @@ func (rh *RoutedHost) Connect(ctx context.Context, pi peer.AddrInfo) error {
 		// try to connect again.
 		newAddrs, err := rh.findPeerAddrs(ctx, pi.ID)
 		if err != nil {
-			return fmt.Errorf("failed to find peers: %w", err)
+			log.Debugf("failed to find more peer addresses %s: %s", pi.ID, err)
+			return cerr
 		}
 
 		// Build lookup map
-		lookup := make(map[ma.Multiaddr]struct{}, len(addrs))
+		lookup := make(map[string]struct{}, len(addrs))
 		for _, addr := range addrs {
-			lookup[addr] = struct{}{}
+			lookup[string(addr.Bytes())] = struct{}{}
 		}
 
 		// if there's any address that's not in the previous set
 		// of addresses, try to connect again. If all addresses
 		// where known previously we return the original error.
 		for _, newAddr := range newAddrs {
-			if _, found := lookup[newAddr]; found {
+			if _, found := lookup[string(newAddr.Bytes())]; found {
 				continue
 			}
 
@@ -188,7 +189,7 @@ func (rh *RoutedHost) SetStreamHandler(pid protocol.ID, handler network.StreamHa
 	rh.host.SetStreamHandler(pid, handler)
 }
 
-func (rh *RoutedHost) SetStreamHandlerMatch(pid protocol.ID, m func(string) bool, handler network.StreamHandler) {
+func (rh *RoutedHost) SetStreamHandlerMatch(pid protocol.ID, m func(protocol.ID) bool, handler network.StreamHandler) {
 	rh.host.SetStreamHandlerMatch(pid, m, handler)
 }
 
