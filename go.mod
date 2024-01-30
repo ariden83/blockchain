@@ -33,7 +33,7 @@ require (
 	github.com/urfave/negroni v1.0.0
 	go.uber.org/zap v1.24.0
 	golang.org/x/crypto v0.17.0
-	golang.org/x/net v0.10.0
+	golang.org/x/net v0.17.0
 	golang.org/x/oauth2 v0.3.0
 	golang.org/x/text v0.14.0
 	google.golang.org/grpc v1.40.0
