@@ -16,6 +16,7 @@ import (
 	"github.com/libp2p/go-libp2p/core/crypto"
 	"github.com/libp2p/go-libp2p/core/metrics"
 	"github.com/libp2p/go-libp2p/core/network"
+	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/libp2p/go-libp2p/core/peerstore"
 	"github.com/libp2p/go-libp2p/core/pnet"
 	"github.com/libp2p/go-libp2p/core/protocol"
@@ -26,6 +27,7 @@ import (
 	relayv2 "github.com/libp2p/go-libp2p/p2p/protocol/circuitv2/relay"
 	"github.com/libp2p/go-libp2p/p2p/protocol/holepunch"
 	"github.com/libp2p/go-libp2p/p2p/transport/quicreuse"
+	"github.com/prometheus/client_golang/prometheus"
 
 	ma "github.com/multiformats/go-multiaddr"
 	madns "github.com/multiformats/go-multiaddr-dns"
@@ -307,10 +309,37 @@ func EnableRelayService(opts ...relayv2.Option) Option {
 //
 // This subsystem performs automatic address rewriting to advertise relay addresses when it
 // detects that the node is publicly unreachable (e.g. behind a NAT).
+//
+// Deprecated: Use EnableAutoRelayWithStaticRelays or EnableAutoRelayWithPeerSource
 func EnableAutoRelay(opts ...autorelay.Option) Option {
 	return func(cfg *Config) error {
 		cfg.EnableAutoRelay = true
 		cfg.AutoRelayOpts = opts
+		return nil
+	}
+}
+
+// EnableAutoRelayWithStaticRelays configures libp2p to enable the AutoRelay subsystem using
+// the provided relays as relay candidates.
+// This subsystem performs automatic address rewriting to advertise relay addresses when it
+// detects that the node is publicly unreachable (e.g. behind a NAT).
+func EnableAutoRelayWithStaticRelays(static []peer.AddrInfo, opts ...autorelay.Option) Option {
+	return func(cfg *Config) error {
+		cfg.EnableAutoRelay = true
+		cfg.AutoRelayOpts = append([]autorelay.Option{autorelay.WithStaticRelays(static)}, opts...)
+		return nil
+	}
+}
+
+// EnableAutoRelayWithPeerSource configures libp2p to enable the AutoRelay
+// subsystem using the provided PeerSource callback to get more relay
+// candidates.  This subsystem performs automatic address rewriting to advertise
+// relay addresses when it detects that the node is publicly unreachable (e.g.
+// behind a NAT).
+func EnableAutoRelayWithPeerSource(peerSource autorelay.PeerSource, opts ...autorelay.Option) Option {
+	return func(cfg *Config) error {
+		cfg.EnableAutoRelay = true
+		cfg.AutoRelayOpts = append([]autorelay.Option{autorelay.WithPeerSource(peerSource)}, opts...)
 		return nil
 	}
 }
@@ -517,6 +546,31 @@ func WithDialTimeout(t time.Duration) Option {
 			return errors.New("dial timeout needs to be non-negative")
 		}
 		cfg.DialTimeout = t
+		return nil
+	}
+}
+
+// DisableMetrics configures libp2p to disable prometheus metrics
+func DisableMetrics() Option {
+	return func(cfg *Config) error {
+		cfg.DisableMetrics = true
+		return nil
+	}
+}
+
+// PrometheusRegisterer configures libp2p to use reg as the Registerer for all metrics subsystems
+func PrometheusRegisterer(reg prometheus.Registerer) Option {
+	return func(cfg *Config) error {
+		if cfg.DisableMetrics {
+			return errors.New("cannot set registerer when metrics are disabled")
+		}
+		if cfg.PrometheusRegisterer != nil {
+			return errors.New("registerer already set")
+		}
+		if reg == nil {
+			return errors.New("registerer cannot be nil")
+		}
+		cfg.PrometheusRegisterer = reg
 		return nil
 	}
 }

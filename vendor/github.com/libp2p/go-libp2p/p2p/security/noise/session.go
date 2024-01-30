@@ -12,6 +12,7 @@ import (
 	"github.com/libp2p/go-libp2p/core/crypto"
 	"github.com/libp2p/go-libp2p/core/network"
 	"github.com/libp2p/go-libp2p/core/peer"
+	"github.com/libp2p/go-libp2p/core/protocol"
 )
 
 type secureSession struct {
@@ -94,10 +95,6 @@ func (s *secureSession) LocalPeer() peer.ID {
 	return s.localID
 }
 
-func (s *secureSession) LocalPrivateKey() crypto.PrivKey {
-	return s.localKey
-}
-
 func (s *secureSession) LocalPublicKey() crypto.PubKey {
 	return s.localKey.GetPublic()
 }
@@ -134,9 +131,10 @@ func (s *secureSession) Close() error {
 	return s.insecureConn.Close()
 }
 
-func SessionWithConnState(s *secureSession, muxer string) *secureSession {
+func SessionWithConnState(s *secureSession, muxer protocol.ID) *secureSession {
 	if s != nil {
 		s.connectionState.StreamMultiplexer = muxer
+		s.connectionState.UsedEarlyMuxerNegotiation = muxer != ""
 	}
 	return s
 }
