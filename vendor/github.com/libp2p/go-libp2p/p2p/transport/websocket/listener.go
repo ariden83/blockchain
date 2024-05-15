@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"strings"
 
 	"github.com/libp2p/go-libp2p/core/transport"
 
@@ -15,6 +16,9 @@ import (
 type listener struct {
 	nl     net.Listener
 	server http.Server
+	// The Go standard library sets the http.Server.TLSConfig no matter if this is a WS or WSS,
+	// so we can't rely on checking if server.TLSConfig is set.
+	isWss bool
 
 	laddr ma.Multiaddr
 
@@ -76,6 +80,7 @@ func newListener(a ma.Multiaddr, tlsConf *tls.Config) (*listener, error) {
 	}
 	ln.server = http.Server{Handler: ln}
 	if parsed.isWSS {
+		ln.isWss = true
 		ln.server.TLSConfig = tlsConf
 	}
 	return ln, nil
@@ -83,7 +88,7 @@ func newListener(a ma.Multiaddr, tlsConf *tls.Config) (*listener, error) {
 
 func (l *listener) serve() {
 	defer close(l.closed)
-	if l.server.TLSConfig == nil {
+	if !l.isWss {
 		l.server.Serve(l.nl)
 	} else {
 		l.server.ServeTLS(l.nl, "", "")
@@ -98,7 +103,7 @@ func (l *listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	select {
-	case l.incoming <- NewConn(c, false):
+	case l.incoming <- NewConn(c, l.isWss):
 	case <-l.closed:
 		c.Close()
 	}
@@ -109,7 +114,7 @@ func (l *listener) Accept() (manet.Conn, error) {
 	select {
 	case c, ok := <-l.incoming:
 		if !ok {
-			return nil, fmt.Errorf("listener is closed")
+			return nil, transport.ErrListenerClosed
 		}
 
 		mnc, err := manet.WrapNetConn(c)
@@ -120,7 +125,7 @@ func (l *listener) Accept() (manet.Conn, error) {
 
 		return mnc, nil
 	case <-l.closed:
-		return nil, fmt.Errorf("listener is closed")
+		return nil, transport.ErrListenerClosed
 	}
 }
 
@@ -132,6 +137,9 @@ func (l *listener) Close() error {
 	l.server.Close()
 	err := l.nl.Close()
 	<-l.closed
+	if strings.Contains(err.Error(), "use of closed network connection") {
+		return transport.ErrListenerClosed
+	}
 	return err
 }
 

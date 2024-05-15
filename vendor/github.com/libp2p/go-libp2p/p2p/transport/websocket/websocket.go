@@ -120,7 +120,7 @@ func (t *WebsocketTransport) Proxy() bool {
 	return false
 }
 
-func (t *WebsocketTransport) Resolve(ctx context.Context, maddr ma.Multiaddr) ([]ma.Multiaddr, error) {
+func (t *WebsocketTransport) Resolve(_ context.Context, maddr ma.Multiaddr) ([]ma.Multiaddr, error) {
 	parsed, err := parseWebsocketMultiaddr(maddr)
 	if err != nil {
 		return nil, err
@@ -136,7 +136,7 @@ func (t *WebsocketTransport) Resolve(ctx context.Context, maddr ma.Multiaddr) ([
 		// We don't have an sni component, we'll use dns/dnsaddr
 		ma.ForEach(parsed.restMultiaddr, func(c ma.Component) bool {
 			switch c.Protocol().Code {
-			case ma.P_DNS, ma.P_DNS4, ma.P_DNS6, ma.P_DNSADDR:
+			case ma.P_DNS, ma.P_DNS4, ma.P_DNS6:
 				// err shouldn't happen since this means we couldn't parse a dns hostname for an sni value.
 				parsed.sni, err = ma.NewComponent("sni", c.Value())
 				return false
@@ -161,9 +161,17 @@ func (t *WebsocketTransport) Dial(ctx context.Context, raddr ma.Multiaddr, p pee
 	if err != nil {
 		return nil, err
 	}
-	macon, err := t.maDial(ctx, raddr)
+	c, err := t.dialWithScope(ctx, raddr, p, connScope)
 	if err != nil {
 		connScope.Done()
+		return nil, err
+	}
+	return c, nil
+}
+
+func (t *WebsocketTransport) dialWithScope(ctx context.Context, raddr ma.Multiaddr, p peer.ID, connScope network.ConnManagementScope) (transport.CapableConn, error) {
+	macon, err := t.maDial(ctx, raddr)
+	if err != nil {
 		return nil, err
 	}
 	conn, err := t.upgrader.Upgrade(ctx, t, macon, network.DirOutbound, p, connScope)

@@ -28,21 +28,29 @@ scalingLimits := rcmgr.DefaultLimits
 // Add limits around included libp2p protocols
 libp2p.SetDefaultServiceLimits(&scalingLimits)
 
-// Turn the scaling limits into a static set of limits using `.AutoScale`. This
+// Turn the scaling limits into a concrete set of limits using `.AutoScale`. This
 // scales the limits proportional to your system memory.
-limits := scalingLimits.AutoScale()
+scaledDefaultLimits := scalingLimits.AutoScale()
+
+// Tweak certain settings
+cfg := rcmgr.PartialLimitConfig{
+  System: rcmgr.ResourceLimits{
+    // Allow unlimited outbound streams
+    StreamsOutbound: rcmgr.Unlimited,
+  },
+  // Everything else is default. The exact values will come from `scaledDefaultLimits` above.
+}
+
+// Create our limits by using our cfg and replacing the default values with values from `scaledDefaultLimits`
+limits := cfg.Build(scaledDefaultLimits)
 
 // The resource manager expects a limiter, se we create one from our limits.
 limiter := rcmgr.NewFixedLimiter(limits)
 
-// (Optional if you want metrics) Construct the OpenCensus metrics reporter.
-str, err := rcmgrObs.NewStatsTraceReporter()
-if err != nil {
-  panic(err)
-}
-
+// Metrics are enabled by default. If you want to disable metrics, use the 
+// WithMetricsDisabled option
 // Initialize the resource manager
-rm, err := rcmgr.NewResourceManager(limiter, rcmgr.WithTraceReporter(str))
+rm, err := rcmgr.NewResourceManager(limiter, rcmgr.WithMetricsDisabled())
 if err != nil {
   panic(err)
 }
@@ -50,6 +58,54 @@ if err != nil {
 // Create a libp2p host
 host, err := libp2p.New(libp2p.ResourceManager(rm))
 ```
+
+### Saving the limits config
+The easiest way to save the defined limits is to serialize the `PartialLimitConfig`
+type as JSON.
+
+```go
+noisyNeighbor, _ := peer.Decode("QmVvtzcZgCkMnSFf2dnrBPXrWuNFWNM9J3MpZQCvWPuVZf")
+cfg := rcmgr.PartialLimitConfig{
+  System: &rcmgr.ResourceLimits{
+    // Allow unlimited outbound streams
+    StreamsOutbound: rcmgr.Unlimited,
+  },
+  Peer: map[peer.ID]rcmgr.ResourceLimits{
+    noisyNeighbor: {
+      // No inbound connections from this peer
+      ConnsInbound: rcmgr.BlockAllLimit,
+      // But let me open connections to them
+      Conns:         rcmgr.DefaultLimit,
+      ConnsOutbound: rcmgr.DefaultLimit,
+      // No inbound streams from this peer
+      StreamsInbound: rcmgr.BlockAllLimit,
+      // And let me open unlimited (by me) outbound streams (the peer may have their own limits on me)
+      StreamsOutbound: rcmgr.Unlimited,
+    },
+  },
+}
+jsonBytes, _ := json.Marshal(&cfg)
+
+// string(jsonBytes)
+// {
+//   "System": {
+//     "StreamsOutbound": "unlimited"
+//   },
+//   "Peer": {
+//     "QmVvtzcZgCkMnSFf2dnrBPXrWuNFWNM9J3MpZQCvWPuVZf": {
+//       "StreamsInbound": "blockAll",
+//       "StreamsOutbound": "unlimited",
+//       "ConnsInbound": "blockAll"
+//     }
+//   }
+// }
+```
+
+This will omit defaults from the JSON output. It will also serialize the
+blockAll, and unlimited values explicitly.
+
+The `Memory` field is serialized as a string to workaround the JSON limitation
+of 32 bit integers (`Memory` is an int64).
 
 ## Basic Resources
 
@@ -105,7 +161,7 @@ belong to some service in the system. Hence, this suggests that apart
 from global limits, we can constrain stream usage at finer
 granularity, at the protocol and service level.
 
-Once again, we disinguish between inbound and outbound streams.
+Once again, we distinguish between inbound and outbound streams.
 Inbound streams are initiated by remote peers and consume resources in
 response to network events; controlling inbound stream usage is again
 paramount for protecting the system from overload or attack.
@@ -271,14 +327,14 @@ and streams.
 ### Scaling Limits
 
 When building software that is supposed to run on many different kind of machines,
-with various memory and CPU configurations, it is desireable to have limits that
+with various memory and CPU configurations, it is desirable to have limits that
 scale with the size of the machine.
 
 This is done using the `ScalingLimitConfig`. For every scope, this configuration
 struct defines the absolutely bare minimum limits, and an (optional) increase of
 these limits, which will be applied on nodes that have sufficient memory.
 
-A `ScalingLimitConfig` can be converted into a `LimitConfig` (which can then be
+A `ScalingLimitConfig` can be converted into a `ConcreteLimitConfig` (which can then be
 used to initialize a fixed limiter with `NewFixedLimiter`) by calling the `Scale` method.
 The `Scale` method takes two parameters: the amount of memory and the number of file
 descriptors that an application is willing to dedicate to libp2p.
@@ -346,7 +402,7 @@ go-libp2p process. For the default definitions see [`DefaultLimits` and
 
 If the defaults seem mostly okay, but you want to adjust one facet you can
 simply copy the default struct object and update the field you want to change. You can
-apply changes to a `BaseLimit`, `BaseLimitIncrease`, and `LimitConfig` with
+apply changes to a `BaseLimit`, `BaseLimitIncrease`, and `ConcreteLimitConfig` with
 `.Apply`.
 
 Example
@@ -386,7 +442,7 @@ Example Log:
 
 The log line above is an example log line that gets emitted if you enable debug
 logging in the resource manager. You can do this by setting the environment
-variable `GOLOG_LOG_LEVEL="rcmgr=info"`. By default only the error is
+variable `GOLOG_LOG_LEVEL="rcmgr=debug"`. By default only the error is
 returned to the caller, and nothing is logged by the resource manager itself.
 
 The log line message (and returned error) will tell you which resource limit was
@@ -427,14 +483,14 @@ your limits often. This could be a sign that you need to raise your limits
 (your process is more intensive than you originally thought) or that you need
 to fix something in your application (surely you don't need over 1000 streams?).
 
-There are OpenCensus metrics that can be hooked up to the resource manager. See
+There are Prometheus metrics that can be hooked up to the resource manager. See
 `obs/stats_test.go` for an example on how to enable this, and `DefaultViews` in
 `stats.go` for recommended views. These metrics can be hooked up to Prometheus
-or any other OpenCensus supported platform.
+or any other platform that can scrape a prometheus endpoint.
 
 There is also an included Grafana dashboard to help kickstart your
 observability into the resource manager. Find more information about it at
-[here](./obs/grafana-dashboards/README.md).
+[here](./../../../dashboards/resource-manager/README.md).
 
 ## Allowlisting multiaddrs to mitigate eclipse attacks
 
@@ -485,7 +541,7 @@ works best.
 
 ## Examples
 
-Here we consider some concrete examples that can ellucidate the abstract
+Here we consider some concrete examples that can elucidate the abstract
 design as described so far.
 
 ### Stream Lifetime
@@ -522,7 +578,7 @@ More specifically the following constraints apply:
 - the peer scope, where the limits for the peer at the other end of the stream
   apply.
 - the service scope, where the limits of the specific service owning the stream apply.
-- the protcol scope, where the limits of the specific protocol for the stream apply.
+- the protocol scope, where the limits of the specific protocol for the stream apply.
 
 
 The resource transfer that happens in the `SetProtocol` and `SetService`

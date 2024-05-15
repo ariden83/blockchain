@@ -3,6 +3,7 @@ package upgrader
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/libp2p/go-libp2p/core/network"
@@ -36,7 +37,7 @@ type listener struct {
 
 // Close closes the listener.
 func (l *listener) Close() error {
-	// Do this first to try to get any relevent errors.
+	// Do this first to try to get any relevant errors.
 	err := l.Listener.Close()
 
 	l.cancel()
@@ -164,6 +165,9 @@ func (l *listener) Accept() (transport.CapableConn, error) {
 		if !c.IsClosed() {
 			return c, nil
 		}
+	}
+	if strings.Contains(l.err.Error(), "use of closed network connection") {
+		return nil, transport.ErrListenerClosed
 	}
 	return nil, l.err
 }

@@ -48,7 +48,6 @@ type Transactions struct {
 	Miner
 }
 
-// address of actual user which mine on this server
 type Miner struct {
 	PubKey     string `config:"miner_pub_key"`
 	PrivateKey string `config:"miner_private_key"`
@@ -80,7 +79,7 @@ type Config struct {
 	Threads int `json:"threads"`
 	//reward is the amnount of tokens given to someone that "mines" a new block
 	Gas          Gas
-	Wallet       Wallet
+	Wallet       wallet.Config
 	Metrics      Metrics
 	Transactions Transactions
 	Database     persistencefactory.Config

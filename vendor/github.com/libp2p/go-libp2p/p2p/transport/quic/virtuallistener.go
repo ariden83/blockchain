@@ -1,13 +1,13 @@
 package libp2pquic
 
 import (
-	"errors"
 	"sync"
 
 	tpt "github.com/libp2p/go-libp2p/core/transport"
 	"github.com/libp2p/go-libp2p/p2p/transport/quicreuse"
-	"github.com/lucas-clemente/quic-go"
+
 	ma "github.com/multiformats/go-multiaddr"
+	"github.com/quic-go/quic-go"
 )
 
 const acceptBufferPerVersion = 4
@@ -29,7 +29,7 @@ func (l *virtualListener) Multiaddr() ma.Multiaddr {
 }
 
 func (l *virtualListener) Close() error {
-	l.acceptRunnner.RmAcceptForVersion(l.version)
+	l.acceptRunnner.RmAcceptForVersion(l.version, tpt.ErrListenerClosed)
 	return l.t.CloseVirtualListener(l)
 }
 
@@ -45,8 +45,9 @@ type acceptVal struct {
 type acceptLoopRunner struct {
 	acceptSem chan struct{}
 
-	muxerMu sync.Mutex
-	muxer   map[quic.VersionNumber]chan acceptVal
+	muxerMu     sync.Mutex
+	muxer       map[quic.VersionNumber]chan acceptVal
+	muxerClosed bool
 }
 
 func (r *acceptLoopRunner) AcceptForVersion(v quic.VersionNumber) chan acceptVal {
@@ -63,21 +64,27 @@ func (r *acceptLoopRunner) AcceptForVersion(v quic.VersionNumber) chan acceptVal
 	return ch
 }
 
-func (r *acceptLoopRunner) RmAcceptForVersion(v quic.VersionNumber) {
+func (r *acceptLoopRunner) RmAcceptForVersion(v quic.VersionNumber, err error) {
 	r.muxerMu.Lock()
 	defer r.muxerMu.Unlock()
+
+	if r.muxerClosed {
+		// Already closed, all versions are removed
+		return
+	}
 
 	ch, ok := r.muxer[v]
 	if !ok {
 		panic("expected chan in accept muxer")
 	}
-	ch <- acceptVal{err: errors.New("listener Accept closed")}
+	ch <- acceptVal{err: err}
 	delete(r.muxer, v)
 }
 
 func (r *acceptLoopRunner) sendErrAndClose(err error) {
 	r.muxerMu.Lock()
 	defer r.muxerMu.Unlock()
+	r.muxerClosed = true
 	for k, ch := range r.muxer {
 		select {
 		case ch <- acceptVal{err: err}:
@@ -96,7 +103,7 @@ func (r *acceptLoopRunner) innerAccept(l *listener, expectedVersion quic.Version
 	// Check if we have a buffered connection first from an earlier Accept call
 	case v, ok := <-bufferedConnChan:
 		if !ok {
-			return nil, errors.New("listener closed")
+			return nil, tpt.ErrListenerClosed
 		}
 		return v.conn, v.err
 	default:
@@ -145,13 +152,23 @@ func (r *acceptLoopRunner) innerAccept(l *listener, expectedVersion quic.Version
 
 func (r *acceptLoopRunner) Accept(l *listener, expectedVersion quic.VersionNumber, bufferedConnChan chan acceptVal) (tpt.CapableConn, error) {
 	for {
-		r.acceptSem <- struct{}{}
-		conn, err := r.innerAccept(l, expectedVersion, bufferedConnChan)
-		<-r.acceptSem
+		var conn tpt.CapableConn
+		var err error
+		select {
+		case r.acceptSem <- struct{}{}:
+			conn, err = r.innerAccept(l, expectedVersion, bufferedConnChan)
+			<-r.acceptSem
 
-		if conn == nil && err == nil {
-			// Didn't find a conn for the expected version and there was no error, lets try again
-			continue
+			if conn == nil && err == nil {
+				// Didn't find a conn for the expected version and there was no error, lets try again
+				continue
+			}
+		case v, ok := <-bufferedConnChan:
+			if !ok {
+				return nil, tpt.ErrListenerClosed
+			}
+			conn = v.conn
+			err = v.err
 		}
 		return conn, err
 	}

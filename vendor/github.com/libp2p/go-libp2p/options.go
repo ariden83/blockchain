@@ -16,16 +16,19 @@ import (
 	"github.com/libp2p/go-libp2p/core/crypto"
 	"github.com/libp2p/go-libp2p/core/metrics"
 	"github.com/libp2p/go-libp2p/core/network"
+	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/libp2p/go-libp2p/core/peerstore"
 	"github.com/libp2p/go-libp2p/core/pnet"
 	"github.com/libp2p/go-libp2p/core/protocol"
 	"github.com/libp2p/go-libp2p/core/transport"
 	"github.com/libp2p/go-libp2p/p2p/host/autorelay"
 	bhost "github.com/libp2p/go-libp2p/p2p/host/basic"
+	"github.com/libp2p/go-libp2p/p2p/net/swarm"
 	tptu "github.com/libp2p/go-libp2p/p2p/net/upgrader"
 	relayv2 "github.com/libp2p/go-libp2p/p2p/protocol/circuitv2/relay"
 	"github.com/libp2p/go-libp2p/p2p/protocol/holepunch"
 	"github.com/libp2p/go-libp2p/p2p/transport/quicreuse"
+	"github.com/prometheus/client_golang/prometheus"
 
 	ma "github.com/multiformats/go-multiaddr"
 	madns "github.com/multiformats/go-multiaddr-dns"
@@ -307,6 +310,8 @@ func EnableRelayService(opts ...relayv2.Option) Option {
 //
 // This subsystem performs automatic address rewriting to advertise relay addresses when it
 // detects that the node is publicly unreachable (e.g. behind a NAT).
+//
+// Deprecated: Use EnableAutoRelayWithStaticRelays or EnableAutoRelayWithPeerSource
 func EnableAutoRelay(opts ...autorelay.Option) Option {
 	return func(cfg *Config) error {
 		cfg.EnableAutoRelay = true
@@ -315,11 +320,36 @@ func EnableAutoRelay(opts ...autorelay.Option) Option {
 	}
 }
 
+// EnableAutoRelayWithStaticRelays configures libp2p to enable the AutoRelay subsystem using
+// the provided relays as relay candidates.
+// This subsystem performs automatic address rewriting to advertise relay addresses when it
+// detects that the node is publicly unreachable (e.g. behind a NAT).
+func EnableAutoRelayWithStaticRelays(static []peer.AddrInfo, opts ...autorelay.Option) Option {
+	return func(cfg *Config) error {
+		cfg.EnableAutoRelay = true
+		cfg.AutoRelayOpts = append([]autorelay.Option{autorelay.WithStaticRelays(static)}, opts...)
+		return nil
+	}
+}
+
+// EnableAutoRelayWithPeerSource configures libp2p to enable the AutoRelay
+// subsystem using the provided PeerSource callback to get more relay
+// candidates.  This subsystem performs automatic address rewriting to advertise
+// relay addresses when it detects that the node is publicly unreachable (e.g.
+// behind a NAT).
+func EnableAutoRelayWithPeerSource(peerSource autorelay.PeerSource, opts ...autorelay.Option) Option {
+	return func(cfg *Config) error {
+		cfg.EnableAutoRelay = true
+		cfg.AutoRelayOpts = append([]autorelay.Option{autorelay.WithPeerSource(peerSource)}, opts...)
+		return nil
+	}
+}
+
 // ForceReachabilityPublic overrides automatic reachability detection in the AutoNAT subsystem,
 // forcing the local node to believe it is reachable externally.
 func ForceReachabilityPublic() Option {
 	return func(cfg *Config) error {
-		public := network.Reachability(network.ReachabilityPublic)
+		public := network.ReachabilityPublic
 		cfg.AutoNATConfig.ForceReachability = &public
 		return nil
 	}
@@ -329,7 +359,7 @@ func ForceReachabilityPublic() Option {
 // forceing the local node to believe it is behind a NAT and not reachable externally.
 func ForceReachabilityPrivate() Option {
 	return func(cfg *Config) error {
-		private := network.Reachability(network.ReachabilityPrivate)
+		private := network.ReachabilityPrivate
 		cfg.AutoNATConfig.ForceReachability = &private
 		return nil
 	}
@@ -517,6 +547,54 @@ func WithDialTimeout(t time.Duration) Option {
 			return errors.New("dial timeout needs to be non-negative")
 		}
 		cfg.DialTimeout = t
+		return nil
+	}
+}
+
+// DisableMetrics configures libp2p to disable prometheus metrics
+func DisableMetrics() Option {
+	return func(cfg *Config) error {
+		cfg.DisableMetrics = true
+		return nil
+	}
+}
+
+// PrometheusRegisterer configures libp2p to use reg as the Registerer for all metrics subsystems
+func PrometheusRegisterer(reg prometheus.Registerer) Option {
+	return func(cfg *Config) error {
+		if cfg.DisableMetrics {
+			return errors.New("cannot set registerer when metrics are disabled")
+		}
+		if cfg.PrometheusRegisterer != nil {
+			return errors.New("registerer already set")
+		}
+		if reg == nil {
+			return errors.New("registerer cannot be nil")
+		}
+		cfg.PrometheusRegisterer = reg
+		return nil
+	}
+}
+
+// DialRanker configures libp2p to use d as the dial ranker. To enable smart
+// dialing use `swarm.DefaultDialRanker`. use `swarm.NoDelayDialRanker` to
+// disable smart dialing.
+//
+// Deprecated: use SwarmOpts(swarm.WithDialRanker(d)) instead
+func DialRanker(d network.DialRanker) Option {
+	return func(cfg *Config) error {
+		if cfg.DialRanker != nil {
+			return errors.New("dial ranker already configured")
+		}
+		cfg.DialRanker = d
+		return nil
+	}
+}
+
+// SwarmOpts configures libp2p to use swarm with opts
+func SwarmOpts(opts ...swarm.Option) Option {
+	return func(cfg *Config) error {
+		cfg.SwarmOpts = opts
 		return nil
 	}
 }

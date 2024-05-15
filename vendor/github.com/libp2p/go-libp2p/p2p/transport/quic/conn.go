@@ -8,8 +8,8 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 	tpt "github.com/libp2p/go-libp2p/core/transport"
 
-	"github.com/lucas-clemente/quic-go"
 	ma "github.com/multiformats/go-multiaddr"
+	"github.com/quic-go/quic-go"
 )
 
 type conn struct {
@@ -18,7 +18,6 @@ type conn struct {
 	scope     network.ConnManagementScope
 
 	localPeer      peer.ID
-	privKey        ic.PrivKey
 	localMultiaddr ma.Multiaddr
 
 	remotePeerID    peer.ID
@@ -32,8 +31,12 @@ var _ tpt.CapableConn = &conn{}
 // It must be called even if the peer closed the connection in order for
 // garbage collection to properly work in this package.
 func (c *conn) Close() error {
+	return c.closeWithError(0, "")
+}
+
+func (c *conn) closeWithError(errCode quic.ApplicationErrorCode, errString string) error {
 	c.transport.removeConn(c.quicConn)
-	err := c.quicConn.CloseWithError(0, "")
+	err := c.quicConn.CloseWithError(errCode, errString)
 	c.scope.Done()
 	return err
 }
@@ -61,9 +64,6 @@ func (c *conn) AcceptStream() (network.MuxedStream, error) {
 
 // LocalPeer returns our peer ID
 func (c *conn) LocalPeer() peer.ID { return c.localPeer }
-
-// LocalPrivateKey returns our private key
-func (c *conn) LocalPrivateKey() ic.PrivKey { return c.privKey }
 
 // RemotePeer returns the peer ID of the remote peer.
 func (c *conn) RemotePeer() peer.ID { return c.remotePeerID }

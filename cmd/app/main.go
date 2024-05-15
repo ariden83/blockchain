@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	p2pfactory "github.com/ariden83/blockchain/internal/p2p/factory"
 	"log"
 	"os"
 	"os/signal"
@@ -20,7 +21,6 @@ import (
 	"github.com/ariden83/blockchain/internal/genesis"
 	"github.com/ariden83/blockchain/internal/logger"
 	"github.com/ariden83/blockchain/internal/metrics"
-	"github.com/ariden83/blockchain/internal/p2p"
 	persistencefactory "github.com/ariden83/blockchain/internal/persistence/factory"
 	transactionfactory "github.com/ariden83/blockchain/internal/transaction/factory"
 	"github.com/ariden83/blockchain/internal/transaction/impl/transaction"
@@ -96,8 +96,10 @@ func main() {
 
 	s.metricsServer = metricsEndpoint.New(cfg.Metrics, logs)
 
-	var p *p2p.EndPoint
-	p = p2p.New(cfg.P2P, per, wallets, logs, evt)
+	p, err := p2pfactory.New(cfg.P2P, per, wallets, logs, evt)
+	if err != nil {
+		logs.Fatal("fail to init P2P", zap.Error(err))
+	}
 	if p.Enabled() {
 		p.Listen(stop)
 	}

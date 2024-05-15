@@ -55,7 +55,7 @@ type ValueStore interface {
 	GetValue(context.Context, string, ...Option) ([]byte, error)
 
 	// SearchValue searches for better and better values from this value
-	// store corresponding to the given Key. By default implementations must
+	// store corresponding to the given Key. By default, implementations must
 	// stop the search after a good value is found. A 'good' value is a value
 	// that would be returned from GetValue.
 	//
@@ -76,7 +76,7 @@ type Routing interface {
 	ValueStore
 
 	// Bootstrap allows callers to hint to the routing system to get into a
-	// Boostrapped state and remain there. It is not a synchronous call.
+	// Bootstrapped state and remain there. It is not a synchronous call.
 	Bootstrap(context.Context) error
 
 	// TODO expose io.Closer or plain-old Close error

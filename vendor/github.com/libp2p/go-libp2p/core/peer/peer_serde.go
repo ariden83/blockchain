@@ -40,14 +40,12 @@ func (id *ID) UnmarshalBinary(data []byte) error {
 	return id.Unmarshal(data)
 }
 
-// Size implements Gogo's proto.Sizer, but we omit the compile-time assertion to avoid introducing a hard
-// dependency on gogo.
 func (id ID) Size() int {
 	return len([]byte(id))
 }
 
 func (id ID) MarshalJSON() ([]byte, error) {
-	return json.Marshal(Encode(id))
+	return json.Marshal(id.String())
 }
 
 func (id *ID) UnmarshalJSON(data []byte) (err error) {
@@ -61,7 +59,7 @@ func (id *ID) UnmarshalJSON(data []byte) (err error) {
 
 // MarshalText returns the text encoding of the ID.
 func (id ID) MarshalText() ([]byte, error) {
-	return []byte(Encode(id)), nil
+	return []byte(id.String()), nil
 }
 
 // UnmarshalText restores the ID from its text encoding.

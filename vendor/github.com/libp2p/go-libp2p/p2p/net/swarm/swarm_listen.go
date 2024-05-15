@@ -1,6 +1,7 @@
 package swarm
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -127,9 +128,15 @@ func (s *Swarm) AddListenAddr(a ma.Multiaddr) error {
 		for {
 			c, err := list.Accept()
 			if err != nil {
+				if !errors.Is(err, transport.ErrListenerClosed) {
+					log.Errorf("swarm listener for %s accept error: %s", a, err)
+				}
 				return
 			}
 			canonicallog.LogPeerStatus(100, c.RemotePeer(), c.RemoteMultiaddr(), "connection_status", "established", "dir", "inbound")
+			if s.metricsTracer != nil {
+				c = wrapWithMetrics(c, s.metricsTracer, time.Now(), network.DirInbound)
+			}
 
 			log.Debugf("swarm listener accepted connection: %s <-> %s", c.LocalMultiaddr(), c.RemoteMultiaddr())
 			s.refs.Add(1)
@@ -153,7 +160,7 @@ func (s *Swarm) AddListenAddr(a ma.Multiaddr) error {
 
 func containsMultiaddr(addrs []ma.Multiaddr, addr ma.Multiaddr) bool {
 	for _, a := range addrs {
-		if addr == a {
+		if addr.Equal(a) {
 			return true
 		}
 	}

@@ -18,7 +18,7 @@ type CancelFunc = func()
 // subscriptions.
 type wildcardSubscriptionType interface{}
 
-// WildcardSubscription is the type to subscribe to to receive all events
+// WildcardSubscription is the type to subscribe to receive all events
 // emitted in the eventbus.
 var WildcardSubscription = new(wildcardSubscriptionType)
 
@@ -39,6 +39,9 @@ type Subscription interface {
 
 	// Out returns the channel from which to consume events.
 	Out() <-chan interface{}
+
+	// Name returns the name for the subscription
+	Name() string
 }
 
 // Bus is an interface for a type-based event delivery system.

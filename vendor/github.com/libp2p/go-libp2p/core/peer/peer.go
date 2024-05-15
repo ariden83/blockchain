@@ -41,12 +41,6 @@ const maxInlineKeyLength = 42
 // hash output as a multihash. See IDFromPublicKey for details.
 type ID string
 
-// Pretty returns a base58-encoded string representation of the ID.
-// Deprecated: use String() instead.
-func (id ID) Pretty() string {
-	return id.String()
-}
-
 // Loggable returns a pretty peer ID string in loggable JSON format.
 func (id ID) Loggable() map[string]interface{} {
 	return map[string]interface{}{
@@ -88,7 +82,7 @@ func (id ID) MatchesPublicKey(pk ic.PubKey) bool {
 
 // ExtractPublicKey attempts to extract the public key from an ID.
 //
-// This method returns ErrNoPublicKey if the peer ID looks valid but it can't extract
+// This method returns ErrNoPublicKey if the peer ID looks valid, but it can't extract
 // the public key.
 func (id ID) ExtractPublicKey() (ic.PubKey, error) {
 	decoded, err := mh.Decode([]byte(id))
@@ -143,16 +137,6 @@ func Decode(s string) (ID, error) {
 		return "", fmt.Errorf("failed to parse peer ID: %s", err)
 	}
 	return FromCid(c)
-}
-
-// Encode encodes a peer ID as a string.
-//
-// At the moment, it base58 encodes the peer ID but, in the future, it will
-// switch to encoding it as a CID by default.
-//
-// Deprecated: use id.String instead.
-func Encode(id ID) string {
-	return id.String()
 }
 
 // FromCid converts a CID to a peer ID, if possible.

@@ -303,7 +303,7 @@ func (e *Adapter) connectToIPFS(ha host.Host) error {
 	}
 	// Decapsulate the /ipfs/<peerID> part from the target
 	// /ip4/<a.b.c.d>/ipfs/<peer> becomes /ip4/<a.b.c.d>
-	targetPeerAddr, err := ma.NewMultiaddr(fmt.Sprintf("/ipfs/%s", peer.Encode(peerid)))
+	targetPeerAddr, err := ma.NewMultiaddr(fmt.Sprintf("/ipfs/%s", peerid))
 	if err != nil {
 		e.log.Error("fail to set new multi address", zap.Error(err), zap.String("target", e.target))
 		return err
@@ -312,7 +312,7 @@ func (e *Adapter) connectToIPFS(ha host.Host) error {
 	targetAddr := ipfsAddr.Decapsulate(targetPeerAddr)
 
 	// We have a peer ID and a targetAddr so we add it to the peerstore
-	// so LibP2P knows how to contact it
+	// so LibP2P knows how to contact it.
 	ha.Peerstore().AddAddr(peerid, targetAddr, pstore.PermanentAddrTTL)
 
 	e.log.Info("opening stream p2p", zap.String("target", e.target))
@@ -414,7 +414,7 @@ func (e *Adapter) makeBasicHost() error {
 	e.setStreamHandler()
 
 	// Parse the multiaddr string.
-	peerMA, err := ma.NewMultiaddr(fmt.Sprintf("/ipfs/%s", e.host.ID().Pretty()))
+	peerMA, err := ma.NewMultiaddr(fmt.Sprintf("/ipfs/%s", e.host.ID()))
 	//peerMA, err := ma.NewMultiaddr(e.target)
 	if err != nil {
 		return err

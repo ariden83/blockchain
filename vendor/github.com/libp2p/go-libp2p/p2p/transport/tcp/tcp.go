@@ -131,6 +131,7 @@ type TcpTransport struct {
 }
 
 var _ transport.Transport = &TcpTransport{}
+var _ transport.DialUpdater = &TcpTransport{}
 
 // NewTCPTransport creates a tcp transport object that tracks dialers and listeners
 // created. It represents an entire TCP stack (though it might not necessarily be).
@@ -176,19 +177,31 @@ func (t *TcpTransport) maDial(ctx context.Context, raddr ma.Multiaddr) (manet.Co
 
 // Dial dials the peer at the remote address.
 func (t *TcpTransport) Dial(ctx context.Context, raddr ma.Multiaddr, p peer.ID) (transport.CapableConn, error) {
+	return t.DialWithUpdates(ctx, raddr, p, nil)
+}
+
+func (t *TcpTransport) DialWithUpdates(ctx context.Context, raddr ma.Multiaddr, p peer.ID, updateChan chan<- transport.DialUpdate) (transport.CapableConn, error) {
 	connScope, err := t.rcmgr.OpenConnection(network.DirOutbound, true, raddr)
 	if err != nil {
 		log.Debugw("resource manager blocked outgoing connection", "peer", p, "addr", raddr, "error", err)
 		return nil, err
 	}
+
+	c, err := t.dialWithScope(ctx, raddr, p, connScope, updateChan)
+	if err != nil {
+		connScope.Done()
+		return nil, err
+	}
+	return c, nil
+}
+
+func (t *TcpTransport) dialWithScope(ctx context.Context, raddr ma.Multiaddr, p peer.ID, connScope network.ConnManagementScope, updateChan chan<- transport.DialUpdate) (transport.CapableConn, error) {
 	if err := connScope.SetPeer(p); err != nil {
 		log.Debugw("resource manager blocked outgoing connection for peer", "peer", p, "addr", raddr, "error", err)
-		connScope.Done()
 		return nil, err
 	}
 	conn, err := t.maDial(ctx, raddr)
 	if err != nil {
-		connScope.Done()
 		return nil, err
 	}
 	// Set linger to 0 so we never get stuck in the TIME-WAIT state. When
@@ -201,8 +214,14 @@ func (t *TcpTransport) Dial(ctx context.Context, raddr ma.Multiaddr, p peer.ID) 
 		var err error
 		c, err = newTracingConn(conn, true)
 		if err != nil {
-			connScope.Done()
 			return nil, err
+		}
+	}
+	if updateChan != nil {
+		select {
+		case updateChan <- transport.DialUpdate{Kind: transport.UpdateKindHandshakeProgressed, Addr: raddr}:
+		default:
+			// It is better to skip the update than to delay upgrading the connection
 		}
 	}
 	direction := network.DirOutbound

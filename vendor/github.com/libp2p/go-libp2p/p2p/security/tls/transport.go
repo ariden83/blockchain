@@ -113,7 +113,7 @@ func (t *Transport) SecureOutbound(ctx context.Context, insecure net.Conn, p pee
 	for _, muxer := range t.muxers {
 		muxers = append(muxers, (string)(muxer))
 	}
-	// Prepend the prefered muxers list to TLS config.
+	// Prepend the preferred muxers list to TLS config.
 	config.NextProtos = append(muxers, config.NextProtos...)
 	cs, err := t.handshake(ctx, tls.Client(insecure, config), keyCh)
 	if err != nil {
@@ -166,12 +166,14 @@ func (t *Transport) setupConn(tlsConn *tls.Conn, remotePubKey ci.PubKey) (sec.Se
 	}
 
 	return &conn{
-		Conn:            tlsConn,
-		localPeer:       t.localPeer,
-		privKey:         t.privKey,
-		remotePeer:      remotePeerID,
-		remotePubKey:    remotePubKey,
-		connectionState: network.ConnectionState{StreamMultiplexer: nextProto},
+		Conn:         tlsConn,
+		localPeer:    t.localPeer,
+		remotePeer:   remotePeerID,
+		remotePubKey: remotePubKey,
+		connectionState: network.ConnectionState{
+			StreamMultiplexer:         protocol.ID(nextProto),
+			UsedEarlyMuxerNegotiation: nextProto != "",
+		},
 	}, nil
 }
 

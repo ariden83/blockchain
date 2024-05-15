@@ -14,7 +14,7 @@ func (t *Transactions) WriteBlock(privateKey []byte) (*blockchain.Block, error) 
 		return nil, err
 	}
 
-	t.event.PushTrace(blockchain.NextID(index).String(), trace.Minage)
+	t.event.PushTrace(blockchain.NextID(index).String(), trace.Mining)
 
 	//mutex.Lock()
 	cbtx := t.CoinBaseTx(privateKey)
@@ -26,7 +26,7 @@ func (t *Transactions) WriteBlock(privateKey []byte) (*blockchain.Block, error) 
 	if blockchain.IsBlockValid(newBlock, blockchain.BlockChain[len(blockchain.BlockChain)-1]) {
 
 		mutex.Lock()
-		t.event.PushTrace(newBlock.Index.String(), trace.Create)
+		t.event.PushTrace(newBlock.Index.String(), trace.Creating)
 		t.event.PushBlock(validator.New(newBlock, address.IAM.CurrentAddress()))
 		mutex.Unlock()
 	} else {
