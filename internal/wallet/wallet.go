@@ -10,7 +10,6 @@ import (
 	"github.com/brianium/mnemonic"
 	"github.com/dgraph-io/badger"
 
-	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/utils"
 	pkgError "github.com/ariden83/blockchain/pkg/errors"
 )
@@ -27,6 +26,11 @@ type Wallets struct {
 	log       *zap.Logger
 }
 
+type Config struct {
+	Path     string `config:"wallet_path"`
+	File     string `config:"wallet_file"`
+	WithFile bool   `config:"wallet_with_file"`
+}
 type IWallets interface {
 	Create([]byte) (*Seed, error)
 	Close() error
@@ -39,7 +43,7 @@ type IWallets interface {
 }
 
 // New represent a new wallet adapter.
-func New(cfg config.Wallet, log *zap.Logger) (*Wallets, error) {
+func New(cfg Config, log *zap.Logger) (*Wallets, error) {
 	var err error
 	opts := badger.DefaultOptions(cfg.Path)
 

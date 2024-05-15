@@ -18,18 +18,21 @@ import (
 	"github.com/ariden83/blockchain/internal/wallet"
 )
 
+// mutex is used for synchronization.
 var mutex = &sync.Mutex{}
 
+// Genesis represents the genesis block and its configuration.
 type Genesis struct {
 	persistence persistenceadapter.Adapter
 	transaction transaction.Adapter
 	cfg         *config.Config
-	p2p         *p2p.EndPoint
+	p2p         p2p.Adapter
 	event       *event.Event
 	wallets     wallet.IWallets
 }
 
-func New(cfg *config.Config, persistence persistenceadapter.Adapter, trans transaction.Adapter, p *p2p.EndPoint,
+// New creates a new Genesis instance.
+func New(cfg *config.Config, persistence persistenceadapter.Adapter, trans transaction.Adapter, p p2p.Adapter,
 	evt *event.Event, wallets wallet.IWallets) *Genesis {
 	return &Genesis{
 		wallets:     wallets,
@@ -41,6 +44,7 @@ func New(cfg *config.Config, persistence persistenceadapter.Adapter, trans trans
 	}
 }
 
+// Genesis checks if the system is at genesis.
 func (g *Genesis) Genesis() bool {
 	if g.p2p.Target() == "" {
 		// call default genesis
@@ -49,18 +53,19 @@ func (g *Genesis) Genesis() bool {
 	return true
 }
 
+// Load loads the genesis block or the current hash from persistence.
 func (g *Genesis) Load(stop chan error) {
-	// si y'a une instance, on la load
+	// if an instance exists, load it
 	if g.p2p.Enabled() && g.p2p.HasTarget() {
-		// on notifie la demande de récupération des fichiers
+		// notify the request to retrieve files
 		g.p2p.PushMsgForFiles(stop)
 		return
 	}
 
-	// sinon, on créé le premier hash
+	// otherwise, create the first hash
 	var lastHash []byte
 
-	// si les fichiers locaux n'existent pas
+	// if local files do not exist
 	if !g.persistence.DBExists() {
 		stop <- errors.New("fail to open DB files")
 		return
@@ -99,6 +104,7 @@ func (g *Genesis) Load(stop chan error) {
 	}
 }
 
+// createGenesis creates the genesis block and updates persistence.
 func (g *Genesis) createGenesis(stop chan error) []byte {
 	privateKey := []byte(g.cfg.Transactions.PrivateKey)
 	if g.cfg.Transactions.PrivateKey == "" {

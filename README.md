@@ -59,7 +59,7 @@ New blockchain. See website of project [blockchain-altcoin.com](https://www.bloc
 ## Command
 
 - `make local` - launch the app
-- `local-light` - launch the app without files generators (logs, blockchain, ...)
+- `make local-light` - launch the app without files generators (logs, blockchain, ...)
 
 ### Build
 

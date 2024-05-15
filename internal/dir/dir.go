@@ -5,6 +5,7 @@ import (
 	"os"
 )
 
+// Options represents the configuration options for directory operations.
 type Options struct {
 	// Required options.
 	Dir      string
@@ -13,6 +14,7 @@ type Options struct {
 	FileMode os.FileMode
 }
 
+// DirExists checks if the directory specified in the Options struct exists.
 func DirExists(opt Options) bool {
 	if _, err := os.Stat(opt.Dir); os.IsNotExist(err) {
 		return false
@@ -20,6 +22,7 @@ func DirExists(opt Options) bool {
 	return true
 }
 
+// CreateDir creates a directory based on the provided Options.
 func CreateDir(opt Options) error {
 	dirExists := DirExists(opt)
 	if !dirExists {

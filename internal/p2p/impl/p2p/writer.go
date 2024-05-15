@@ -22,7 +22,7 @@ var mutex = &sync.Mutex{}
 
 // routine Go qui diffuse le dernier état de notre blockchain toutes les 5 secondes à nos pairs
 // Ils le recevront et le jetteront si la longueur est plus courte que la leur. Ils l'accepteront si c'est plus long
-func (e *EndPoint) writeData(rw *bufio.ReadWriter) {
+func (e *Adapter) writeData(rw *bufio.ReadWriter) {
 
 	go func() {
 		for {
@@ -83,7 +83,7 @@ func (e *EndPoint) writeData(rw *bufio.ReadWriter) {
 	}()
 }
 
-func (e *EndPoint) marshal(rw *bufio.ReadWriter, evt event.Message, bytes []byte) {
+func (e *Adapter) marshal(rw *bufio.ReadWriter, evt event.Message, bytes []byte) {
 	if len(bytes) == 0 {
 		return
 	}
@@ -116,7 +116,7 @@ type callFiles struct {
 	Token string
 }
 
-func (e *EndPoint) callFiles(_ *bufio.ReadWriter) []byte {
+func (e *Adapter) callFiles(_ *bufio.ReadWriter) []byte {
 	bytes, err := json.Marshal(callFiles{
 		Token: e.cfg.Token,
 	})
@@ -128,7 +128,7 @@ func (e *EndPoint) callFiles(_ *bufio.ReadWriter) []byte {
 	return bytes
 }
 
-func (e *EndPoint) sendAddress(_ *bufio.ReadWriter) []byte {
+func (e *Adapter) sendAddress(_ *bufio.ReadWriter) []byte {
 
 	bytes, err := json.Marshal(address.IAM.GetNewAddress())
 	if err != nil {
@@ -139,7 +139,7 @@ func (e *EndPoint) sendAddress(_ *bufio.ReadWriter) []byte {
 	return bytes
 }
 
-func (e *EndPoint) resendBlock(_ *bufio.ReadWriter) []byte {
+func (e *Adapter) resendBlock(_ *bufio.ReadWriter) []byte {
 	bytes, err := json.Marshal(blockchain.BlockChain)
 	if err != nil {
 		e.log.Error("fail to marshal blockChain", zap.Error(err))
@@ -149,7 +149,7 @@ func (e *EndPoint) resendBlock(_ *bufio.ReadWriter) []byte {
 	return bytes
 }
 
-func (e *EndPoint) sendBlock(_ *bufio.ReadWriter, block validator.Validator) []byte {
+func (e *Adapter) sendBlock(_ *bufio.ReadWriter, block validator.Validator) []byte {
 	bytes, err := json.Marshal(block)
 	if err != nil {
 		e.log.Error("fail to marshal block message to send", zap.Error(err))
@@ -158,7 +158,7 @@ func (e *EndPoint) sendBlock(_ *bufio.ReadWriter, block validator.Validator) []b
 	return bytes
 }
 
-func (e *EndPoint) sendBlockChain(_ *bufio.ReadWriter) []byte {
+func (e *Adapter) sendBlockChain(_ *bufio.ReadWriter) []byte {
 	spew.Dump(blockchain.BlockChain)
 	bytes, err := json.Marshal(blockchain.BlockChain)
 	if err != nil {
@@ -169,7 +169,7 @@ func (e *EndPoint) sendBlockChain(_ *bufio.ReadWriter) []byte {
 	return bytes
 }
 
-func (e *EndPoint) sendBlockChainFull(_ *bufio.ReadWriter) []byte {
+func (e *Adapter) sendBlockChainFull(_ *bufio.ReadWriter) []byte {
 
 	blocks := []blockchain.Block{}
 	iterator := iterator.New(e.persistence)
@@ -194,7 +194,7 @@ func (e *EndPoint) sendBlockChainFull(_ *bufio.ReadWriter) []byte {
 }
 
 // @todo envoyer en stream
-func (e *EndPoint) sendWallets(_ *bufio.ReadWriter) []byte {
+func (e *Adapter) sendWallets(_ *bufio.ReadWriter) []byte {
 	listSeeds, err := e.wallets.GetSeeds()
 	if err != nil {
 		e.log.Error("fail to marshal wallets", zap.Error(err))
@@ -210,6 +210,6 @@ func (e *EndPoint) sendWallets(_ *bufio.ReadWriter) []byte {
 	return bytes
 }
 
-func (e *EndPoint) sendPool(_ *bufio.ReadWriter) []byte {
+func (e *Adapter) sendPool(_ *bufio.ReadWriter) []byte {
 	return []byte{}
 }

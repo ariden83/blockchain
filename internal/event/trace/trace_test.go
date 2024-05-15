@@ -2,8 +2,10 @@ package trace
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
 
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/logger"
@@ -84,4 +86,56 @@ func Test_trace(t *testing.T) {
 
 	assert.Equal(t, 1, i)
 	assert.Equal(t, 1, j)
+}
+
+func Test_PushAndRead(t *testing.T) {
+	// Create a new Trace instance
+	trace := New(config.Trace{Enabled: true}, zap.NewNop())
+	assert.NotNil(t, trace)
+
+	// Create a new trace reader channel
+	reader := trace.NewReader()
+	assert.NotNil(t, reader)
+
+	// Push a message onto the trace channel
+	trace.Push("block123", Mining)
+
+	// Read the message from the trace reader channel
+	select {
+	case msg := <-reader.GetChan():
+		assert.Equal(t, "block123", msg.ID)
+		assert.Equal(t, Mining, msg.State)
+	case <-time.After(1 * time.Second):
+		t.Error("Timeout while waiting for message")
+	}
+
+	// Close the trace reader channel
+	trace.CloseReader(*reader)
+}
+
+func Test_PushWithoutTrace(t *testing.T) {
+	// Create a new Trace instance with tracing disabled
+	trace := New(config.Trace{Enabled: false}, zap.NewNop())
+	assert.Nil(t, trace)
+}
+
+func Test_CloseReader(t *testing.T) {
+	// Create a new Trace instance
+	trace := New(config.Trace{Enabled: true}, zap.NewNop())
+	assert.NotNil(t, trace)
+
+	// Create a new trace reader channel
+	reader := trace.NewReader()
+	assert.NotNil(t, reader)
+
+	// Close the trace reader channel
+	trace.CloseReader(*reader)
+
+	// Try to read from the closed trace reader channel (should not block)
+	select {
+	case <-reader.GetChan():
+		t.Error("Received unexpected message from closed channel")
+	default:
+		// No message received, as expected
+	}
 }

@@ -23,11 +23,11 @@ var (
 	uniqueMsg = "once"
 )
 
-func (e *EndPoint) saveMsgReceived(uid string) {
+func (e *Adapter) saveMsgReceived(uid string) {
 	e.msgReceived = append(e.msgReceived, uid)
 }
 
-func (e *EndPoint) msgAlreadyReceived(uid string) bool {
+func (e *Adapter) msgAlreadyReceived(uid string) bool {
 	if uid == uniqueMsg {
 		return false
 	}
@@ -42,7 +42,7 @@ func (e *EndPoint) msgAlreadyReceived(uid string) bool {
 
 // routine Go qui récupère le dernier état de notre blockchain toutes les 5 secondes
 // err = rw.Flush()
-func (e *EndPoint) readData(rw *bufio.ReadWriter) {
+func (e *Adapter) readData(rw *bufio.ReadWriter) {
 	go func() {
 		e.readerReady = true
 		for {
@@ -101,14 +101,14 @@ func (e *EndPoint) readData(rw *bufio.ReadWriter) {
 	}()
 }
 
-func (e *EndPoint) readBlockChainFull(chain []byte) {
+func (e *Adapter) readBlockChainFull(chain []byte) {
 	if !e.dbLoad {
 		e.readBlockChain(chain)
 	}
 }
 
 // get blockChain for the first time
-func (e *EndPoint) readBlockChain(chain []byte) {
+func (e *Adapter) readBlockChain(chain []byte) {
 	var newBlockChain []blockchain.Block
 	if err := json.Unmarshal(chain, &newBlockChain); err != nil {
 		e.log.Error("fail to unmarshal blockChain received", zap.Error(err))
@@ -171,7 +171,7 @@ func (e *EndPoint) readBlockChain(chain []byte) {
 	}
 }
 
-func (e *EndPoint) getNumOnNewBlockChain(newBlockChain []blockchain.Block, lastHashInDB []byte) int {
+func (e *Adapter) getNumOnNewBlockChain(newBlockChain []blockchain.Block, lastHashInDB []byte) int {
 	if len(newBlockChain) == 0 {
 		return 0
 	}
@@ -183,7 +183,7 @@ func (e *EndPoint) getNumOnNewBlockChain(newBlockChain []blockchain.Block, lastH
 	return 0
 }
 
-func (e *EndPoint) readNewBlock(msg event.Message) {
+func (e *Adapter) readNewBlock(msg event.Message) {
 	var validator validator.Validator
 	if err := json.Unmarshal(msg.Value, &validator); err != nil {
 		e.log.Error("fail to unmarshal block received", zap.Error(err))
@@ -275,7 +275,7 @@ func (e *EndPoint) readNewBlock(msg event.Message) {
 	}
 }
 
-func (e *EndPoint) readWallets(chain []byte) {
+func (e *Adapter) readWallets(chain []byte) {
 	seedsReceived := []wallet.SeedNoPrivKey{}
 
 	if err := json.Unmarshal(chain, &seedsReceived); err != nil {
@@ -297,17 +297,17 @@ func (e *EndPoint) readWallets(chain []byte) {
 	//spew.Dump(e.wallets.GetAllPublicSeeds())
 }
 
-func (e *EndPoint) readPool(_ []byte) {
+func (e *Adapter) readPool(_ []byte) {
 	e.log.Info("readPool")
 }
 
 // on renotifie wallets and blockChain
-func (e *EndPoint) readFilesAsk() {
+func (e *Adapter) readFilesAsk() {
 	e.event.Push(event.Message{Type: event.BlockChainFull})
 	e.event.Push(event.Message{Type: event.Wallet})
 }
 
-func (e *EndPoint) updateAddress(m event.Message) {
+func (e *Adapter) updateAddress(m event.Message) {
 	var addressReceived []string
 	if err := json.Unmarshal(m.Value, &addressReceived); err != nil {
 		spew.Dump(string(m.Value))

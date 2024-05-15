@@ -9,7 +9,7 @@ var (
 	noGoodAddress          = "no good addresses"
 )
 
-func (e *EndPoint) Handle(err error) {
+func (e *Adapter) Handle(err error) {
 	if err != nil {
 		e.log.Fatal("fatal error, can't continue", zap.Error(err))
 	}

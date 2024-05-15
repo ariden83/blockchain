@@ -3,6 +3,7 @@ package config
 import (
 	"context"
 	"fmt"
+	"github.com/ariden83/blockchain/internal/wallet"
 	"math/big"
 	"reflect"
 	"strings"
@@ -13,6 +14,9 @@ import (
 	"github.com/heetch/confita/backend/env"
 	"github.com/heetch/confita/backend/flags"
 
+	"github.com/ariden83/blockchain/internal/event/trace"
+	p2pfactory "github.com/ariden83/blockchain/internal/p2p/factory"
+	p2padapter "github.com/ariden83/blockchain/internal/p2p/impl/p2p"
 	persistencefactory "github.com/ariden83/blockchain/internal/persistence/factory"
 	"github.com/ariden83/blockchain/internal/persistence/impl/badger"
 )
@@ -33,20 +37,10 @@ type Gas struct {
 	Cap int `config:"gas-cap"`
 }
 
-type Wallet struct {
-	Path     string `config:"wallet_path"`
-	File     string `config:"wallet_file"`
-	WithFile bool   `config:"wallet_with_file"`
-}
-
 type Metrics struct {
 	Namespace string
 	Name      string
 	Port      int
-}
-
-type Trace struct {
-	Enabled bool `config:"memory_enabled"`
 }
 
 type Transactions struct {
@@ -73,40 +67,6 @@ type GRPC struct {
 	Host    string `config:"grpc_host" yaml:"grpc_host"`
 }
 
-type P2P struct {
-	Enabled bool `config:"p2p_enabled"`
-	// Parse options from the command line
-	// Port ouvre le port auquel nous voulons autoriser les connexions
-	Port int `config:"p2p_port"`
-	// secio : sécurisation des flux
-	Secio bool `config:"p2p_secio_enabled"`
-	// target nous permet de spécifier l'adresse d'un autre hôte auquel nous voulons nous connecter,
-	// ce qui signifie que nous agissons en tant qu'homologue d'un hôte si nous utilisons ce drapeau.
-	Target string `config:"p2p_target"`
-	// seed est le paramètre aléatoire facultatif utilisé pour construire notre adresse
-	// que d'autres pairs peuvent utiliser pour se connecter à nous
-	Seed int64 `config:"p2p_seed"`
-
-	TimeToCommunicate int `config:"p2p_time_to_communicate"`
-	// token utilisé pour assurer la sécurité de la connexion
-	Token string `config:"p2p_token"`
-
-	ProtocolID string `config:"p2p_protocol_ID"`
-
-	DiscoveryNamespace string `config:"p2p_discovery_name"`
-
-	AddressTimer time.Duration `config:"p2p_address_timer"`
-}
-
-type XCache struct {
-	Size            int  `config:"cache_size"`
-	TTL             int  `config:"cache_ttl"`
-	MaxSizeAccepted int  `config:"cache_max_sized_accepted"`
-	NegSize         int  `config:"cache_neg_size"`
-	NegTTL          int  `config:"cache_neg_tll"`
-	Active          bool `config:"cache_active"`
-}
-
 type Log struct {
 	Path     string `config:"log_path"`
 	WithFile bool   `config:"log_with_file"`
@@ -126,10 +86,10 @@ type Config struct {
 	Database     persistencefactory.Config
 	API          API
 	Log          Log
-	P2P          P2P
-	XCache       XCache
+	P2P          p2pfactory.Config
+	XCache       p2padapter.XCache
 	GRPC         GRPC
-	Trace        Trace
+	Trace        trace.Config
 }
 
 func getDefaultConfig() *Config {
@@ -142,7 +102,7 @@ func getDefaultConfig() *Config {
 				PubKey: "xpub661MyMwAqRbcFTZYiEcSv4Qj2Qr2NzQ7rjYc3iv9c6VSTxoYsqA9AA6nNbp8e9nVR9hRARXz5CApP6j5BxUnohyj89oSg3zZdDuKmGhdSFF",
 			},
 		},
-		Trace: Trace{
+		Trace: trace.Config{
 			Enabled: true,
 		},
 		Database: persistencefactory.Config{
@@ -152,7 +112,7 @@ func getDefaultConfig() *Config {
 				File: "./tmp/blocks/MANIFEST",
 			},
 		},
-		Wallet: Wallet{
+		Wallet: wallet.Config{
 			Path:     "./tmp/wallets",
 			File:     "./tmp/wallets/wallets.data",
 			WithFile: true,
@@ -180,15 +140,18 @@ func getDefaultConfig() *Config {
 			Port:    8155,
 			Host:    "0.0.0.0",
 		},
-		P2P: P2P{
-			Port:               8097,
-			Enabled:            true,
-			TimeToCommunicate:  5,
-			ProtocolID:         "/p2p/1.0.0",
-			DiscoveryNamespace: "blockchain",
-			AddressTimer:       30 * time.Minute,
+		P2P: p2pfactory.Config{
+			Implementation: p2pfactory.ImplementationP2P,
+			Config: p2padapter.Config{
+				Port:               8097,
+				Enabled:            true,
+				TimeToCommunicate:  5,
+				ProtocolID:         "/p2p/1.0.0",
+				DiscoveryNamespace: "blockchain",
+				AddressTimer:       30 * time.Minute,
+			},
 		},
-		XCache: XCache{
+		XCache: p2padapter.XCache{
 			Size:            5000,
 			TTL:             60,
 			MaxSizeAccepted: 60000,

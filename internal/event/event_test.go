@@ -2,6 +2,7 @@ package event
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
@@ -72,4 +73,63 @@ func Test_New_Event(t *testing.T) {
 
 		eventAdapter.CloseReaders()
 	})
+}
+
+func Test_PushAndRead(t *testing.T) {
+	// Create a new Event instance
+	event := New(WithTraces(config.Trace{Enabled: true}, zap.NewNop()))
+	assert.NotNil(t, event)
+
+	// Create a new message reader channel
+	reader := event.NewReader()
+	assert.NotNil(t, reader)
+
+	// Push a message onto the event channel
+	event.Push(Message{Type: BlockChain, ID: "block123", Value: []byte("data")})
+
+	// Read the message from the event reader channel
+	select {
+	case msg := <-reader:
+		assert.Equal(t, BlockChain, msg.Type)
+		assert.Equal(t, "block123", msg.ID)
+		assert.Equal(t, []byte("data"), msg.Value)
+		event.CloseReaders()
+	case <-time.After(1 * time.Second):
+		t.Error("Timeout while waiting for message")
+	}
+}
+
+func Test_PushWithoutTrace(t *testing.T) {
+	// Create a new Event instance with tracing disabled
+	event := New(WithTraces(config.Trace{Enabled: true}, zap.NewNop()))
+	assert.NotNil(t, event)
+	defer event.CloseReaders()
+
+	// Try to push a message (should not panic)
+	assert.NotPanics(t, func() {
+		event.Push(Message{Type: BlockChain, ID: "block123", Value: []byte("data")})
+	})
+}
+
+func Test_CloseReaders(t *testing.T) {
+	// Create a new Event instance
+	event := New(WithTraces(config.Trace{Enabled: true}, zap.NewNop()))
+	assert.NotNil(t, event)
+
+	// Create a new message reader channel
+	reader := event.NewReader()
+	assert.NotNil(t, reader)
+
+	// Close all message reader channels
+	event.CloseReaders()
+
+	// Try to read from the closed message reader channel and ensure no value is received
+	select {
+	case msg, ok := <-reader:
+		if ok {
+			t.Errorf("Received unexpected message from closed channel: %v", msg)
+		}
+	default:
+		// No message received, as expected
+	}
 }

@@ -8,12 +8,12 @@ import (
 	"go.uber.org/zap"
 )
 
-func (e *EndPoint) handleCounter(s network.Stream) {
+func (e *Adapter) handleCounter(s network.Stream) {
 	go e.writeCounter(s)
 	go e.readCounter(s)
 }
 
-func (e *EndPoint) writeCounter(s network.Stream) {
+func (e *Adapter) writeCounter(s network.Stream) {
 	var counter uint64
 
 	for {
@@ -28,7 +28,7 @@ func (e *EndPoint) writeCounter(s network.Stream) {
 	}
 }
 
-func (e *EndPoint) readCounter(s network.Stream) {
+func (e *Adapter) readCounter(s network.Stream) {
 	for {
 		var counter uint64
 

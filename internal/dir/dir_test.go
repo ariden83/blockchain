@@ -3,31 +3,49 @@ package dir
 import (
 	"os"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func Test_DirExists(t *testing.T) {
-	assert.True(t, DirExists(Options{
-		Dir:      "../dir",
-		FileMode: os.FileMode(0705),
-	}))
+	// Create a temporary directory for testing
+	testDir := "testdir"
+	os.Mkdir(testDir, 0755)
+	defer os.RemoveAll(testDir)
 
-	assert.False(t, DirExists(Options{
-		Dir:      "./no-exist",
-		FileMode: os.FileMode(0705),
-	}))
+	// Test when directory exists
+	opt := Options{Dir: testDir}
+	if !DirExists(opt) {
+		t.Errorf("Expected directory %s to exist, but it does not", testDir)
+	}
+
+	// Test when directory does not exist
+	opt.Dir = "nonexistentdir"
+	if DirExists(opt) {
+		t.Errorf("Expected directory %s to not exist, but it does", opt.Dir)
+	}
 }
 
 func Test_CreateDir(t *testing.T) {
-	folderPath := "./test"
-	err := CreateDir(Options{
-		Dir:      folderPath,
-		FileMode: os.FileMode(0705),
-	})
-	assert.NoError(t, err)
+	// Create a temporary directory for testing
+	testDir := "testdir"
+	defer os.RemoveAll(testDir)
 
-	// clean test
-	err = os.RemoveAll(folderPath)
-	assert.NoError(t, err)
+	// Test creating a directory that doesn't exist
+	opt := Options{Dir: testDir}
+	err := CreateDir(opt)
+	if err != nil {
+		t.Errorf("Failed to create directory: %v", err)
+	}
+
+	// Test creating a directory that already exists
+	err = CreateDir(opt)
+	if err != nil {
+		t.Errorf("Failed to create directory: %v", err)
+	}
+
+	// Test creating a directory with read-only mode
+	opt.ReadOnly = true
+	err = CreateDir(opt)
+	if err == nil {
+		t.Error("Expected error when creating directory in read-only mode, but none occurred")
+	}
 }
