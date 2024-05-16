@@ -1,9 +1,10 @@
 package decoder
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 // https://pilabor.com/blog/2021/05/js-gcm-encrypt-dotnet-decrypt/

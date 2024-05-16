@@ -3,15 +3,16 @@ package metrics
 import (
 	"context"
 	"encoding/json"
-	"go.uber.org/zap"
 	"net/http"
 	"net/http/pprof"
 	"strconv"
 	"time"
 
-	"github.com/ariden83/blockchain/config"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"go.uber.org/zap"
+
+	"github.com/ariden83/blockchain/config"
 )
 
 type EndPoint struct {

@@ -5,9 +5,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"go.uber.org/zap"
-
 	"github.com/mailjet/mailjet-apiv3-go/v3"
+	"go.uber.org/zap"
 )
 
 type contactDetails struct {

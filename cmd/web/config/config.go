@@ -3,18 +3,20 @@ package config
 import (
 	"context"
 	"fmt"
-	"github.com/ariden83/blockchain/config"
+	"os"
+	"path/filepath"
+	"reflect"
+	"strings"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/heetch/confita"
 	"github.com/heetch/confita/backend"
 	"github.com/heetch/confita/backend/env"
 	"github.com/heetch/confita/backend/file"
 	"github.com/heetch/confita/backend/flags"
-	"os"
-	"path/filepath"
-	"reflect"
-	"strings"
-	"time"
+
+	"github.com/ariden83/blockchain/config"
 )
 
 type OAuthConfig struct {

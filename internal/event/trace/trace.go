@@ -3,6 +3,7 @@ package trace
 
 import (
 	"fmt"
+
 	"go.uber.org/zap"
 
 	"github.com/ariden83/blockchain/internal/utils"

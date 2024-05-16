@@ -12,7 +12,6 @@ import (
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/p2p"
-	"github.com/ariden83/blockchain/internal/persistence"
 	"github.com/ariden83/blockchain/internal/transaction"
 	"github.com/ariden83/blockchain/internal/utils"
 	"github.com/ariden83/blockchain/internal/wallet"

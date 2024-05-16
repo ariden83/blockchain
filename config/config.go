@@ -3,7 +3,6 @@ package config
 import (
 	"context"
 	"fmt"
-	"github.com/ariden83/blockchain/internal/wallet"
 	"math/big"
 	"reflect"
 	"strings"
@@ -19,6 +18,7 @@ import (
 	p2padapter "github.com/ariden83/blockchain/internal/p2p/impl/p2p"
 	persistencefactory "github.com/ariden83/blockchain/internal/persistence/factory"
 	"github.com/ariden83/blockchain/internal/persistence/impl/badger"
+	"github.com/ariden83/blockchain/internal/wallet"
 )
 
 type Gas struct {

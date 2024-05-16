@@ -2,18 +2,16 @@ package http
 
 import (
 	"context"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/go-chi/chi"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 
-	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/event"
 	transactionfactory "github.com/ariden83/blockchain/internal/transaction/factory"
 	"github.com/ariden83/blockchain/internal/wallet"
@@ -25,7 +23,7 @@ func Test_get_Wallets(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
-	wallets, err := wallet.New(config.Wallet{}, zap.NewNop())
+	wallets, err := wallet.New(wallet.Config{}, zap.NewNop())
 	assert.NoError(t, err)
 
 	_, err = wallets.Create([]byte("test"))

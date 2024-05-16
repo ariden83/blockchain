@@ -2,7 +2,6 @@ package signschnorr
 
 import (
 	"crypto/sha256"
-
 	"math/big"
 	"os"
 	"testing"

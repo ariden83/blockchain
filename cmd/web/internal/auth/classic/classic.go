@@ -1,9 +1,11 @@
 package classic
 
 import (
-	"github.com/ariden83/blockchain/cmd/web/config"
-	"golang.org/x/oauth2"
 	"net/http"
+
+	"golang.org/x/oauth2"
+
+	"github.com/ariden83/blockchain/cmd/web/config"
 )
 
 const Name string = "classic"

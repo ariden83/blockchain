@@ -2,7 +2,7 @@
 package event
 
 import (
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 	"go.uber.org/zap"
 
 	"github.com/ariden83/blockchain/internal/event/trace"

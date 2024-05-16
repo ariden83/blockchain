@@ -1,23 +1,21 @@
 package transaction
 
 import (
+	"encoding/hex"
 	"math/big"
 	"sync"
 	"time"
 
-	"encoding/hex"
 	"github.com/gcash/bchd/bchec"
 	"go.uber.org/zap"
 
-	signschnorr "github.com/ariden83/blockchain/internal/blockchain/signSchnorr"
-	pkgError "github.com/ariden83/blockchain/pkg/errors"
-
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/blockchain"
+	signschnorr "github.com/ariden83/blockchain/internal/blockchain/signSchnorr"
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/iterator"
-	"github.com/ariden83/blockchain/internal/persistence"
 	"github.com/ariden83/blockchain/internal/wallet"
+	pkgError "github.com/ariden83/blockchain/pkg/errors"
 )
 
 // Transactions represent a transactions adapter.

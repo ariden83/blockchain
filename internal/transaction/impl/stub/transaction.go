@@ -7,7 +7,6 @@ import (
 
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/event"
-	"github.com/ariden83/blockchain/internal/persistence"
 	transactionadapter "github.com/ariden83/blockchain/internal/transaction"
 )
 

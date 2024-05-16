@@ -41,9 +41,8 @@ import (
 	"encoding/hex"
 	"math/big"
 
-	"golang.org/x/crypto/ripemd160"
-
 	secp "github.com/decred/dcrd/dcrec/secp256k1/v4"
+	"golang.org/x/crypto/ripemd160"
 )
 
 var curve *secp.KoblitzCurve = S256()

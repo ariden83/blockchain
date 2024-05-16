@@ -1,8 +1,9 @@
 package transaction
 
 import (
-	"go.uber.org/zap"
 	"math/big"
+
+	"go.uber.org/zap"
 
 	"github.com/ariden83/blockchain/internal/blockchain"
 )

@@ -1,10 +1,10 @@
 package genesis
 
 import (
-	"go.uber.org/zap"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
 
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/event"
@@ -29,7 +29,7 @@ func Test_Genesis(t *testing.T) {
 
 	evt := &event.Event{}
 
-	wallets, err := wallet.New(config.Wallet{}, zap.NewNop())
+	wallets, err := wallet.New(wallet.Config{}, zap.NewNop())
 	assert.NoError(t, err)
 
 	genesis := New(cfg, persistence, trans, p2p, evt, wallets)

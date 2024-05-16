@@ -8,16 +8,15 @@ import (
 	"sync"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/metrics"
-	"github.com/ariden83/blockchain/internal/persistence"
 	"github.com/ariden83/blockchain/internal/transaction"
 	"github.com/ariden83/blockchain/internal/wallet"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var mutex = &sync.Mutex{}

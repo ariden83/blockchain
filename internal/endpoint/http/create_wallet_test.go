@@ -4,16 +4,15 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/go-chi/chi"
-	"go.uber.org/zap"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/go-chi/chi"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 
-	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/event"
 	transactionfactory "github.com/ariden83/blockchain/internal/transaction/factory"
 	"github.com/ariden83/blockchain/internal/wallet"
@@ -26,7 +25,7 @@ func Test_create_wallet(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
-	wallets, err := wallet.New(config.Wallet{}, zap.NewNop())
+	wallets, err := wallet.New(wallet.Config{}, zap.NewNop())
 	assert.NoError(t, err)
 
 	endpoint := New(WithTransactions(trans), WithEvents(event.New()), WithWallets(wallets))

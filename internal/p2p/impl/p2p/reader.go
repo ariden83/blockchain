@@ -12,10 +12,10 @@ import (
 	"github.com/ariden83/blockchain/internal/blockchain"
 	"github.com/ariden83/blockchain/internal/blockchain/difficulty"
 	"github.com/ariden83/blockchain/internal/event"
-	"github.com/ariden83/blockchain/internal/p2p/validator"
-	"github.com/ariden83/blockchain/internal/utils"
 	// "github.com/davecgh/go-spew/spew"
 	"github.com/ariden83/blockchain/internal/p2p/address"
+	"github.com/ariden83/blockchain/internal/p2p/validator"
+	"github.com/ariden83/blockchain/internal/utils"
 	"github.com/ariden83/blockchain/internal/wallet"
 )
 

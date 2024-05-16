@@ -6,33 +6,30 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
-	"go.uber.org/zap"
 	"io"
 	mrand "math/rand"
 	"strings"
 	"time"
 
 	"github.com/libp2p/go-libp2p"
+	dht "github.com/libp2p/go-libp2p-kad-dht"
 	"github.com/libp2p/go-libp2p/core/crypto"
 	"github.com/libp2p/go-libp2p/core/host"
 	"github.com/libp2p/go-libp2p/core/network"
 	"github.com/libp2p/go-libp2p/core/peer"
+	pstore "github.com/libp2p/go-libp2p/core/peerstore"
 	"github.com/libp2p/go-libp2p/core/protocol"
 	"github.com/libp2p/go-libp2p/core/routing"
-
-	pstore "github.com/libp2p/go-libp2p/core/peerstore"
 	"github.com/libp2p/go-libp2p/p2p/net/connmgr"
-
-	dht "github.com/libp2p/go-libp2p-kad-dht"
 	"github.com/libp2p/go-libp2p/p2p/security/noise"
 	libp2ptls "github.com/libp2p/go-libp2p/p2p/security/tls"
-
 	ma "github.com/multiformats/go-multiaddr"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
+	"go.uber.org/zap"
 
 	"github.com/ariden83/blockchain/internal/event"
 	"github.com/ariden83/blockchain/internal/p2p/address"
-	"github.com/ariden83/blockchain/internal/persistence"
+	persistenceadapter "github.com/ariden83/blockchain/internal/persistence"
 	"github.com/ariden83/blockchain/internal/wallet"
 	"github.com/ariden83/blockchain/internal/xcache"
 )

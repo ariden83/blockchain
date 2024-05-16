@@ -4,11 +4,10 @@ import (
 	"bytes"
 	"sync"
 
-	"go.uber.org/zap"
-
 	"github.com/LuisAcerv/btchdwallet/crypt"
 	"github.com/brianium/mnemonic"
 	"github.com/dgraph-io/badger"
+	"go.uber.org/zap"
 
 	"github.com/ariden83/blockchain/internal/utils"
 	pkgError "github.com/ariden83/blockchain/pkg/errors"

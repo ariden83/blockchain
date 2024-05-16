@@ -1,10 +1,10 @@
 package explorer
 
 import (
-	"go.uber.org/zap"
 	"net/http"
 
 	"github.com/go-session/session"
+	"go.uber.org/zap"
 
 	"github.com/ariden83/blockchain/cmd/web/internal/decoder"
 	"github.com/ariden83/blockchain/cmd/web/internal/ip"

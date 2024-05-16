@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 
-	"github.com/ariden83/blockchain/config"
+	"github.com/ariden83/blockchain/internal/event/trace"
 )
 
 func Test_New_Event(t *testing.T) {
@@ -18,13 +18,13 @@ func Test_New_Event(t *testing.T) {
 
 	t.Run("new event with WithTraces option", func(t *testing.T) {
 		t.Run("new event with WithTraces option: enabled", func(t *testing.T) {
-			eventAdapter := New(WithTraces(config.Trace{Enabled: true}, zap.NewNop()))
+			eventAdapter := New(WithTraces(trace.Config{Enabled: true}, zap.NewNop()))
 			assert.NotNil(t, eventAdapter)
 			assert.NotNil(t, eventAdapter.trace)
 		})
 
 		t.Run("new event with WithTraces option: not enabled", func(t *testing.T) {
-			eventAdapter := New(WithTraces(config.Trace{Enabled: false}, zap.NewNop()))
+			eventAdapter := New(WithTraces(trace.Config{Enabled: false}, zap.NewNop()))
 			assert.NotNil(t, eventAdapter)
 			assert.Nil(t, eventAdapter.trace)
 		})
@@ -77,7 +77,7 @@ func Test_New_Event(t *testing.T) {
 
 func Test_PushAndRead(t *testing.T) {
 	// Create a new Event instance
-	event := New(WithTraces(config.Trace{Enabled: true}, zap.NewNop()))
+	event := New(WithTraces(trace.Config{Enabled: true}, zap.NewNop()))
 	assert.NotNil(t, event)
 
 	// Create a new message reader channel
@@ -101,7 +101,7 @@ func Test_PushAndRead(t *testing.T) {
 
 func Test_PushWithoutTrace(t *testing.T) {
 	// Create a new Event instance with tracing disabled
-	event := New(WithTraces(config.Trace{Enabled: true}, zap.NewNop()))
+	event := New(WithTraces(trace.Config{Enabled: true}, zap.NewNop()))
 	assert.NotNil(t, event)
 	defer event.CloseReaders()
 
@@ -113,7 +113,7 @@ func Test_PushWithoutTrace(t *testing.T) {
 
 func Test_CloseReaders(t *testing.T) {
 	// Create a new Event instance
-	event := New(WithTraces(config.Trace{Enabled: true}, zap.NewNop()))
+	event := New(WithTraces(trace.Config{Enabled: true}, zap.NewNop()))
 	assert.NotNil(t, event)
 
 	// Create a new message reader channel

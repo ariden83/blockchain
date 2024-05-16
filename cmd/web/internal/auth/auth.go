@@ -1,11 +1,13 @@
 package auth
 
 import (
+	"net/http"
+
+	"golang.org/x/oauth2"
+
 	"github.com/ariden83/blockchain/cmd/web/config"
 	"github.com/ariden83/blockchain/cmd/web/internal/auth/classic"
 	"github.com/ariden83/blockchain/cmd/web/internal/auth/google"
-	"golang.org/x/oauth2"
-	"net/http"
 )
 
 type IOAuth interface {

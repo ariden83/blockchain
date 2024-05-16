@@ -5,13 +5,15 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
-	"github.com/ariden83/blockchain/cmd/web/config"
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
+
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
+
+	"github.com/ariden83/blockchain/cmd/web/config"
 )
 
 const Name string = "googleAPI"

@@ -1,9 +1,10 @@
 package metrics
 
 import (
-	"github.com/ariden83/blockchain/config"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+
+	"github.com/ariden83/blockchain/config"
 )
 
 type Metrics struct {

@@ -2,10 +2,11 @@ package factory
 
 import (
 	"fmt"
+
 	"go.uber.org/zap"
 
 	"github.com/ariden83/blockchain/internal/event"
-	p2p "github.com/ariden83/blockchain/internal/p2p"
+	"github.com/ariden83/blockchain/internal/p2p"
 	p2padapter "github.com/ariden83/blockchain/internal/p2p/impl/p2p"
 	"github.com/ariden83/blockchain/internal/p2p/impl/stub"
 	persistenceadapter "github.com/ariden83/blockchain/internal/persistence"

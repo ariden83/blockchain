@@ -2,12 +2,14 @@ package explorer
 
 import (
 	"encoding/json"
-	pkgErr "github.com/ariden83/blockchain/pkg/errors"
-	"github.com/go-session/session"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"net/http/httputil"
+
+	"github.com/go-session/session"
+	"go.uber.org/zap"
+
+	pkgErr "github.com/ariden83/blockchain/pkg/errors"
 )
 
 const (

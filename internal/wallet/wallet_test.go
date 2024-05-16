@@ -1,7 +1,6 @@
 package wallet
 
 import (
-	"go.uber.org/zap"
 	"log"
 	"testing"
 
@@ -9,6 +8,7 @@ import (
 	"github.com/brianium/mnemonic"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 
 	"github.com/ariden83/blockchain/config"
 	"github.com/ariden83/blockchain/internal/hdwallet"
@@ -16,7 +16,7 @@ import (
 )
 
 func Test_New_Wallet(t *testing.T) {
-	wallerAdapter, err := New(config.Wallet{}, zap.NewNop())
+	wallerAdapter, err := New(Config{}, zap.NewNop())
 	assert.NoError(t, err)
 	assert.NotNil(t, wallerAdapter)
 }

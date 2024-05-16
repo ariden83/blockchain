@@ -3,11 +3,12 @@ package explorer
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"go.uber.org/zap"
 	"net/http"
 	"net/http/pprof"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"go.uber.org/zap"
 )
 
 func (e *Explorer) StartMetricsServer(stop chan error) {

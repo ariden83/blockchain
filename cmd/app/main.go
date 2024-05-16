@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	p2pfactory "github.com/ariden83/blockchain/internal/p2p/factory"
 	"log"
 	"os"
 	"os/signal"
@@ -21,6 +20,7 @@ import (
 	"github.com/ariden83/blockchain/internal/genesis"
 	"github.com/ariden83/blockchain/internal/logger"
 	"github.com/ariden83/blockchain/internal/metrics"
+	p2pfactory "github.com/ariden83/blockchain/internal/p2p/factory"
 	persistencefactory "github.com/ariden83/blockchain/internal/persistence/factory"
 	transactionfactory "github.com/ariden83/blockchain/internal/transaction/factory"
 	"github.com/ariden83/blockchain/internal/transaction/impl/transaction"

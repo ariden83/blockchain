@@ -3,11 +3,11 @@ package explorer
 import (
 	"context"
 	"errors"
-	"github.com/go-session/session"
 	"net/http"
 	"os"
 	"time"
 
+	"github.com/go-session/session"
 	uuid "github.com/satori/go.uuid"
 	"go.uber.org/zap"
 

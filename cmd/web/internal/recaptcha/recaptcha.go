@@ -3,10 +3,11 @@ package recaptcha
 import (
 	"encoding/json"
 	"fmt"
-	"go.uber.org/zap"
 	"net/http"
 	"net/url"
 	"time"
+
+	"go.uber.org/zap"
 
 	"github.com/ariden83/blockchain/cmd/web/config"
 )

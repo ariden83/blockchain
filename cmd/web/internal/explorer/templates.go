@@ -2,11 +2,12 @@ package explorer
 
 import (
 	"fmt"
-	"go.uber.org/zap"
-	"golang.org/x/text/language"
 	"net/http"
 	"path/filepath"
 	"text/template"
+
+	"go.uber.org/zap"
+	"golang.org/x/text/language"
 )
 
 var templates *template.Template
