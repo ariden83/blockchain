@@ -3,6 +3,7 @@ package iterator
 
 import (
 	"github.com/ariden83/blockchain/internal/blockchain"
+	persistenceadapter "github.com/ariden83/blockchain/internal/persistence"
 	"github.com/ariden83/blockchain/internal/utils"
 )
 
